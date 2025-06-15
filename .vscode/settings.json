@@ -1,0 +1,13 @@
+{
+  "terminal.integrated.profiles.windows": {
+    "venv": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "if (!(Test-Path '.venv')) { Write-Host 'Ambiente virtual não encontrado. Criando novo ambiente...' -ForegroundColor Yellow; python -m venv .venv; & '.venv\\Scripts\\activate'; python -m pip install --upgrade pip; Write-Host 'Pip atualizado!' -ForegroundColor Cyan; if (Test-Path 'requirements.txt') { python -m pip install -r requirements.txt; Write-Host 'Dependências instaladas do requirements.txt!' -ForegroundColor Cyan; }; Write-Host 'Ambiente virtual criado com sucesso!' -ForegroundColor Green; } else { Write-Host 'Ambiente virtual encontrado!' -ForegroundColor Green; & '.venv\\Scripts\\activate'; python.exe -m pip install --upgrade pip; Write-Host 'Pip atualizado!' -ForegroundColor Cyan; python -m pip freeze > requirements.txt; Write-Host 'Requirements atualizados!' -ForegroundColor Cyan; python -m pip install -r requirements.txt; Write-Host 'Dependências atualizadas!' -ForegroundColor Cyan; }; if (!$env:VIRTUAL_ENV) { & '.venv\\Scripts\\activate' }; Write-Host ('Ambiente virtual ativado! (' + $env:VIRTUAL_ENV + ')') -ForegroundColor Green;"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "venv"
+}
