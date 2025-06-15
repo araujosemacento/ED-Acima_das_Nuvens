@@ -1,3 +1,6 @@
+#`shinylive export . static` to generate a static site to Github Pages
+static
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
