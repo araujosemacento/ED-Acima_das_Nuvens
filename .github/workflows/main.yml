@@ -43,6 +43,12 @@ jobs:
           path: .web/_static/
 
   deploy:
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      pull-requests: write
+
     environment:
       name: github-pages
       url: ${{ steps.static_app.outputs.page_url }}
