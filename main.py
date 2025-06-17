@@ -1,9 +1,7 @@
-import arrr
-from pyscript import document
+from js import document  # type: ignore
 
 
-def translate_english(event):
-    input_text = document.querySelector("#english")
-    english = input_text.value
+def process_input(event):
+    input_text = document.querySelector("#teste")
     output_div = document.querySelector("#output")
-    output_div.innerText = arrr.translate(english)
+    output_div.innerText = input_text.value

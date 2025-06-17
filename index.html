@@ -4,19 +4,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Allow-Origin" content="*" />
-  <title>🦜 Polyglot - Piratical PyScript</title>
-  <link rel="stylesheet" href="https://pyscript.net/releases/2025.5.1/core.css">
-  <script type="module" src="https://pyscript.net/releases/2025.5.1/core.js"></script>
+  <title>Estrutura de Dados | Acima das Nuvens</title>
+  <link rel="stylesheet" href="./public/pyscript/core.css">
+  <script type="module" src="./public/pyscript/core.js"></script>
 </head>
 
 <body>
-  <h1>Polyglot 🦜 💬 🇬🇧 ➡️ 🏴‍☠️</h1>
-  <p>Translate English into Pirate speak...</p>
-  <input type="text" id="english" placeholder="Type English here..." />
-  <button py-click="translate_english">Translate</button>
-  <div id="output"></div>
-  <script type="py" src="./main.py" config="./pyscript.json"></script>
+  <h1>Estrutura de Dados</h1>
+  <input type="text" name="teste" id="teste" value="Isso é um teste!" />
+  <button py-click="process_input">Processar</button>
+  <p id="output">Aguardando processamento...</p>
+  <script src="./main.py" type="py"></script>
 </body>
 
 </html>
