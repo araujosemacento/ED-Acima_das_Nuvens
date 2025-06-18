@@ -1,0 +1,36 @@
+@use "themes";
+@use "sass:map";
+
+$system-theme: map.get(themes.$themes, "system");
+
+:root {
+  --system-text: hsl(180, 40%, 4%);
+  --system-background: hsl(180, 80%, 96%);
+  --system-primary: hsl(175, 50%, 55%);
+  --system-secondary: hsl(222, 75%, 70%);
+  --system-accent: hsl(292, 25%, 65%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-text: hsl(180, 40%, 96%);
+    --system-background: hsl(180, 80%, 4%);
+    --system-primary: hsl(175, 50%, 45%);
+    --system-secondary: hsl(222, 75%, 30%);
+    --system-accent: hsl(292, 25%, 35%);
+  }
+}
+
+@include themes.themifying(themes.$themes) {
+  body {
+    color: red;
+    background-color: themes.themed("background");
+    font-weight: 100;
+
+    @font-face {
+      font-family: "Noto Sans Mono";
+      src: url("../fonts/Noto_Sans_Mono/NotoSansMono-VariableFont_wdth\,wght.ttf")
+        format("truetype");
+    }
+  }
+}

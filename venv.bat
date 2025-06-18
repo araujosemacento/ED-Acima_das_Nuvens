@@ -1,30 +1,58 @@
 @echo off
-:: filepath: c:\Users\Suzuma\Documents\GitHub\ed-acima_das_nuvens\venv.bat
 
 if not exist .venv (
-  python -c "print('\033[93mAmbiente virtual nao encontrado. Criando novo ambiente...\033[0m\n')"
+  echo Ambiente virtual nao encontrado. Criando novo ambiente...
   python -m venv .venv
   
+  :: Ativa o ambiente virtual
+  call .venv\Scripts\activate.bat
+  
   :: Atualiza pip dentro do ambiente virtual
-  call powershell -noexit -ExecutionPolicy Bypass -Command "& { .venv\Scripts\Activate.ps1 }"
   python -m pip install --upgrade pip
+  echo Pip atualizado!
   
   if exist requirements.txt (
     python -m pip install -r requirements.txt
-    python -c "print('\033[96mDependencias instaladas do requirements.txt!\033[0m\n')"
+    echo Dependencias instaladas do requirements.txt!
   )
-  python -c "print('\033[92mAmbiente virtual criado com sucesso!\033[0m\n')"
+  echo Ambiente virtual criado com sucesso!
   ) else (
-  python -c "print('\033[92mAmbiente virtual encontrado!\033[0m\n')"
+  echo Ambiente virtual encontrado!
   
-  :: Ativa o ambiente virtual antes de qualquer operação
-  call powershell -noexit -ExecutionPolicy Bypass -Command "& { .venv\Scripts\Activate.ps1 }"
+  :: Ativa o ambiente virtual
+  call .venv\Scripts\activate.bat
+  
+  :: Atualiza pip
+  python -m pip install --upgrade pip
+  echo Pip atualizado!
   
   python -m pip freeze > requirements.txt
-  python -c "print('\033[96mRequirements atualizados!\033[0m\n')"
+  echo Requirements atualizados!
   python -m pip install -r requirements.txt
-  python -c "print('\033[96mDependencias atualizadas!\033[0m\n')"
+  echo Dependencias atualizadas!
 )
 
-:: Indica visualmente que o ambiente está ativado (usando aspas simples para evitar problemas de escape)
-python -c "import sys, os; sys.stdout.write('\033[92mAmbiente virtual ativado! (' + os.environ['VIRTUAL_ENV'].replace('\\', '/') + ')\033[0m\n')"
+:: Verifica se node_modules existe
+if not exist node_modules (
+  echo Node modules nao encontrado. Verificando Bun...
+  where bun >nul 2>&1
+  if %errorlevel% equ 0 (
+    echo Instalando dependencias com Bun...
+    bun i
+    echo Dependencias instaladas com Bun!
+    ) else (
+    echo Bun nao encontrado. Instalando Bun...
+    npm i bun -g -y
+    echo Bun instalado! Instalando dependencias...
+    bun i
+    echo Dependencias instaladas com Bun!
+  )
+  ) else (
+  echo Node modules encontrado!
+)
+
+:: Limpa a tela do terminal
+cls
+
+:: Indica visualmente que o ambiente está ativado
+echo Ambiente virtual ativado! (%VIRTUAL_ENV%)

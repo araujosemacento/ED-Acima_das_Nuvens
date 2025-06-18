@@ -1,5 +1,51 @@
 {
   "dependencies": {
-    "@pyscript/core": "^0.6.55"
+    "@pyscript/core": "^0.6.55",
+    "bulma": "^1.0.4",
+    "sass": "^1.89.2"
+  },
+  "scripts": {
+    "build:sass": "sass --load-path=node_modules sass/:public/styles/output/ --style compressed",
+    "watch:sass": "bun run build:sass --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "pytest": "pytest tests/",
+    "pytest:watch": "pytest-watch tests/",
+    "pytest:coverage": "pytest tests/ --cov=. --cov-report=html"
+  },
+  "name": "ed-acima_das_nuvens",
+  "version": "1.0.0",
+  "description": "__RPG interativo baseado em texto:__ O usuário👤 toma decisões que influenciam um grupo de personagens com um objetivo em comum. Obtendo riquezas e sobrevivendo a uma perigosa aventura sobre as nuvens ☁️.",
+  "main": "index.js",
+  "devDependencies": {
+    "jest": "^30.0.0",
+    "jest-pytest": "^0.7.0",
+    "jsdom": "^26.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/araujosemacento/ED-Acima_das_Nuvens.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/araujosemacento/ED-Acima_das_Nuvens/issues"
+  },
+  "homepage": "https://github.com/araujosemacento/ED-Acima_das_Nuvens#readme",
+  "jest": {
+    "moduleFileExtensions": [
+      "py",
+      "js"
+    ],
+    "runner": "jest-pytest",
+    "testPathIgnorePatterns": [],
+    "testMatch": [
+      "**/test_*.py",
+      "**/*.test.js",
+      "**/tests/*.test.py"
+    ]
   }
 }

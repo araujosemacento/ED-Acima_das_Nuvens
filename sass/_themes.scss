@@ -1,0 +1,45 @@
+@use "sass:map";
+
+$themes: (
+  light: (
+    text: hsl(180, 40%, 4%),
+    background: hsl(180, 80%, 96%),
+    primary: hsl(175, 50%, 55%),
+    secondary: hsl(222, 75%, 70%),
+    accent: hsl(292, 25%, 65%),
+  ),
+  dark: (
+    text: hsl(180, 40%, 96%),
+    background: hsl(180, 80%, 4%),
+    primary: hsl(175, 50%, 45%),
+    secondary: hsl(222, 75%, 30%),
+    accent: hsl(292, 25%, 35%),
+  ),
+  system: (
+    text: var(--system-text),
+    background: var(--system-background),
+    primary: var(--system-primary),
+    secondary: var(--system-secondary),
+    accent: var(--system-accent),
+  ),
+);
+
+@mixin themifying($themes-map) {
+  @each $name, $values in $themes-map {
+    // Suporte pra classes de tema
+    .#{$name}-theme {
+      $theme-map: $values !global;
+      @content;
+    }
+
+    // Suporte pra data-theme
+    [data-theme="#{$name}"] {
+      $theme-map: $values !global;
+      @content;
+    }
+  }
+}
+
+@function themed($key) {
+  @return map.get($theme-map, $key);
+}
