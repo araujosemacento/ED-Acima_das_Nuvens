@@ -32,10 +32,19 @@
     "type": "git",
     "url": "git+https://github.com/araujosemacento/ED-Acima_das_Nuvens.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "python",
+    "javascript",
+    "rpg",
+    "interactive",
+    "text-based",
+    "adventure",
+    "bulma",
+    "sass"
+  ],
+  "author": "Gabriel Melo",
+  "license": "AGPL-3.0-only",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/araujosemacento/ED-Acima_das_Nuvens/issues"
   },
@@ -49,8 +58,9 @@
     "testPathIgnorePatterns": [],
     "testMatch": [
       "**/test_*.py",
-      "**/*.test.js",
-      "**/tests/*.test.py"
+      "**/*_test.py",
+      "**/*.test.py",
+      "**/*.test.js"
     ]
   }
 }
