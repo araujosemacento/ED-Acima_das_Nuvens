@@ -87,6 +87,26 @@ def get_file_size_mb(filepath):
     return 0
 
 
+def scan_css_dependencies():
+    """Escaneia todos os arquivos CSS relevantes"""
+    css_files = []
+
+    # Busca CSS em diretórios comuns
+    css_directories = [
+        "public/styles/css/",
+        "public/styles/output/",
+        "node_modules/bulma/css/",
+    ]
+
+    for css_dir in css_directories:
+        if os.path.exists(css_dir):
+            for file in os.listdir(css_dir):
+                if file.endswith((".css", ".min.css")):
+                    css_files.append(os.path.join(css_dir, file))
+
+    return css_files
+
+
 def scan_minimal_dependencies():
     """Escaneia apenas as dependências realmente necessárias"""
     essential_files = set()
@@ -104,15 +124,20 @@ def scan_minimal_dependencies():
                 deps = extract_dependencies_from_python(file_path)
                 essential_files.update(deps)
 
-    # CSS compilado (se existir)
-    css_output = "public/styles/output/index.css"
-    if os.path.exists(css_output):
-        essential_files.add(css_output)
-        deps = extract_dependencies_from_css(css_output)
-        essential_files.update(deps)
+    # Escaneia todos os CSS files
+    css_files = scan_css_dependencies()
+    for css_file in css_files:
+        if os.path.exists(css_file):
+            essential_files.add(css_file)
+            deps = extract_dependencies_from_css(css_file)
+            essential_files.update(deps)
 
     # Apenas fontes realmente usadas no CSS
     font_extensions = {".ttf", ".woff", ".woff2", ".eot"}
+
+    # Define o arquivo CSS de saída principal
+    css_output = "public/styles/output/index.css"
+
     if os.path.exists(css_output):
         with open(css_output, "r", encoding="utf-8") as f:
             css_content = f.read()
