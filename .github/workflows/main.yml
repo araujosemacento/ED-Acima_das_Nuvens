@@ -16,21 +16,73 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build static files
-        id: build
-        run: |
-          mkdir -p output
-          cp index.html output/
-          cp main.py output/
-          cp -r public output/
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-      - name: Upload static files as artifact
-        id: deployment
+      - name: Setup Node.js (for SASS compilation if needed)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: |
+          echo "� Instalando dependências Python..."
+          pip install --upgrade pip
+          # Instala dependências básicas necessárias para os scripts
+
+          echo "📦 Verificando dependências Node.js..."
+          if [ -f "package.json" ]; then
+            npm install --only=prod
+          fi
+
+      - name: Compile SASS if needed
+        run: |
+          if [ -f "sass/index.scss" ] && [ -f "package.json" ]; then
+            echo "🎨 Compilando SASS..."
+            npm run build:sass || echo "⚠️ Compilação SASS falhou, continuando..."
+          else
+            echo "ℹ️ SASS não encontrado ou já compilado"
+          fi
+
+      - name: Detect minimal dependencies
+        id: detect-deps
+        run: |
+          echo "🔍 Executando análise de dependências..."
+          python dependencies.py
+
+          if [ -f "dependencies.json" ]; then
+            echo "✅ Análise concluída com sucesso"
+            cat dependencies.json | head -20
+          else
+            echo "❌ Falha na análise de dependências"
+            exit 1
+          fi
+
+      - name: Build minimal distribution
+        run: |
+          echo "🔨 Construindo build mínimo..."
+          python minbuild.py
+
+          if [ -d "dist" ]; then
+            echo "✅ Build mínimo criado com sucesso"
+            echo "📁 Conteúdo do diretório dist:"
+            find dist -type f | head -20
+            
+            # Calcula tamanho total
+            size=$(du -sh dist | cut -f1)
+            echo "📦 Tamanho total do build: $size"
+          else
+            echo "❌ Falha ao criar build mínimo"
+            exit 1
+          fi
+
+      - name: Upload optimized artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: output/
+          path: dist/
 
-  # Deployment job
   deploy:
     permissions:
       contents: write
@@ -41,13 +93,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     needs: build
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

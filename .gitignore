@@ -193,3 +193,6 @@ coverage/
 
 # Nota: A pasta .vscode NÃO está incluída aqui para manter
 # as configurações de workspace rastreadas pelo Git
+
+# Build artifacts and generated files
+dependencies.json
