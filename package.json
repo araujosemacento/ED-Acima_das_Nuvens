@@ -17,13 +17,16 @@
     "deps:scan": "python dependencies.py",
     "deps:build": "python minbuild.py",
     "move:safe": "git mv",
-    "move:help": "echo 'Exemplos: npm run move:safe public/old/ public/new/ ou git mv arquivo.txt novo_nome.txt'"
+    "move:help": "echo 'Exemplos: npm run move:safe public/old/ public/new/ ou git mv arquivo.txt novo_nome.txt'",
+    "dev": "concurrently \"bun run watch:sass\" \"browser-sync start --server --files '*.html,*.py,public/**/*' --port 3000\""
   },
   "name": "ed-acima_das_nuvens",
   "version": "1.0.0",
   "description": "__RPG interativo baseado em texto:__ O usuário👤 toma decisões que influenciam um grupo de personagens com um objetivo em comum. Obtendo riquezas e sobrevivendo a uma perigosa aventura sobre as nuvens ☁️.",
   "main": "index.js",
   "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.1.2",
     "jest": "^30.0.0",
     "jest-pytest": "^0.7.0",
     "jsdom": "^26.1.0"
