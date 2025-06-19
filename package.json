@@ -18,7 +18,10 @@
     "deps:build": "python minbuild.py",
     "move:safe": "git mv",
     "move:help": "echo 'Exemplos: npm run move:safe public/old/ public/new/ ou git mv arquivo.txt novo_nome.txt'",
-    "dev": "concurrently \"bun run watch:sass\" \"browser-sync start --server --files '*.html,*.py,public/**/*' --port 3000\""
+    "dev": "concurrently \"bun run watch:sass\" \"browser-sync start --config bs-config.cjs\"",
+    "dev:debug": "concurrently \"bun run watch:sass\" \"browser-sync start --config bs-config.cjs --logLevel debug\"",
+    "dev:no-open": "concurrently \"bun run watch:sass\" \"browser-sync start --config bs-config.cjs --no-open\"",
+    "server:only": "browser-sync start --config bs-config.cjs"
   },
   "name": "ed-acima_das_nuvens",
   "version": "1.0.0",

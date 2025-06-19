@@ -1,36 +1,114 @@
-@use "themes";
+@use "themes" as *;
+@use "sass:color";
 @use "sass:map";
 
-$system-theme: map.get(themes.$themes, "system");
+// Configuração inicial do tema light como padrão
+$theme-map: map.get($themes, light) !default;
 
-:root {
-  --system-text: hsl(180, 40%, 4%);
-  --system-background: hsl(180, 80%, 96%);
-  --system-primary: hsl(175, 50%, 55%);
-  --system-secondary: hsl(222, 75%, 70%);
-  --system-accent: hsl(292, 25%, 65%);
+// Função para acessar valores do tema atual
+@function theme($key) {
+  @return map.get($theme-map, $key);
 }
 
+// Aplicar tema padrão (light)
+html {
+  color: theme(text);
+  background: theme(background);
+}
+
+// Tema escuro via prefers-color-scheme
 @media (prefers-color-scheme: dark) {
-  :root {
-    --system-text: hsl(180, 40%, 96%);
-    --system-background: hsl(180, 80%, 4%);
-    --system-primary: hsl(175, 50%, 45%);
-    --system-secondary: hsl(222, 75%, 30%);
-    --system-accent: hsl(292, 25%, 35%);
+  html {
+    $theme-map: map.get($themes, dark) !global;
+    color: theme(text);
+    background: theme(background);
   }
 }
 
-@include themes.themifying(themes.$themes) {
-  body {
-    color: red;
-    background-color: themes.themed("background");
-    font-weight: 100;
+// Temas forçados via classe ou data-attribute
+@include themifying($themes) {
+  html {
+    color: themed(text);
+    background: themed(background);
+  }
 
-    @font-face {
-      font-family: "Noto Sans Mono";
-      src: url("../fonts/Noto_Sans_Mono/NotoSansMono-VariableFont_wdth\,wght.ttf")
-        format("truetype");
+  // Exemplo de uso em outros elementos
+  .button {
+    background: themed(primary);
+    color: themed(text);
+
+    &:hover {
+      background: color.scale(themed(primary), $lightness: -10%);
+    }
+  }
+
+  .card {
+    background: themed(background);
+    border: 1px solid color.scale(themed(text), $lightness: 70%);
+    color: themed(text);
+  }
+
+  .navbar {
+    background: themed(secondary);
+    color: themed(text);
+
+    .navbar-item {
+      color: themed(text);
+
+      &:hover {
+        background: color.scale(themed(text), $alpha: -90%);
+      }
+    }
+  }
+
+  .hero {
+    background: linear-gradient(135deg, themed(primary), themed(secondary));
+    color: themed(text);
+
+    &.is-accent {
+      background: themed(accent);
+    }
+  }
+}
+
+// Classes auxiliares para temas específicos
+.text-primary {
+  color: theme(primary);
+}
+.text-secondary {
+  color: theme(secondary);
+}
+.text-accent {
+  color: theme(accent);
+}
+
+.bg-primary {
+  background: theme(primary);
+}
+.bg-secondary {
+  background: theme(secondary);
+}
+.bg-accent {
+  background: theme(accent);
+}
+
+// Mixin para componentes que precisam reagir aos temas
+@mixin theme-aware {
+  @include themifying($themes) {
+    @content;
+  }
+}
+
+// Exemplo de uso do mixin theme-aware
+.custom-component {
+  @include theme-aware {
+    background: themed(background);
+    border: 2px solid themed(primary);
+    color: themed(text);
+
+    &:hover {
+      background: themed(primary);
+      color: themed(background);
     }
   }
 }

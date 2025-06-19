@@ -1,4 +1,5 @@
 @use "sass:map";
+@use "sass:color";
 
 $themes: (
   light: (
@@ -7,6 +8,9 @@ $themes: (
     primary: hsl(175, 50%, 55%),
     secondary: hsl(222, 75%, 70%),
     accent: hsl(292, 25%, 65%),
+    border: hsl(180, 20%, 85%),
+    surface: hsl(180, 60%, 98%),
+    muted: hsl(180, 20%, 60%),
   ),
   dark: (
     text: hsl(180, 40%, 96%),
@@ -14,25 +18,24 @@ $themes: (
     primary: hsl(175, 50%, 45%),
     secondary: hsl(222, 75%, 30%),
     accent: hsl(292, 25%, 35%),
-  ),
-  system: (
-    text: var(--system-text),
-    background: var(--system-background),
-    primary: var(--system-primary),
-    secondary: var(--system-secondary),
-    accent: var(--system-accent),
+    border: hsl(180, 20%, 15%),
+    surface: hsl(180, 60%, 8%),
+    muted: hsl(180, 20%, 40%),
   ),
 );
 
+// Variável global para o tema atual
+$theme-map: () !default;
+
 @mixin themifying($themes-map) {
   @each $name, $values in $themes-map {
-    // Suporte pra classes de tema
+    // Suporte para classes de tema
     .#{$name}-theme {
       $theme-map: $values !global;
       @content;
     }
 
-    // Suporte pra data-theme
+    // Suporte para data-theme
     [data-theme="#{$name}"] {
       $theme-map: $values !global;
       @content;
@@ -42,4 +45,33 @@ $themes: (
 
 @function themed($key) {
   @return map.get($theme-map, $key);
+}
+
+// Mixin para criar variações de cor automaticamente
+@mixin color-variants($base-color, $prefix: "") {
+  #{$prefix}color: $base-color;
+  #{$prefix}color-light: color.scale($base-color, $lightness: 15%);
+  #{$prefix}color-dark: color.scale($base-color, $lightness: -15%);
+  #{$prefix}color-transparent: color.scale($base-color, $alpha: -20%);
+}
+
+// Mixin para estados hover/focus/active
+@mixin interactive-states($base-color, $text-color: null) {
+  background: $base-color;
+  @if $text-color {
+    color: $text-color;
+  }
+
+  &:hover {
+    background: color.scale($base-color, $lightness: -8%);
+  }
+
+  &:focus {
+    background: color.scale($base-color, $lightness: -5%);
+    box-shadow: 0 0 0 3px color.scale($base-color, $alpha: -70%);
+  }
+
+  &:active {
+    background: color.scale($base-color, $lightness: -12%);
+  }
 }
