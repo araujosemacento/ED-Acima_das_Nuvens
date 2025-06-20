@@ -12,7 +12,7 @@ def build_minimal():
 
     with open("dependencies.json", "r") as f:
         data = json.load(f)
-    
+
     # Limpa diretório de build
     if os.path.exists("dist"):
         shutil.rmtree("dist")
@@ -44,9 +44,9 @@ def build_minimal():
     critical_files = [
         "dist/public/alpine.js",
         "dist/public/ionicons/ionicons.esm.js",
-        "dist/public/ionicons/svgs/sunny.svg"
+        "dist/public/ionicons/svgs/sunny.svg",
     ]
-    
+
     missing_files = [f for f in critical_files if not os.path.exists(f)]
     if missing_files:
         print("\n⚠️  Arquivos críticos não copiados:")
@@ -56,14 +56,14 @@ def build_minimal():
         print("\n✅ Todos os arquivos críticos foram copiados")
 
     print(f"\n✅ Build concluído: {copied_count} itens copiados para dist/")
-    
+
     # Calcula tamanho final
     total_size = sum(
         os.path.getsize(os.path.join(dirpath, filename))
         for dirpath, _, filenames in os.walk("dist")
         for filename in filenames
     ) / (1024 * 1024)
-    
+
     print(f"📊 Tamanho final: {total_size:.1f}MB")
 
 
