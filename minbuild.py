@@ -11,7 +11,9 @@ def build_minimal():
         return
 
     with open("dependencies.json", "r") as f:
-        data = json.load(f)  # Limpa diretório de build
+        data = json.load(f)
+    
+    # Limpa diretório de build
     if os.path.exists("dist"):
         shutil.rmtree("dist")
     os.makedirs("dist")
@@ -29,22 +31,40 @@ def build_minimal():
                 print(f"  ✓ {dep}")
                 copied_count += 1
             elif os.path.isdir(dep):
-                dest_path = f"dist/{dep}"
+                # Remove trailing slash para consistência
+                clean_dep = dep.rstrip("/")
+                dest_path = f"dist/{clean_dep}"
                 if os.path.exists(dest_path):
                     shutil.rmtree(dest_path)
                 shutil.copytree(dep, dest_path)
-                print(f"  ✓ {dep}/ (diretório)")
+                print(f"  ✓ {dep} (diretório)")
                 copied_count += 1
-        else:
-            print(f"  ⚠️ Não encontrado: {dep}")
 
-    size_info = data.get(
-        "total_size_mb", data.get("stats", {}).get("essential_size_mb", 0)
-    )
-    print(f"\n🎉 Build concluído!")
-    print(f"📁 Arquivos copiados: {copied_count}/{len(data['essential'])}")
-    print(f"📦 Tamanho estimado: {size_info:.1f}MB")
-    print("📁 Arquivos em ./dist/")
+    # Verifica se arquivos críticos foram copiados
+    critical_files = [
+        "dist/public/alpine.js",
+        "dist/public/ionicons/ionicons.esm.js",
+        "dist/public/ionicons/svgs/sunny.svg"
+    ]
+    
+    missing_files = [f for f in critical_files if not os.path.exists(f)]
+    if missing_files:
+        print("\n⚠️  Arquivos críticos não copiados:")
+        for f in missing_files:
+            print(f"  - {f}")
+    else:
+        print("\n✅ Todos os arquivos críticos foram copiados")
+
+    print(f"\n✅ Build concluído: {copied_count} itens copiados para dist/")
+    
+    # Calcula tamanho final
+    total_size = sum(
+        os.path.getsize(os.path.join(dirpath, filename))
+        for dirpath, _, filenames in os.walk("dist")
+        for filename in filenames
+    ) / (1024 * 1024)
+    
+    print(f"📊 Tamanho final: {total_size:.1f}MB")
 
 
 if __name__ == "__main__":

@@ -70,6 +70,35 @@ def extract_dependencies_from_python(py_file):
     return dependencies
 
 
+def extract_dependencies_from_html(html_file):
+    """Extrai dependências de arquivos HTML"""
+    dependencies = set()
+
+    if not os.path.exists(html_file):
+        return dependencies
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Busca por src, href e outros atributos
+    patterns = [
+        r'src=["\']([^"\']+)["\']',
+        r'href=["\']([^"\']+)["\']',
+        r'content=["\']([^"\']+)["\']',
+    ]
+
+    for pattern in patterns:
+        matches = re.findall(pattern, content)
+        for match in matches:
+            if not match.startswith(("http", "data:", "#", "mailto:")):
+                # Remove ./ do início se existir
+                clean_path = match.lstrip("./")
+                if os.path.exists(clean_path):
+                    dependencies.add(clean_path)
+
+    return dependencies
+
+
 def get_file_size_mb(filepath):
     """Retorna o tamanho do arquivo em MB"""
     if os.path.isfile(filepath):
@@ -123,6 +152,9 @@ def scan_minimal_dependencies():
             if file_path.endswith(".py"):
                 deps = extract_dependencies_from_python(file_path)
                 essential_files.update(deps)
+            elif file_path.endswith(".html"):
+                deps = extract_dependencies_from_html(file_path)
+                essential_files.update(deps)
 
     # Escaneia todos os CSS files
     css_files = scan_css_dependencies()
@@ -131,6 +163,20 @@ def scan_minimal_dependencies():
             essential_files.add(css_file)
             deps = extract_dependencies_from_css(css_file)
             essential_files.update(deps)
+
+    # Adiciona dependências críticas que podem não ser detectadas
+    critical_deps = [
+        "public/alpine.js",
+        "public/ionicons/ionicons.esm.js",
+        "public/ionicons/ionicons.js",
+        "public/ionicons/svgs/sunny.svg",
+        "public/favicon/site.webmanifest",
+    ]
+
+    for dep in critical_deps:
+        if os.path.exists(dep):
+            essential_files.add(dep)
+            print(f"✓ Dependência crítica adicionada: {dep}")
 
     # Apenas fontes realmente usadas no CSS
     font_extensions = {".ttf", ".woff", ".woff2", ".eot"}
@@ -147,6 +193,13 @@ def scan_minimal_dependencies():
             noto_mono_path = "public/styles/fonts/Noto_Sans_Mono/NotoSansMono-VariableFont_wdth,wght.ttf"
             if os.path.exists(noto_mono_path):
                 essential_files.add(noto_mono_path)
+
+    # Adiciona todo o diretório de ícones se usado
+    if any("ionicons" in str(f) for f in essential_files):
+        ionicons_dir = "public/ionicons"
+        if os.path.exists(ionicons_dir):
+            essential_files.add(f"{ionicons_dir}/")
+            print(f"✓ Diretório ionicons adicionado: {ionicons_dir}/")
 
     # PyScript apenas se usado
     pyscript_core = "public/pyscript/core.js"
