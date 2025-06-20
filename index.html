@@ -8,6 +8,8 @@
   <!-- PyScript (@pyscript/core@0.6.55)-->
   <link rel="stylesheet" href="./public/pyscript/core.css">
   <script type="module" src="./public/pyscript/core.js"></script>
+  <!-- Alpine.js (alpinejs@3.14.9) -->
+  <script src="./public/alpine.js" defer></script>
   <!-- Bulma 1.0.4 -->
   <link rel="stylesheet" href="./public/styles/css/bulma.min.css">
   <!-- Custom Styles -->
@@ -22,8 +24,13 @@
 </head>
 
 <body>
-  <button id="theme-toggle" class="button is-primary">Toggle Theme</button>
+  <button id="theme-toggle" class="button">
+    <image src="./public/ionicons/svgs/sunny.svg" class="icon" />
+  </button>
   <!-- <script type="py" src="./main.py"></script> -->
+  <!-- Ionicons Local -->
+  <script type="module" src="./public/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="./public/ionicons/ionicons.js"></script>
 </body>
 
 </html>

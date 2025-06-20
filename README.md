@@ -268,7 +268,7 @@ git mv arquivo.txt novo_nome.txt
 O projeto possui um sistema de **deploy automático** configurado através do workflow `.github/workflows/main.yml` que:
 
 - ✅ **Detecta dependências mínimas** via `dependencies.py`
-- ✅ **Compila SASS** automaticamente 
+- ✅ **Compila SASS** automaticamente
 - ✅ **Gera build otimizado** (~6MB) via `minbuild.py`
 - ✅ **Deploy no GitHub Pages** a cada push na `main`
 
@@ -439,3 +439,55 @@ O workflow usa apenas **tokens automáticos** do GitHub, sem necessidade de conf
 ---
 
 > 💡 **Dica**: O sistema detecta automaticamente se há mudanças no SASS ou Python e otimiza o build de acordo. Para deploys mais rápidos, use commits focados que alterem apenas um tipo de arquivo por vez.
+
+---
+
+#### [TBA]
+
+- Proposta de implementação de balanceamento pro sistema de banco de dados estático
+- Pesquisa referenciando [Warsim](https://store.steampowered.com/app/659540/Warsim_The_Realm_of_Aslona/)
+- Incluir imagem no topo do README.md:
+
+<div style="text-align: center;">
+  <h1>Pixel Concept Art</h1>
+  <p>Arte conceitual pixelizada para o jogo ED - Acima das Nuvens</p>
+  <img src="./public/readme_pxart.png" alt="pixel-concept-art" style="max-height: 400px; max-width: 100%;" />
+</div>
+
+---
+
+```JSON
+{
+  "narrative_tree": {
+    "metadata": {
+      "balance_strategy": "weighted_normalization",
+      "target_depth": 6,
+      "min_choices_per_node": 2
+    },
+    "characters": {
+      "joao": {
+        "story_nodes": {
+          "inicio": {
+            "depth": 0,
+            "choices": ["vinganca", "infiltracao"],
+            "balance_weight": 1.0
+          },
+          "vinganca": {
+            "depth": 1,
+            "choices": ["preparacao", "acao_direta"],
+            "inserted_for_balance": false,
+            "balance_weight": 1.2
+          },
+          "preparacao": {
+            "depth": 2,
+            "choices": ["reflexao", "coleta_info"],
+            "inserted_for_balance": true,
+            "balance_weight": 0.8,
+            "narrative_purpose": "equilibrar_profundidade"
+          }
+        }
+      }
+    }
+  }
+}
+```
