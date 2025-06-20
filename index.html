@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8" />
@@ -27,37 +27,9 @@
 </head>
 
 <body>
-  <!-- Theme Toggle Popup -->
-  <div class="theme-toggle-container" x-data="{ isOpen: false }">
-    <button id="theme-toggle" class="button is-rounded theme-toggle-button" @click="isOpen = !isOpen"
-      :aria-expanded="isOpen" aria-label="Theme selector">
-      <ion-icon id="theme-icon" name="sunny" class="icon"></ion-icon>
-    </button>
-
-    <div class="theme-popup notification" x-show="isOpen" x-transition @click.away="isOpen = false">
-      <div class="theme-options">
-        <button class="theme-option button is-fullwidth" data-theme="light">
-          <span class="icon">
-            <ion-icon name="sunny"></ion-icon>
-          </span>
-          <span class="theme-label">Light</span>
-        </button>
-        <button class="theme-option button is-fullwidth" data-theme="dark">
-          <span class="icon">
-            <ion-icon name="moon"></ion-icon>
-          </span>
-          <span class="theme-label">Dark</span>
-        </button>
-        <button class="theme-option button is-fullwidth" data-theme="system">
-          <span class="icon">
-            <ion-icon name="desktop"></ion-icon>
-          </span>
-          <span class="theme-label">System</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
+  <button id="theme-toggle" class="button is-rounded is-loading">
+    <ion-icon name="sunny" class="icon"></ion-icon>
+  </button>
   <script type="py" src="./main.py"></script>
 </body>
 

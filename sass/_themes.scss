@@ -24,30 +24,38 @@ $themes: (
   ),
 );
 
-// Variável global para o tema atual
-$theme-map: () !default;
+// Mixin padrão para root
+@mixin apply-theme-properties($theme) {
+  $theme-map: map.get($themes, $theme);
 
-@mixin themifying($themes-map) {
-  @each $name, $values in $themes-map {
-    // Suporte para classes de tema
-    .#{$name}-theme {
-      $theme-map: $values !global;
-      @content;
-    }
+  @if not $theme-map {
+    @error "Theme '#{$theme}' not found. Available themes: #{map.keys($themes)}";
+  }
 
-    // Suporte para data-theme
-    [data-theme="#{$name}"] {
-      $theme-map: $values !global;
-      @content;
-    }
+  @each $key, $value in $theme-map {
+    --#{$key}: #{$value};
   }
 }
 
-@function themed($key) {
-  @return map.get($theme-map, $key);
+// Mixin com !important para classes
+@mixin apply-theme-properties-important($theme) {
+  $theme-map: map.get($themes, $theme);
+
+  @if not $theme-map {
+    @error "Theme '#{$theme}' not found. Available themes: #{map.keys($themes)}";
+  }
+
+  @each $key, $value in $theme-map {
+    --#{$key}: #{$value} !important;
+  }
 }
 
-// Mixin para criar variações de cor automaticamente
+// Função para acessar cores do tema
+@function theme-color($key, $theme: light) {
+  @return map.get(map.get($themes, $theme), $key);
+}
+
+// Mixins utilitários
 @mixin color-variants($base-color, $prefix: "") {
   #{$prefix}color: $base-color;
   #{$prefix}color-light: color.scale($base-color, $lightness: 15%);
@@ -55,7 +63,6 @@ $theme-map: () !default;
   #{$prefix}color-transparent: color.scale($base-color, $alpha: -20%);
 }
 
-// Mixin para estados hover/focus/active
 @mixin interactive-states($base-color, $text-color: null) {
   background: $base-color;
   @if $text-color {

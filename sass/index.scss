@@ -1,227 +1,55 @@
 @use "themes" as *;
-@use "sass:color";
-@use "sass:map";
+@import url("../fonts/Noto_Sans_Mono/NotoSansMono-VariableFont_wdth,wght.ttf");
 
-// Configuração inicial do tema light como padrão
-$theme-map: map.get($themes, light) !default;
-
-// Função para acessar valores do tema atual
-@function theme($key) {
-  @return map.get($theme-map, $key);
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-// Aplicar tema padrão (light)
-html {
-  color: theme(text);
-  background: theme(background);
+html,
+body {
+  height: 100%;
+  font-family: "Noto Sans Mono", monospace;
+  font-weight: 500;
+  background: var(--background);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-// Tema escuro via prefers-color-scheme
+// Hierarquia correta de especificidade
+:root {
+  @include apply-theme-properties(light);
+}
+
 @media (prefers-color-scheme: dark) {
-  html {
-    $theme-map: map.get($themes, dark) !global;
-    color: theme(text);
-    background: theme(background);
+  :root {
+    @include apply-theme-properties(dark);
   }
 }
 
-// Temas forçados via classe ou data-attribute
-@include themifying($themes) {
-  html {
-    color: themed(text);
-    background: themed(background);
-  }
-
-  // Exemplo de uso em outros elementos
-  .button {
-    background: themed(primary);
-    color: themed(text);
-
-    &:hover {
-      background: color.scale(themed(primary), $lightness: -10%);
-    }
-  }
-
-  .card {
-    background: themed(background);
-    border: 1px solid color.scale(themed(text), $lightness: 70%);
-    color: themed(text);
-  }
-
-  .navbar {
-    background: themed(secondary);
-    color: themed(text);
-
-    .navbar-item {
-      color: themed(text);
-
-      &:hover {
-        background: color.scale(themed(text), $alpha: -90%);
-      }
-    }
-  }
-
-  .hero {
-    background: linear-gradient(135deg, themed(primary), themed(secondary));
-    color: themed(text);
-
-    &.is-accent {
-      background: themed(accent);
-    }
-  }
+:root[data-theme="light"],
+:root.light-theme {
+  @include apply-theme-properties(light);
 }
 
-// Theme Toggle Component Styles
-.theme-toggle-container {
+:root[data-theme="dark"],
+:root.dark-theme {
+  @include apply-theme-properties(dark);
+}
+
+// Classes para elementos específicos (máxima prioridade)
+.light-theme {
+  @include apply-theme-properties-important(light);
+}
+
+.dark-theme {
+  @include apply-theme-properties-important(dark);
+}
+
+#theme-toggle {
   position: fixed;
-  z-index: 9999;
-
-  // Mobile: top right
   top: 1rem;
   right: 1rem;
-
-  // Desktop: bottom right
-  @media (min-width: 769px) {
-    top: auto;
-    bottom: 1rem;
-  }
-}
-
-.theme-toggle-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .icon {
-    font-size: 1.2rem;
-  }
-}
-
-.theme-popup {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.5rem;
-  min-width: 140px;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-
-  // Mobile: adjust position
-  @media (max-width: 768px) {
-    right: -0.5rem;
-  }
-
-  // Desktop: position above button
-  @media (min-width: 769px) {
-    top: auto;
-    bottom: 100%;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-  }
-}
-
-.theme-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.theme-option {
-  justify-content: flex-start;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateX(2px);
-  }
-
-  &.is-active {
-    font-weight: 600;
-  }
-
-  .icon {
-    margin-right: 0.5rem;
-    font-size: 1rem;
-  }
-}
-
-// Theme-aware styles for the toggle component
-@include themifying($themes) {
-  .theme-toggle-button {
-    background: themed(surface);
-    color: themed(text);
-    border: 1px solid themed(border);
-
-    &:hover {
-      background: themed(primary);
-      color: themed(background);
-    }
-  }
-
-  .theme-popup {
-    background: themed(surface);
-    border: 1px solid themed(border);
-  }
-
-  .theme-option {
-    background: transparent;
-    color: themed(text);
-
-    &:hover {
-      background: themed(primary);
-      color: themed(background);
-    }
-
-    &.is-active {
-      background: color.scale(themed(primary), $alpha: -80%);
-      color: themed(primary);
-    }
-  }
-}
-
-// ...existing code...
-.text-primary {
-  color: theme(primary);
-}
-.text-secondary {
-  color: theme(secondary);
-}
-.text-accent {
-  color: theme(accent);
-}
-
-.bg-primary {
-  background: theme(primary);
-}
-.bg-secondary {
-  background: theme(secondary);
-}
-.bg-accent {
-  background: theme(accent);
-}
-
-// Exemplo de uso do mixin themifying
-.custom-component {
-  @include themifying($themes) {
-    background: themed(background);
-    border: 2px solid themed(primary);
-    color: themed(text);
-
-    &:hover {
-      background: themed(primary);
-      color: themed(background);
-    }
-  }
+  z-index: 1000;
 }
