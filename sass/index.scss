@@ -71,7 +71,127 @@ html {
   }
 }
 
-// Classes auxiliares para temas específicos
+// Theme Toggle Component Styles
+.theme-toggle-container {
+  position: fixed;
+  z-index: 9999;
+
+  // Mobile: top right
+  top: 1rem;
+  right: 1rem;
+
+  // Desktop: bottom right
+  @media (min-width: 769px) {
+    top: auto;
+    bottom: 1rem;
+  }
+}
+
+.theme-toggle-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .icon {
+    font-size: 1.2rem;
+  }
+}
+
+.theme-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  min-width: 140px;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+  // Mobile: adjust position
+  @media (max-width: 768px) {
+    right: -0.5rem;
+  }
+
+  // Desktop: position above button
+  @media (min-width: 769px) {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.theme-option {
+  justify-content: flex-start;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(2px);
+  }
+
+  &.is-active {
+    font-weight: 600;
+  }
+
+  .icon {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+// Theme-aware styles for the toggle component
+@include themifying($themes) {
+  .theme-toggle-button {
+    background: themed(surface);
+    color: themed(text);
+    border: 1px solid themed(border);
+
+    &:hover {
+      background: themed(primary);
+      color: themed(background);
+    }
+  }
+
+  .theme-popup {
+    background: themed(surface);
+    border: 1px solid themed(border);
+  }
+
+  .theme-option {
+    background: transparent;
+    color: themed(text);
+
+    &:hover {
+      background: themed(primary);
+      color: themed(background);
+    }
+
+    &.is-active {
+      background: color.scale(themed(primary), $alpha: -80%);
+      color: themed(primary);
+    }
+  }
+}
+
+// ...existing code...
 .text-primary {
   color: theme(primary);
 }
@@ -92,16 +212,9 @@ html {
   background: theme(accent);
 }
 
-// Mixin para componentes que precisam reagir aos temas
-@mixin theme-aware {
-  @include themifying($themes) {
-    @content;
-  }
-}
-
-// Exemplo de uso do mixin theme-aware
+// Exemplo de uso do mixin themifying
 .custom-component {
-  @include theme-aware {
+  @include themifying($themes) {
     background: themed(background);
     border: 2px solid themed(primary);
     color: themed(text);
