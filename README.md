@@ -28,7 +28,7 @@ Implementação via [CSS Flip Cards](https://www.w3schools.com/howto/howto_css_f
 ### **Stack Tecnológica**
 
 ```javascript
-Frontend: HTML5 + CSS/Sass + PyScript
+Frontend: HTML5 + CSS/Sass + PyScript + Ionicons
 Backend:  Python (client-side)
 Testing:  Jest (JS/DOM) + Pytest (Python)
 Build:    Node.js + Sass compiler
