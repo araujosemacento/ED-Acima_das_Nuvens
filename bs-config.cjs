@@ -22,6 +22,7 @@ module.exports = {
     "*.html",
     "*.py",
     "main.py",
+    "sass/**/*.scss", // Source SCSS files
     "public/styles/output/**/*.css", // Compiled CSS from Sass
     "public/**/*.js",
     "public/**/*.json",
@@ -108,12 +109,12 @@ module.exports = {
 
   // Custom callbacks
   callbacks: {
-    ready: function(err, bs) {
+    ready: function (err, bs) {
       if (err) {
         console.error("BrowserSync error:", err);
         return;
       }
-      
+
       console.log("\n🎮 ED-Acima das Nuvens - Development Server");
       console.log("📍 Local:", bs.options.get("urls").get("local"));
       console.log("🌐 External:", bs.options.get("urls").get("external"));
