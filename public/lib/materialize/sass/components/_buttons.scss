@@ -33,7 +33,6 @@
   box-shadow: none;
   color: $button-disabled-color !important;
   cursor: default;
-
   &:hover {
     background-color: $button-disabled-background !important;
     color: $button-disabled-color !important;
@@ -48,7 +47,6 @@
 .btn-flat {
   font-size: $button-font-size;
   outline: 0;
-
   i {
     font-size: $button-icon-font-size;
     line-height: inherit;
@@ -70,15 +68,11 @@
   background-color: $button-raised-background;
   text-align: center;
   letter-spacing: .5px;
-
   @extend .z-depth-1;
-
   transition: background-color .2s ease-out;
   cursor: pointer;
-
   &:hover {
     background-color: $button-raised-background-hover;
-
     @extend .z-depth-1-half;
   }
 }
@@ -87,23 +81,18 @@
 .btn-floating {
   &:hover {
     background-color: $button-floating-background-hover;
-
     @extend .z-depth-1-half;
   }
-
-  &::before {
+  &:before {
     border-radius: 0;
   }
-
   &.btn-large {
     &.halfway-fab {
       bottom: -$button-floating-large-size / 2;
     }
-
     width: $button-floating-large-size;
     height: $button-floating-large-size;
     padding: 0;
-
     i {
       line-height: $button-floating-large-size;
     }
@@ -113,10 +102,8 @@
     &.halfway-fab {
       bottom: -$button-floating-small-size / 2;
     }
-
     width: $button-floating-small-size;
     height: $button-floating-small-size;
-
     i {
       line-height: $button-floating-small-size;
     }
@@ -127,12 +114,10 @@
       right: auto;
       left: 24px;
     }
-
     position: absolute;
     right: 24px;
     bottom: -$button-floating-size / 2;
   }
-
   display: inline-block;
   color: $button-floating-color;
   position: relative;
@@ -144,13 +129,10 @@
   padding: 0;
   background-color: $button-floating-background;
   border-radius: $button-floating-radius;
-
   @extend .z-depth-1;
-
   transition: background-color .3s;
   cursor: pointer;
   vertical-align: middle;
-
   i {
     width: inherit;
     display: inline-block;
@@ -178,7 +160,6 @@ button.btn-floating {
   &.direction-left,
   &.direction-right {
     padding: 0 0 0 15px;
-
     ul {
       text-align: right;
       right: 64px;
@@ -186,70 +167,57 @@ button.btn-floating {
       transform: translateY(-50%);
       height: 100%;
       left: auto;
-
-      /* width 100% only goes to width of button container */
+      /*width 100% only goes to width of button container */
       width: 500px;
-
       li {
         display: inline-block;
         margin: 7.5px 15px 0 0;
       }
     }
   }
-
   &.direction-right {
     padding: 0 15px 0 0;
-
     ul {
       text-align: left;
       direction: rtl;
       left: 64px;
       right: auto;
-
       li {
         margin: 7.5px 0 0 15px;
       }
     }
   }
-
   &.direction-bottom {
-    padding: 0 0 15px;
-
+    padding: 0 0 15px 0;
     ul {
       top: 64px;
       bottom: auto;
       display: flex;
       flex-direction: column-reverse;
-
       li {
-        margin: 15px 0 0;
+        margin: 15px 0 0 0;
       }
     }
   }
-
   &.toolbar {
     &.active {
       &>a i {
         opacity: 0;
       }
     }
-
     padding: 0;
     height: $button-floating-large-size;
-
     ul {
       display: flex;
       top: 0;
       bottom: 0;
       z-index: 1;
-
       li {
         flex: 1;
         display: inline-block;
         margin: 0;
         height: 100%;
         transition: none;
-
         a {
           display: block;
           overflow: hidden;
@@ -261,7 +229,6 @@ button.btn-floating {
           color: #fff;
           line-height: $button-floating-large-size;
           z-index: 1;
-
           i {
             line-height: inherit;
           }
@@ -269,14 +236,12 @@ button.btn-floating {
       }
     }
   }
-
   position: fixed;
   right: 23px;
   bottom: 23px;
   padding-top: 15px;
   margin-bottom: 0;
   z-index: 997;
-
   ul {
     left: 0;
     right: 0;
@@ -285,16 +250,13 @@ button.btn-floating {
     bottom: 64px;
     margin: 0;
     visibility: hidden;
-
     li {
       margin-bottom: 15px;
     }
-
     a.btn-floating {
       opacity: 0;
     }
   }
-
   .fab-backdrop {
     position: absolute;
     top: 0;
@@ -315,16 +277,13 @@ button.btn-floating {
   color: $button-flat-color;
   cursor: pointer;
   transition: background-color .2s;
-
   &:focus,
   &:hover {
     box-shadow: none;
   }
-
   &:focus {
-    background-color: rgb(0 0 0 / 10%);
+    background-color: rgba(0, 0, 0, .1);
   }
-
   &.disabled,
   &.btn-flat[disabled]  {
     background-color: transparent !important;
@@ -336,7 +295,6 @@ button.btn-floating {
 // Large button
 .btn-large {
   @extend .btn;
-
   height: $button-large-height;
   line-height: $button-large-height;
   font-size: $button-large-font-size;
@@ -350,11 +308,9 @@ button.btn-floating {
 // Small button
 .btn-small {
   @extend .btn;
-
   height: $button-small-height;
   line-height: $button-small-height;
   font-size: $button-small-font-size;
-
   i {
     font-size: $button-small-icon-font-size;
   }

@@ -9,8 +9,8 @@
   li {
     padding: 2px 0;
   }
-
   a {
+    display: inline-block;
     font-weight: 300;
     color: #757575;
     padding-left: 16px;
@@ -24,7 +24,6 @@
       padding-left: 15px;
       border-left: 1px solid $primary-color;
     }
-
     &.active {
       font-weight: 500;
       padding-left: 14px;

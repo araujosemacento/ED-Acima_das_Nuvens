@@ -13,10 +13,10 @@ label {
   color: $input-border-color;
 }
 
-@use 'input-fields';
-@use 'radio-buttons';
-@use 'checkboxes';
-@use 'switches';
-@use 'select';
-@use 'file-input';
-@use 'range';
+@import 'input-fields';
+@import 'radio-buttons';
+@import 'checkboxes';
+@import 'switches';
+@import 'select';
+@import 'file-input';
+@import 'range';

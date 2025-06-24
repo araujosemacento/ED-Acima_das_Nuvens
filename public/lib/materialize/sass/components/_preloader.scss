@@ -8,11 +8,9 @@
     subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-/*************************  */
-
+/**************************/
 /* STYLES FOR THE SPINNER */
-
-/*************************  */
+/**************************/
 
 /*
  * Constants:
@@ -47,12 +45,13 @@
 
   &.active {
     /* duration: 360 * ARCTIME / (ARCSTARTROT + (360-ARCSIZE)) */
+    -webkit-animation: container-rotate 1568ms linear infinite;
     animation: container-rotate 1568ms linear infinite;
   }
 }
 
-@keyframes container-rotate {
-  to { transform: rotate(360deg) }
+@-webkit-keyframes container-rotate {
+  to { -webkit-transform: rotate(360deg) }
 }
 
 @keyframes container-rotate {
@@ -102,21 +101,25 @@
  */
 .active .spinner-layer.spinner-blue {
   /* durations: 4 * ARCTIME */
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, blue-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, blue-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
 .active .spinner-layer.spinner-red {
   /* durations: 4 * ARCTIME */
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, red-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, red-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
 .active .spinner-layer.spinner-yellow {
   /* durations: 4 * ARCTIME */
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, yellow-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, yellow-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
 .active .spinner-layer.spinner-green {
   /* durations: 4 * ARCTIME */
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, green-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, green-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
@@ -127,18 +130,19 @@
 .active .spinner-layer.spinner-green-only {
   /* durations: 4 * ARCTIME */
   opacity: 1;
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
-@keyframes fill-unfill-rotate {
-  12.5% { transform: rotate(135deg);  } /* 0.5 * ARCSIZE */
-  25%   { transform: rotate(270deg);  } /* 1   * ARCSIZE */
-  37.5% { transform: rotate(405deg);  } /* 1.5 * ARCSIZE */
-  50%   { transform: rotate(540deg);  } /* 2   * ARCSIZE */
-  62.5% { transform: rotate(675deg);  } /* 2.5 * ARCSIZE */
-  75%   { transform: rotate(810deg);  } /* 3   * ARCSIZE */
-  87.5% { transform: rotate(945deg);  } /* 3.5 * ARCSIZE */
-  100%    { transform: rotate(1080deg); } /* 4   * ARCSIZE */
+@-webkit-keyframes fill-unfill-rotate {
+  12.5% { -webkit-transform: rotate(135deg);  } /* 0.5 * ARCSIZE */
+  25%   { -webkit-transform: rotate(270deg);  } /* 1   * ARCSIZE */
+  37.5% { -webkit-transform: rotate(405deg);  } /* 1.5 * ARCSIZE */
+  50%   { -webkit-transform: rotate(540deg);  } /* 2   * ARCSIZE */
+  62.5% { -webkit-transform: rotate(675deg);  } /* 2.5 * ARCSIZE */
+  75%   { -webkit-transform: rotate(810deg);  } /* 3   * ARCSIZE */
+  87.5% { -webkit-transform: rotate(945deg);  } /* 3.5 * ARCSIZE */
+  to    { -webkit-transform: rotate(1080deg); } /* 4   * ARCSIZE */
 }
 
 @keyframes fill-unfill-rotate {
@@ -149,11 +153,11 @@
   62.5% { transform: rotate(675deg);  } /* 2.5 * ARCSIZE */
   75%   { transform: rotate(810deg);  } /* 3   * ARCSIZE */
   87.5% { transform: rotate(945deg);  } /* 3.5 * ARCSIZE */
-  100%    { transform: rotate(1080deg); } /* 4   * ARCSIZE */
+  to    { transform: rotate(1080deg); } /* 4   * ARCSIZE */
 }
 
-@keyframes blue-fade-in-out {
-  0% { opacity: 1; }
+@-webkit-keyframes blue-fade-in-out {
+  from { opacity: 1; }
   25% { opacity: 1; }
   26% { opacity: 0; }
   89% { opacity: 0; }
@@ -162,7 +166,7 @@
 }
 
 @keyframes blue-fade-in-out {
-  0% { opacity: 1; }
+  from { opacity: 1; }
   25% { opacity: 1; }
   26% { opacity: 0; }
   89% { opacity: 0; }
@@ -170,8 +174,8 @@
   100% { opacity: 1; }
 }
 
-@keyframes red-fade-in-out {
-  0% { opacity: 0; }
+@-webkit-keyframes red-fade-in-out {
+  from { opacity: 0; }
   15% { opacity: 0; }
   25% { opacity: 1; }
   50% { opacity: 1; }
@@ -179,15 +183,15 @@
 }
 
 @keyframes red-fade-in-out {
-  0% { opacity: 0; }
+  from { opacity: 0; }
   15% { opacity: 0; }
   25% { opacity: 1; }
   50% { opacity: 1; }
   51% { opacity: 0; }
 }
 
-@keyframes yellow-fade-in-out {
-  0% { opacity: 0; }
+@-webkit-keyframes yellow-fade-in-out {
+  from { opacity: 0; }
   40% { opacity: 0; }
   50% { opacity: 1; }
   75% { opacity: 1; }
@@ -195,15 +199,15 @@
 }
 
 @keyframes yellow-fade-in-out {
-  0% { opacity: 0; }
+  from { opacity: 0; }
   40% { opacity: 0; }
   50% { opacity: 1; }
   75% { opacity: 1; }
   76% { opacity: 0; }
 }
 
-@keyframes green-fade-in-out {
-  0% { opacity: 0; }
+@-webkit-keyframes green-fade-in-out {
+  from { opacity: 0; }
   65% { opacity: 0; }
   75% { opacity: 1; }
   90% { opacity: 1; }
@@ -211,7 +215,7 @@
 }
 
 @keyframes green-fade-in-out {
-  0% { opacity: 0; }
+  from { opacity: 0; }
   65% { opacity: 0; }
   75% { opacity: 1; }
   90% { opacity: 1; }
@@ -253,6 +257,7 @@
     border-color: inherit;
     border-bottom-color: transparent !important;
     border-radius: 50%;
+    -webkit-animation: none;
     animation: none;
     position: absolute;
     top: 0;
@@ -263,12 +268,13 @@
   &.left .circle {
     left: 0;
     border-right-color: transparent !important;
+    -webkit-transform: rotate(129deg);
     transform: rotate(129deg);
   }
-
   &.right .circle {
     left: -100%;
     border-left-color: transparent !important;
+    -webkit-transform: rotate(-129deg);
     transform: rotate(-129deg);
   }
 }
@@ -277,44 +283,47 @@
 
 .active .circle-clipper.left .circle {
   /* duration: ARCTIME */
+  -webkit-animation: left-spin 1333ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: left-spin 1333ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
 .active .circle-clipper.right .circle {
   /* duration: ARCTIME */
+  -webkit-animation: right-spin 1333ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
   animation: right-spin 1333ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
-@keyframes left-spin {
-  0% { transform: rotate(130deg); }
-  50% { transform: rotate(-5deg); }
-  100% { transform: rotate(130deg); }
+@-webkit-keyframes left-spin {
+  from { -webkit-transform: rotate(130deg); }
+  50% { -webkit-transform: rotate(-5deg); }
+  to { -webkit-transform: rotate(130deg); }
 }
 
 @keyframes left-spin {
-  0% { transform: rotate(130deg); }
+  from { transform: rotate(130deg); }
   50% { transform: rotate(-5deg); }
-  100% { transform: rotate(130deg); }
+  to { transform: rotate(130deg); }
+}
+
+@-webkit-keyframes right-spin {
+  from { -webkit-transform: rotate(-130deg); }
+  50% { -webkit-transform: rotate(5deg); }
+  to { -webkit-transform: rotate(-130deg); }
 }
 
 @keyframes right-spin {
-  0% { transform: rotate(-130deg); }
+  from { transform: rotate(-130deg); }
   50% { transform: rotate(5deg); }
-  100% { transform: rotate(-130deg); }
-}
-
-@keyframes right-spin {
-  0% { transform: rotate(-130deg); }
-  50% { transform: rotate(5deg); }
-  100% { transform: rotate(-130deg); }
+  to { transform: rotate(-130deg); }
 }
 
 #spinnerContainer.cooldown {
   /* duration: SHRINK_TIME */
+  -webkit-animation: container-rotate 1568ms linear infinite, fade-out 400ms cubic-bezier(0.4, 0.0, 0.2, 1);
   animation: container-rotate 1568ms linear infinite, fade-out 400ms cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-@keyframes fade-out {
+@-webkit-keyframes fade-out {
   from { opacity: 1; }
   to { opacity: 0; }
 }

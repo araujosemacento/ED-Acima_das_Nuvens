@@ -11,7 +11,7 @@
 }
 
 .text-primary {
-	color: rgb(255 255 255 / 100%);
+	color: rgba(255, 255, 255, 1);
 }
 
 
@@ -25,8 +25,9 @@
 
 .timepicker-text-container {
 	font-size: 4rem;
+	font-weight: bold;
 	text-align: center;
-	color: rgb(255 255 255 / 60%);
+	color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
 	position: relative;
   user-select: none;
@@ -76,9 +77,11 @@
 .timepicker-canvas,
 .timepicker-dial {
 	position: absolute;
-	inset: 0;
+	left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
-
 .timepicker-minutes {
 	visibility: hidden;
 }
@@ -99,11 +102,9 @@
 .timepicker-tick:hover {
 	background-color: transparentize($secondary-color, .75);
 }
-
 .timepicker-dial {
 	transition: transform 350ms, opacity 350ms;
 }
-
 .timepicker-dial-out {
   &.timepicker-hours {
 	  transform: scale(1.1, 1.1);
@@ -115,7 +116,6 @@
 
 	opacity: 0;
 }
-
 .timepicker-canvas {
 	transition: opacity 175ms;
 
@@ -125,16 +125,13 @@
 	  stroke-linecap: round;
   }
 }
-
 .timepicker-canvas-out {
 	opacity: 0.25;
 }
-
 .timepicker-canvas-bearing {
 	stroke: none;
 	fill: $secondary-color;
 }
-
 .timepicker-canvas-bg {
 	stroke: none;
 	fill: $secondary-color;

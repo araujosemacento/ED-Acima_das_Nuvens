@@ -37,6 +37,7 @@
 $primary-color: color("materialize-red", "lighten-2") !default;
 $primary-color-light: lighten($primary-color, 15%) !default;
 $primary-color-dark: darken($primary-color, 15%) !default;
+
 $secondary-color: color("teal", "lighten-1") !default;
 $success-color: color("green", "base") !default;
 $error-color: color("red", "base") !default;
@@ -135,16 +136,17 @@ $chip-margin: 5px !default;
 
 $datepicker-display-font-size: 2.8rem;
 $datepicker-calendar-header-color: #999;
-$datepicker-weekday-color: rgb(0 0 0 / 87%) !default;
+$datepicker-weekday-color: rgba(0, 0, 0, .87) !default;
 $datepicker-weekday-bg: darken($secondary-color, 7%) !default;
 $datepicker-date-bg: $secondary-color !default;
-$datepicker-year: rgb(255 255 255 / 70%) !default;
-$datepicker-focus: rgb(0 0 0 / 5%) !default;
+$datepicker-year: rgba(255, 255, 255, .7) !default;
+$datepicker-focus: rgba(0,0,0, .05) !default;
 $datepicker-selected: $secondary-color !default;
 $datepicker-selected-outfocus: desaturate(lighten($secondary-color, 35%), 15%) !default;
 $datepicker-day-focus: transparentize(desaturate($secondary-color, 5%), .75) !default;
-$datepicker-disabled-day-color: rgb(0 0 0 / 30%) !default;
-$timepicker-clock-color: rgb(0 0 0 / 87%) !default;
+$datepicker-disabled-day-color: rgba(0, 0, 0, .3) !default;
+
+$timepicker-clock-color: rgba(0, 0, 0, .87) !default;
 $timepicker-clock-plate-bg: #eee !default;
 
 
@@ -173,7 +175,7 @@ $input-margin-bottom: 8px;
 $input-margin: 0 0 $input-margin-bottom 0 !default;
 $input-padding: 0 !default;
 $label-font-size: .8rem !default;
-$input-disabled-color: rgb(0 0 0 / 42%) !default;
+$input-disabled-color: rgba(0,0,0, .42) !default;
 $input-disabled-solid-color: #949494 !default;
 $input-disabled-border: 1px dotted $input-disabled-color !default;
 $input-invalid-border: 1px solid $input-error-color !default;
@@ -192,20 +194,20 @@ $track-height: 3px !default;
 
 // Select
 $select-border: 1px solid #f2f2f2 !default;
-$select-background: rgb(255 255 255 / 90%) !default;
+$select-background: rgba(255, 255, 255, 0.90) !default;
 $select-focus: 1px solid lighten($secondary-color, 47%) !default;
-$select-option-hover: rgb(0 0 0 / 8%) !default;
-$select-option-focus: rgb(0 0 0 / 8%) !default;
-$select-option-selected: rgb(0 0 0 / 3%) !default;
+$select-option-hover: rgba(0,0,0,.08) !default;
+$select-option-focus: rgba(0,0,0,.08) !default;
+$select-option-selected: rgba(0,0,0,.03) !default;
 $select-padding: 5px !default;
 $select-radius: 2px !default;
-$select-disabled-color: rgb(0 0 0 / 30%) !default;
+$select-disabled-color: rgba(0,0,0,.3) !default;
 
 // Switches
 $switch-bg-color: $secondary-color !default;
 $switch-checked-lever-bg: desaturate(lighten($switch-bg-color, 25%), 25%) !default;
 $switch-unchecked-bg: #F1F1F1 !default;
-$switch-unchecked-lever-bg: rgb(0 0 0 / 38%) !default;
+$switch-unchecked-lever-bg: rgba(0,0,0,.38) !default;
 $switch-radius: 15px !default;
 
 
@@ -219,6 +221,7 @@ $large-screen-up: 1201px !default;
 $small-screen: 600px !default;
 $medium-screen: 992px !default;
 $large-screen: 1200px !default;
+
 $medium-and-up: "only screen and (min-width : #{$small-screen-up})" !default;
 $large-and-up: "only screen and (min-width : #{$medium-screen-up})" !default;
 $extra-large-and-up: "only screen and (min-width : #{$large-screen-up})" !default;
@@ -252,7 +255,7 @@ $navbar-brand-font-size: 2.1rem !default;
 
 $sidenav-width: 300px !default;
 $sidenav-font-size: 14px !default;
-$sidenav-font-color: rgb(0 0 0 / 87%) !default;
+$sidenav-font-color: rgba(0,0,0,.87) !default;
 $sidenav-bg-color: #fff !default;
 $sidenav-padding: 16px !default;
 $sidenav-item-height: 48px !default;
@@ -284,8 +287,8 @@ $tabs-bg-color: #fff !default;
 // 18. Tables
 // ==========================================================================
 
-$table-border-color: rgb(0 0 0 / 12%) !default;
-$table-striped-color: rgb(242 242 242 / 50%) !default;
+$table-border-color: rgba(0,0,0,.12) !default;
+$table-striped-color: rgba(242, 242, 242, 0.5) !default;
 
 
 // 19. Toasts
@@ -300,9 +303,8 @@ $toast-action-color: #eeff41;
 // 20. Typography
 // ==========================================================================
 
-$font-stack: -apple-system, blinkmacsystemfont, "Segoe UI", roboto, oxygen-sans, ubuntu, cantarell, "Helvetica Neue", sans-serif !default;
-$off-black: rgb(0 0 0 / 87%) !default;
-
+$font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif !default;
+$off-black: rgba(0, 0, 0, 0.87) !default;
 // Header Styles
 $h1-fontsize: 4.2rem !default;
 $h2-fontsize: 3.56rem !default;
@@ -317,14 +319,14 @@ $h6-fontsize: 1.15rem !default;
 
 $footer-font-color: #fff !default;
 $footer-bg-color: $primary-color !default;
-$footer-copyright-font-color: rgb(255 255 255 / 80%) !default;
-$footer-copyright-bg-color: rgb(51 51 51 / 8%) !default;
+$footer-copyright-font-color: rgba(255,255,255,.8) !default;
+$footer-copyright-bg-color: rgba(51,51,51,.08) !default;
 
 
 // 22. Flow Text
 // ==========================================================================
 
-$range: $large-screen - $small-screen !default;
+$range : $large-screen - $small-screen !default;
 $intervals: 20 !default;
 $interval-size: $range / $intervals !default;
 

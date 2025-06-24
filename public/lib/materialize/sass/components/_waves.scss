@@ -28,7 +28,8 @@
     margin-top:-10px;
     margin-left:-10px;
     opacity: 0;
-    background: rgb(0 0 0 / 20%);
+
+    background: rgba(0,0,0,0.2);
     transition: all 0.7s ease-out;
     transition-property: transform, opacity;
     transform: scale(0);
@@ -37,31 +38,25 @@
 
   // Waves Colors
   &.waves-light .waves-ripple {
-    background-color: rgb(255 255 255 / 45%);
+    background-color: rgba(255, 255, 255, 0.45);
   }
-
   &.waves-red .waves-ripple {
-    background-color: rgb(244 67 54 / 70%);
+    background-color: rgba(244, 67, 54, .70);
   }
-
   &.waves-yellow .waves-ripple {
-    background-color: rgb(255 235 59 / 70%);
+    background-color: rgba(255, 235, 59, .70);
   }
-
   &.waves-orange .waves-ripple {
-    background-color: rgb(255 152 0 / 70%);
+    background-color: rgba(255, 152, 0, .70);
   }
-
   &.waves-purple .waves-ripple {
-    background-color: rgb(156 39 176 / 70%);
+    background-color: rgba(156, 39, 176, 0.70);
   }
-
   &.waves-green .waves-ripple {
-    background-color: rgb(76 175 80 / 70%);
+    background-color: rgba(76, 175, 80, 0.70);
   }
-
   &.waves-teal .waves-ripple {
-    background-color: rgb(0 150 136 / 70%);
+    background-color: rgba(0, 150, 136, 0.70);
   }
 
   // Style input button bug.
@@ -85,7 +80,7 @@
 
 .waves-circle {
   transform: translateZ(0);
-  mask-image: radial-gradient(circle, white 100%, black 100%);
+  -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
 }
 
 .waves-input-wrapper {
@@ -106,7 +101,7 @@
   height: 2.5em;
   line-height: 2.5em;
   border-radius: 50%;
-  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .waves-block {

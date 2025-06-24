@@ -5,9 +5,7 @@
   padding: $card-padding;
   margin: $element-top-margin 0 $element-bottom-margin 0;
   border-radius: 2px;
-
   @extend .z-depth-1;
-
   background-color: $card-bg-color;
 }
 
@@ -17,14 +15,12 @@
   background-color: $card-bg-color;
   transition: box-shadow .25s;
   border-radius: 2px;
-
   @extend .z-depth-1;
 
 
   .card-title {
     font-size: 24px;
     font-weight: 300;
-
     &.activator {
       cursor: pointer;
     }
@@ -38,16 +34,13 @@
       max-height: 60%;
       overflow: hidden;
     }
-
     .card-image + .card-content {
       max-height: 40%;
     }
-
     .card-content {
       max-height: 100%;
       overflow: hidden;
     }
-
     .card-action {
       position: absolute;
       bottom: 0;
@@ -86,7 +79,6 @@
 
     .card-image {
       max-width: 50%;
-
       img {
         border-radius: 2px 0 0 2px;
         max-width: 100%;
@@ -129,7 +121,10 @@
       display: block;
       border-radius: 2px 2px 0 0;
       position: relative;
-      inset: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
       width: 100%;
     }
 
@@ -150,7 +145,6 @@
     p {
       margin: 0;
     }
-
     .card-title {
       display: block;
       line-height: 32px;
@@ -166,13 +160,12 @@
     &:last-child {
       border-radius: 0 0 2px 2px;
     }
-
     background-color: inherit; // Use inherit to inherit color classes
-    border-top: 1px solid rgb(160 160 160 / 20%);
+    border-top: 1px solid rgba(160,160,160,.2);
     position: relative;
     padding: 16px $card-padding;
 
-    a:not(.btn, .btn-large, .btn-floating) {
+    a:not(.btn):not(.btn-large):not(.btn-floating) {
       color: $card-link-color;
       margin-right: $card-padding;
       transition: color .3s ease;

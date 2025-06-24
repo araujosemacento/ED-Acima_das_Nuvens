@@ -9,7 +9,7 @@
   cursor: zoom-in;
   position: relative;
   transition: opacity .4s;
-  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 
   &.active {
     cursor: zoom-out;
@@ -18,7 +18,10 @@
 
 #materialbox-overlay {
   position:fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background-color: #292929;
   z-index: 1000;
   will-change: opacity;
