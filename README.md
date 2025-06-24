@@ -1,57 +1,38 @@
 # 🎮 ED - Acima das Nuvens
 
-> **RPG interativo baseado em cartas e narrativa ramificada** - Uma aventura sobre as nuvens onde cada decisão molda o destino de 5 personagens únicos em busca da lendária Gansa dos Ovos Dourados.
+> **RPG interativo baseado em cartas e narrativa ramificada** - Aventura sobre as nuvens onde cada decisão molda o destino de 5 personagens únicos em busca da lendária Gansa dos Ovos Dourados.
 
 ## 🎯 Conceito Principal
 
-### **Sistema Híbrido: Cartas + Narrativa em Árvore**
+**Sistema Híbrido: Cartas + Narrativa em Árvore**
 
-Inspirado em jogos como [**Night of the Full Moon**](https://play.google.com/store/apps/details?id=com.ztgame.yyzy) e [**Zork by Tim Anderson**](https://textadventures.co.uk/games/play/5zyoqrsugeopel3ffhz_vq), o jogo combina:
+Inspirado em [Night of the Full Moon](https://play.google.com/store/apps/details?id=com.ztgame.yyzy) e [Zork](https://textadventures.co.uk/games/play/5zyoqrsugeopel3ffhz_vq):
 
-- 🃏 **Combates baseados em cartas** (CSS flip cards + animações)
+- 🃏 **Combates baseados em cartas** (CSS flip cards)
 - 🌳 **Narrativa ramificada** em estrutura de árvore
 - 🎭 **5 personagens jogáveis** com objetivos únicos
-- 🏰 **Cenário único**: Castelo nas nuvens do Gigante
+- 🏰 **Cenário**: Castelo nas nuvens do Gigante
 
-### **Mecânica Core: Cartas CSS Puras**
-
-```plain
-[Carta Frente] → Hover/Click → [Carta Verso]
-     ↓                           ↓
-  Ação Base                 Efeito/Dano
-```
-
-Implementação via [CSS Flip Cards](https://www.w3schools.com/howto/howto_css_flip_card.asp) sem JavaScript pesado.
-
-## 🏗️ Arquitetura Técnica
-
-### **Stack Tecnológica**
+## 🏗️ Stack Tecnológica
 
 ```javascript
-Frontend: HTML5 + CSS/Sass + PyScript + Ionicons
-Backend:  Python (client-side)
-Testing:  Jest (JS/DOM) + Pytest (Python)
-Build:    Node.js + Sass compiler
-Dev:      BrowserSync + Live Reload
+Frontend: HTML5 + CSS/Sass + Brython
+Build:    Vite + Sass compiler  
+Runtime:  Bun
 ```
 
-### **Estrutura do Projeto**
+### Estrutura do Projeto
 
-```plain
+```
 ed-acima_das_nuvens/
-├── 🎮 JOGO
+├── src/
 │   ├── index.html              # Interface principal
-│   ├── main.py                 # Lógica PyScript
-│   └── sass/                   # Estilos (compilado → CSS)
-├── 🧪 TESTES
-│   ├── tests/main.test.js      # Jest (DOM/Interface)
-│   └── tests/test_main.py      # Pytest (Python/Lógica)
-├── 📦 ASSETS
-│   └── public/                 # PyScript, Bulma, fontes, etc.
-└── ⚙️ CONFIG
-    ├── package.json            # Scripts npm
-    ├── bs-config.cjs           # BrowserSync
-    └── dependencies.py         # Build otimizado
+│   ├── main.py                 # Lógica Brython
+│   └── style.css               # Estilos
+├── lib/
+│   ├── brython/                # Runtime Brython
+│   └── materialize/            # Framework CSS
+└── package.json                # Scripts e dependências
 ```
 
 ## 🎭 Personagens & Objetivos
@@ -64,58 +45,40 @@ ed-acima_das_nuvens/
 | **Kit** 🐈‍⬛  | Acumular riquezas 💰    | Ganância              |
 | **Ed** 🥚    | Encontrar família 👥    | Abandono              |
 
-### **Objetivo Comum: Roubar a Gansa 🪿 dos Ovos Dourados**
+**Objetivo Comum: Roubar a Gansa 🪿 dos Ovos Dourados**
 
-## 🌳 Sistema de Narrativa Ramificada
+## 🚀 Desenvolvimento
 
-### **Estrutura em Árvore (por personagem)**
+```bash
+# Ambiente de desenvolvimento
+bun run dev                   # Vite dev server + hot reload
 
-```plain
-                [Finais Múltiplos]
-               /   X    |     X   \
-        [Neutro]   [Desastroso]  [Verdadeiro]
-            /    X      |      X     \
-    [Ações-Chave]  [Ações-Chave]  [Ações-Chave]
-         /      X       |       X       \
-   [Eventos]        [Eventos]        [Eventos]
-      /        X        |         X        \
-[Início] -------- [Infiltração] -------- [Castelo]
-
-
----------------------------------------------------------
-Cada 'X' representa uma escolha que leva a diferentes
-cursos de ação, consequências e/ou finais.
----------------------------------------------------------
+# Build e preview
+bun run build                 # Build de produção
+bun run preview              # Preview do build
 ```
 
-### **Exemplos de Ramificação (João)**
+## 🎯 Roadmap
 
-```plain
-JOÃO - Vingança contra o Gigante 🧌
-├── NEUTRO: Mata o gigante, abandona amigos
-├── DESASTROSO: Morte coletiva na vingança
-└── VERDADEIRO: Perdoa, todos sobrevivem
-```
+### **Fase 1: Fundação** *(Atual)*
+- [x] Estrutura básica HTML/CSS/Python
+- [x] Integração Brython
+- [x] Sistema de build Vite
+- [ ] Framework CSS (Materialize)
 
-### **Eventos-Chave Obrigatórios**
+### **Fase 2: Cartas CSS**
+- [ ] Implementar flip cards CSS
+- [ ] Sistema de deck por personagem
+- [ ] Animações de combate
 
-- 🔥 **Incêndio da Lamparina** (durante furto da Gansa)
-- 🏗️ **Desmoronamento do Castelo** (efeito borboleta)
-- 🪿 **Roubo da Gansa** (conflito entre personagens)
+### **Fase 3: Narrativa**
+- [ ] Árvore de decisões (JSON)
+- [ ] Sistema de flags de progresso
+- [ ] Múltiplos finais
 
-## 🃏 Sistema de Cartas
+## 📄 Licença
 
-### **Tipos de Cartas [TBD]**
-
-- ⚔️ **Ação**: Combate direto
-- 🛡️ **Defesa**: Proteção/Bloqueio  
-- 🎭 **Narrativa**: Escolhas de diálogo
-- 🔮 **Especial**: Habilidades únicas por personagem
-
-### **Implementação CSS**
-
-```scss
-.card {
+**AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
   perspective: 1000px;
   
   &.flipped .card-inner {
@@ -133,36 +96,73 @@ JOÃO - Vingança contra o Gigante 🧌
 ### **Desenvolvimento Principal**
 
 ```bash
-# Iniciar ambiente completo
-npm run dev                    # Sass watch + BrowserSync
+# Ambiente de desenvolvimento
+bun run dev                   # Vite dev server + hot reload
 
-# Desenvolvimento focado
-npm run watch:sass            # Apenas compilação Sass
-npm run server:only           # Apenas servidor
+# Build e preview
+bun run build                 # Build de produção
+bun run preview              # Preview do build
 ```
 
-### **Sistema de Build Otimizado**
+## 🎨 Referências Visuais
 
-```bash
-# Análise de dependências
-npm run deps:scan             # Detecta arquivos essenciais
+### **Inspirações de Gameplay**
 
-# Build mínimo (100MB → ~6MB)
-npm run deps:build            # Cria dist/ otimizado
-```
+- 🌙 [**Night of the Full Moon**](https://play.google.com/store/apps/details?id=com.ztgame.yyzy)
+- 📖 [**Zork by Tim Anderson**](https://textadventures.co.uk/games/play/5zyoqrsugeopel3ffhz_vq)
 
-### **Testes Duplos**
+### **Estética Pretendida**
 
-```bash
-# JavaScript (Interface/DOM)
-npm test                      # Jest runner
-npm run test:watch           # Watch mode
-npm run test:coverage        # Relatório cobertura
+- 🎨 **Arte**: ASCII/Pixel art
+- 🎭 **Tom**: Dark fairy tale brasileiro
+- 🃏 **UI**: Cartas com flip animations
+- 🌌 **Cenário**: Castelo nas nuvens
 
-# Python (Lógica/PyScript)  
-npm run pytest              # Pytest runner
-npm run pytest:watch        # Watch mode
-npm run pytest:coverage     # Relatório HTML
+## 🎯 Roadmap de Desenvolvimento
+
+### **Fase 1: Fundação** *(Atual)*
+
+- [x] Estrutura básica HTML/CSS/Python
+- [x] Integração Brython
+- [x] Sistema de build Vite
+- [ ] Framework CSS (Materialize/Bulma)
+
+### **Fase 2: Cartas CSS** *(Próxima)*
+
+- [ ] Implementar flip cards CSS
+- [ ] Sistema de deck por personagem
+- [ ] Animações de combate
+- [ ] Estados de carta
+
+### **Fase 3: Narrativa**
+
+- [ ] Árvore de decisões (JSON)
+- [ ] Sistema de flags de progresso
+- [ ] Múltiplos finais
+- [ ] Save/Load de progresso
+
+### **Fase 4: Polish**
+
+- [ ] Arte final das cartas
+- [ ] Efeitos sonoros
+- [ ] Animações avançadas
+- [ ] Mobile responsivo
+
+## 🤝 Como Contribuir
+
+1. **Fork** do repositório
+2. **Clone** localmente: `git clone ...`
+3. **Instalar** dependências: `bun install`
+4. **Desenvolver** com: `bun run dev`
+5. **Build** com: `bun run build`
+
+---
+
+> 💡 **Nota Técnica**: O projeto usa Brython para executar Python diretamente no browser, eliminando a necessidade de transpilação. O Vite fornece hot reload e build otimizado.
+
+## 📄 Licença
+
+**AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
 ```
 
 ### **Gerenciamento Seguro de Arquivos**
