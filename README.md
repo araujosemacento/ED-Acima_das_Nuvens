@@ -27,7 +27,7 @@ Runtime:  Bun
 ed-acima_das_nuvens/
 ├── src/
 │   ├── index.html              # Interface principal
-│   ├── main.py                 # Lógica Brython
+│   ├── index.py                 # Lógica Brython
 │   └── style.css               # Estilos
 ├── lib/
 │   ├── brython/                # Runtime Brython
