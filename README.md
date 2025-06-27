@@ -163,101 +163,6 @@ bun run preview              # Preview do build
 ## 📄 Licença
 
 **AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
-```
-
-### **Gerenciamento Seguro de Arquivos**
-
-```bash
-# Mover mantendo histórico Git
-npm run move:safe pasta_antiga/ pasta_nova/
-git mv arquivo.txt novo_nome.txt
-
-# ⚠️ NUNCA mover manualmente - usar git mv
-```
-
-## 🎨 Referências Visuais
-
-### **Inspirações de Gameplay**
-
-- 🌙 [**Night of the Full Moon**](https://play.google.com/store/apps/details?id=com.ztgame.yyzy)
-  - Sistema de cartas roguelike
-  - Narrativa dark fairy tale
-  - Arte estilizada 2D
-
-- 📖 [**Zork by Tim Anderson**](https://textadventures.co.uk/games/play/5zyoqrsugeopel3ffhz_vq)
-  - Narrativa ramificada
-  - Escolhas com consequências
-  - Múltiplos finais
-
-### **Estética Pretendida**
-
-- 🎨 **Arte**: Ascii
-- 🎭 **Tom**: Dark fairy tale brasileiro
-- 🃏 **UI**: Cartas com flip animations + ascii sprite
-- 🌌 **Cenário**: Castelo nas nuvens + atmosfera mística
-
-## 📊 Métricas do Projeto
-
-### **Otimizações Implementadas**
-
-- ✅ Build reduzido de 100MB+ para ~6MB
-- ✅ Detecção automática de dependências
-- ✅ Dual testing (Jest + Pytest)
-- ✅ Live reload para HTML/Python/CSS
-- ✅ Sass compilation automatizada
-
-### **Cobertura de Testes**
-
-- 🧪 **Jest**: Interface, DOM, simulação PyScript
-- 🐍 **Pytest**: Lógica Python, mocks completos
-- 📊 **Coverage**: Relatórios HTML + Terminal
-
-## 🎯 Roadmap de Desenvolvimento
-
-### **Fase 1: Fundação** *(Atual)*
-
-- [x] Estrutura básica HTML/CSS/Python
-- [x] Sistema de temas (light/dark)
-- [x] Testes automatizados (Jest + Pytest)
-- [x] Build system otimizado
-
-### **Fase 2: Cartas CSS**
-
-- [ ] Implementar flip cards CSS puros
-- [ ] Sistema de deck por personagem
-- [ ] Animações de combate
-- [ ] Estados de carta (ativa/usada/bloqueada)
-
-### **Fase 3: Narrativa**
-
-- [ ] Árvore de decisões (JSON) por personagem
-- [ ] Sistema de flags de progresso
-- [ ] Múltiplos finais implementados
-- [ ] Save/Load de progresso
-
-### **Fase 4: Polish**
-
-- [ ] Arte final das cartas
-- [ ] Efeitos sonoros
-- [ ] Animações avançadas
-- [ ] Mobile responsivo
-
-## 🤝 Como Contribuir
-
-1. **Fork** do repositório
-2. **Clone** localmente: `git clone ...`
-3. **Instalar** dependências: `npm install`
-4. **Desenvolver** com: `npm run dev`
-5. **Testar** com: `npm test && npm run pytest`
-6. **Build** otimizado: `npm run deps:build`
-
----
-
-> 💡 **Nota Técnica**: O projeto usa PyScript para lógica Python client-side, substituindo implementação javascript, com a pretensão de estabelecer arquivos JSON para utilizar como banco de dados estático afim de estabelecer a progressão da narrativa. O sistema de build otimizado detecta automaticamente dependências reais, reduzindo drasticamente o tamanho dos deploys.
-
-## 📄 Licença
-
-**AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
@@ -491,3 +396,101 @@ O workflow usa apenas **tokens automáticos** do GitHub, sem necessidade de conf
   }
 }
 ```
+
+# Sistema de Componentes Brython Recursivo
+
+## Visão Geral
+
+Este projeto implementa um sistema de componentes recursivo para aplicações web usando Brython (Python client-side), inspirado em frameworks modernos como React, mas com sintaxe e lógica Python. Cada componente é composto por um arquivo `.py` (lógica) e um `.html` (template), ambos homônimos e localizados na mesma pasta. O sistema suporta passagem de propriedades (`props`), children, contexto ascendente/descendente e comunicação entre componentes.
+
+## Estrutura de Componentes
+
+```
+app/
+  MeuComponente/
+    meucomponente.py   # Lógica do componente
+    meucomponente.html # Estrutura HTML do componente
+```
+
+## Funcionamento
+
+- O sistema busca e executa o `.py` do componente.
+- O `.py` pode chamar `inject_html()` para injetar automaticamente o HTML homônimo.
+- O HTML pode conter placeholders `<Props key="..." />` e `<Props />` para children.
+- Subcomponentes (tags customizadas) são processados recursivamente.
+- Props e children são passados automaticamente.
+- Comunicação ascendente: o componente pode emitir dados para o pai via `emit_to_parent(key, value)`.
+- Contexto: cada componente recebe um objeto `context` herdado da hierarquia.
+- O sistema faz cache dos HTMLs para performance e limita a profundidade recursiva para evitar travamentos.
+
+## API do Script de Componente
+
+No escopo do `.py` do componente, estão disponíveis:
+- `element`: DOM do componente
+- `props`: dicionário de propriedades
+- `children`: HTML dos filhos
+- `component_name`: nome do componente
+- `context`: objeto de contexto herdado
+- `inject_html(on_injected=None)`: injeta o HTML homônimo e executa callback opcional após injeção
+- `emit_to_parent(key, value)`: envia dados para o pai
+
+## Exemplo de Componente
+
+### app/components/Butaun/butaun.py
+```python
+# Exemplo de uso de props, children e comunicação ascendente
+def on_injected(element):
+    btn = element.querySelector('button')
+    if btn:
+        btn.bind('click', lambda ev: emit_to_parent('botao_clicado', props.get('titulo', '')))
+
+inject_html(on_injected)
+```
+
+### app/components/Butaun/butaun.html
+```html
+<div class="card">
+  <div class="card-content">
+    <span class="card-title"><Props key="titulo" /></span>
+    <div class="children-content"><Props /></div>
+  </div>
+  <div class="card-action">
+    <button>Clique no Butaun!</button>
+  </div>
+</div>
+```
+
+## Comunicação Entre Componentes
+
+- **Descendente:** props e children são passados automaticamente.
+- **Ascendente:** use `emit_to_parent(key, value)` no filho. O pai pode ler `context['__emits__']` após renderização dos filhos.
+- **Contexto:** qualquer valor colocado em `context` é herdado pelos filhos.
+
+## Performance e Limites
+- O sistema faz cache dos HTMLs já buscados.
+- Limite de profundidade recursiva configurável (default: 20).
+- Recomenda-se evitar árvores muito profundas ou componentes que se auto-aninham sem controle.
+
+## Dicas
+- Sempre use `inject_html()` no início do `.py` do componente.
+- Use `on_injected(element)` para manipular o DOM após a injeção.
+- Use `emit_to_parent` para comunicação ascendente.
+- Use `context` para compartilhar dados entre componentes relacionados.
+
+## Exemplo de App
+
+```python
+# app/app.py
+inject_html()
+```
+
+```html
+<!-- app/app.html -->
+<MeuComponente titulo="Exemplo">
+  <OutroComponente />
+</MeuComponente>
+```
+
+---
+
+Para dúvidas ou sugestões, consulte o código-fonte em `src/main.py`.

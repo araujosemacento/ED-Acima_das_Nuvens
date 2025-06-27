@@ -17,14 +17,16 @@
   <script type="text/javascript" src="/lib/brython/brython_stdlib.js"></script>
 
   <!-- Estilos -->
-  <link type="text/scss" rel="stylesheet" href="./_index.scss">
+  <link rel="stylesheet" href="./_index.scss">
 </head>
 
 <body onload="brython()">
-  <app></app>
+  <div id="_app">
+    <a class="waves-effect waves-light btn">button</a>
+  </div>
   <script type="text/python" src="./main.py"></script>
   <!-- Materialize -->
-  <link rel="stylesheet" href="/lib/materialize/sass/materialize.css">
+  <script type="text/javascript" src="/lib/materialize/js/bin/materialize.min.js"></script>
 </body>
 
 </html>
