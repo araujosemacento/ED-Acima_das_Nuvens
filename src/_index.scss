@@ -1,1 +1,37 @@
 @use "../public/lib/materialize/sass/materialize.scss";
+@use "../public/lib/materialize/sass/components/color-variables" as colors;
+@font-face {
+  font-family: "noto-display";
+  src: url("../public/fonts/Noto_Sans_Display/NotoSansDisplay-VariableFont_wdth\,wght.ttf")
+    format("truetype");
+  font-display: swap;
+}
+
+:root {
+  height: 100%;
+}
+
+[data-theme="light"] {
+  body {
+    background-color: colors.color("teal", "lighten-4");
+  }
+}
+
+[data-theme="dark"] {
+  body {
+    background-color: colors.color("teal", "darken-3");
+  }
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: noto-display, sans-serif;
+
+  &,
+  & * {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+  }
+}
