@@ -28,12 +28,23 @@
 <body onload="brython()">
   <div id="_app">
     <div id="theme-toggle-container">
-      <button type="button" id="show-theme-toggle-menu" class="btn-floating waves-effect pink"/>
+      <button type="button" id="show-theme-toggle-menu" class="btn-floating waves-effect pink">
+        <ion-icon id="theme-toggle-menu-icon" name="sunny"></ion-icon>
+      </button>
+      <div id="toggle-theme-menu">
+        <a>Claro</a>
+        <a>Escuro</a>
+        <a>Sistema</a>
+      </div>
     </div>
   </div>
   <script type="text/python" src="./main.py"></script>
   <!-- Materialize -->
   <script type="text/javascript" src="/lib/materialize/js/bin/materialize.min.js"></script>
+  <!-- Ion-Icons -->
+  <script type="module" src="/lib/ionicons/ionicons.esm.js"></script>
+  <!-- Alpine -->
+  <script type="text/javascript" src="/lib/alpine.min.js"></script>
 </body>
 
 </html>
