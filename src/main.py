@@ -1,4 +1,4 @@
-from browser import window, document as dom
+from browser import window, document as dom  # type: ignore
 
 if window.localStorage.getItem("theme") is None:
     window.localStorage.setItem(

@@ -1,10 +1,12 @@
 # 🎮 ED - Acima das Nuvens
 
+<!-- markdownlint-disable MD033 -->
+
 > **RPG interativo baseado em cartas e narrativa ramificada** - Aventura sobre as nuvens onde cada decisão molda o destino de 5 personagens únicos em busca da lendária Gansa dos Ovos Dourados.
 
 ## 🎯 Conceito Principal
 
-**Sistema Híbrido: Cartas + Narrativa em Árvore**
+### **Sistema Híbrido: Cartas + Narrativa em Árvore**
 
 Inspirado em [Night of the Full Moon](https://play.google.com/store/apps/details?id=com.ztgame.yyzy) e [Zork](https://textadventures.co.uk/games/play/5zyoqrsugeopel3ffhz_vq):
 
@@ -17,13 +19,13 @@ Inspirado em [Night of the Full Moon](https://play.google.com/store/apps/details
 
 ```javascript
 Frontend: HTML5 + CSS/Sass + Brython
-Build:    Vite + Sass compiler  
+Build:    Vite + Sass compiler
 Runtime:  Bun
 ```
 
 ### Estrutura do Projeto
 
-```
+```plaintext
 ed-acima_das_nuvens/
 ├── src/
 │   ├── index.html              # Interface principal
@@ -37,15 +39,15 @@ ed-acima_das_nuvens/
 
 ## 🎭 Personagens & Objetivos
 
-| Personagem  | Objetivo Principal     | Motivação             |
-| ----------- | ---------------------- | --------------------- |
-| **João** 👦🏻  | Matar o Gigante 🧌      | Vingança pela família |
+| Personagem   | Objetivo Principal      | Motivação             |
+| ------------ | ----------------------- | --------------------- |
+| **João** 👦🏻  | Matar o Gigante 🧌       | Vingança pela família |
 | **Maria** 👧🏻 | Conquistar o Castelo 🏰 | Sede de poder         |
-| **Pib** 🐈   | Devorar a Gansa 🪿      | Fome ancestral        |
-| **Kit** 🐈‍⬛  | Acumular riquezas 💰    | Ganância              |
+| **Pib** 🐈   | Devorar a Gansa 🪿       | Fome ancestral        |
+| **Kit** 🐈‍⬛   | Acumular riquezas 💰    | Ganância              |
 | **Ed** 🥚    | Encontrar família 👥    | Abandono              |
 
-**Objetivo Comum: Roubar a Gansa 🪿 dos Ovos Dourados**
+### **Objetivo Comum: Roubar a Gansa 🪿 dos Ovos Dourados**
 
 ## 🚀 Desenvolvimento
 
@@ -60,18 +62,21 @@ bun run preview              # Preview do build
 
 ## 🎯 Roadmap
 
-### **Fase 1: Fundação** *(Atual)*
+### **Fase 1: Fundação** _(Atual)_
+
 - [x] Estrutura básica HTML/CSS/Python
 - [x] Integração Brython
 - [x] Sistema de build Vite
 - [ ] Framework CSS (Materialize)
 
 ### **Fase 2: Cartas CSS**
+
 - [ ] Implementar flip cards CSS
 - [ ] Sistema de deck por personagem
 - [ ] Animações de combate
 
 ### **Fase 3: Narrativa**
+
 - [ ] Árvore de decisões (JSON)
 - [ ] Sistema de flags de progresso
 - [ ] Múltiplos finais
@@ -79,17 +84,18 @@ bun run preview              # Preview do build
 ## 📄 Licença
 
 **AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
-  perspective: 1000px;
-  
-  &.flipped .card-inner {
-    transform: rotateY(180deg);
-  }
-  
-  .card-front, .card-back {
-    backface-visibility: hidden;
-  }
+perspective: 1000px;
+
+&.flipped .card-inner {
+transform: rotateY(180deg);
 }
-```
+
+.card-front, .card-back {
+backface-visibility: hidden;
+}
+}
+
+````bash
 
 ## 🚀 Comandos de Desenvolvimento
 
@@ -103,6 +109,7 @@ bun run dev                   # Vite dev server + hot reload
 bun run build                 # Build de produção
 bun run preview              # Preview do build
 ```
+````
 
 ## 🎨 Referências Visuais
 
@@ -120,21 +127,21 @@ bun run preview              # Preview do build
 
 ## 🎯 Roadmap de Desenvolvimento
 
-### **Fase 1: Fundação** *(Atual)*
+### **Fase 1: Fundação** _(HEAD)_
 
 - [x] Estrutura básica HTML/CSS/Python
 - [x] Integração Brython
 - [x] Sistema de build Vite
 - [ ] Framework CSS (Materialize/Bulma)
 
-### **Fase 2: Cartas CSS** *(Próxima)*
+### **Fase 2: Cartas CSS** _(Próxima)_
 
 - [ ] Implementar flip cards CSS
 - [ ] Sistema de deck por personagem
 - [ ] Animações de combate
 - [ ] Estados de carta
 
-### **Fase 3: Narrativa**
+### **Fase 3: Narrativa** _(TODO)_
 
 - [ ] Árvore de decisões (JSON)
 - [ ] Sistema de flags de progresso
@@ -158,11 +165,7 @@ bun run preview              # Preview do build
 
 ---
 
-> 💡 **Nota Técnica**: O projeto usa Brython para executar Python diretamente no browser, eliminando a necessidade de transpilação. O Vite fornece hot reload e build otimizado.
-
-## 📄 Licença
-
-**AGPL-3.0-only** - Veja [LICENSE](LICENSE) para detalhes.
+> 💡 **Nota Técnica**: O projeto usa Brython para executar Python diretamente no browser, eliminando a necessidade de transcrição. O Vite fornece hot reload e build otimizado.
 
 ---
 
@@ -181,8 +184,8 @@ O projeto possui um sistema de **deploy automático** configurado através do wo
 
 ```yml
 Push → GitHub Actions → Deps Analysis → SASS Compile → Minimal Build → Deploy Pages
-  ↓         ↓                 ↓             ↓                ↓               ↓
- main  Ubuntu 22.04    dependencies.py   npm build      minbuild.py     Live Site
+↓         ↓                 ↓             ↓                ↓               ↓
+main  Ubuntu 22.04    dependencies.py   npm build      minbuild.py     Live Site
 ```
 
 ### **Monitoramento do Deploy**
@@ -199,8 +202,8 @@ Push → GitHub Actions → Deps Analysis → SASS Compile → Minimal Build →
 
 ```yaml
 # Deploy automático em:
-- push: branches main          # Commits diretos
-- pull_request: branches main  # PRs para main
+- push: branches main # Commits diretos
+- pull_request: branches main # PRs para main
 ```
 
 ### **Processo de Build Otimizado**
@@ -236,18 +239,18 @@ O arquivo `.github/workflows/main.yml` configura:
 
 ```yaml
 # Stack completa no CI
-- Python 3.11          # PyScript + build scripts
-- Node.js 18           # SASS compilation  
-- Ubuntu Latest        # Ambiente padronizado
+- Python 3.11 # PyScript + build scripts
+- Node.js 18 # SASS compilation
+- Ubuntu Latest # Ambiente padronizado
 ```
 
 #### **Permissões Necessárias**
 
 ```yaml
 permissions:
-  contents: write     # Leitura do repositório
-  pages: write        # Deploy no Pages
-  id-token: write     # Token de autenticação
+  contents: write # Leitura do repositório
+  pages: write # Deploy no Pages
+  id-token: write # Token de autenticação
 ```
 
 ### **Troubleshooting Comum**
@@ -315,9 +318,9 @@ git push origin main          # Trigger automático
 
 ```yaml
 # Automático via GitHub Actions
-- npm dependencies cached      # Reutiliza entre builds
-- Python packages cached       # Acelera setup
-- SASS compilation optimized   # Apenas arquivos alterados
+- npm dependencies cached # Reutiliza entre builds
+- Python packages cached # Acelera setup
+- SASS compilation optimized # Apenas arquivos alterados
 ```
 
 ### **Configuração Inicial (One-time)**
@@ -334,8 +337,8 @@ O workflow usa apenas **tokens automáticos** do GitHub, sem necessidade de conf
 
 ### **URLs Importantes**
 
-| Recurso         | URL                                                                     |
-| --------------- | ----------------------------------------------------------------------- |
+| Recurso          | URL                                                                     |
+| ---------------- | ----------------------------------------------------------------------- |
 | 🌐 **Site Live** | <https://araujosemacento.github.io/ed-acima_das_nuvens/>                |
 | 🔍 **Actions**   | <https://github.com/araujosemacento/ed-acima_das_nuvens/actions>        |
 | ⚙️ **Settings**  | <https://github.com/araujosemacento/ed-acima_das_nuvens/settings/pages> |
@@ -397,15 +400,15 @@ O workflow usa apenas **tokens automáticos** do GitHub, sem necessidade de conf
 }
 ```
 
-# Sistema de Componentes Brython Recursivo
+## Sistema de Componentes Brython Recursivo
 
-## Visão Geral
+### Visão Geral
 
 Este projeto implementa um sistema de componentes recursivo para aplicações web usando Brython (Python client-side), inspirado em frameworks modernos como React, mas com sintaxe e lógica Python. Cada componente é composto por um arquivo `.py` (lógica) e um `.html` (template), ambos homônimos e localizados na mesma pasta. O sistema suporta passagem de propriedades (`props`), children, contexto ascendente/descendente e comunicação entre componentes.
 
-## Estrutura de Componentes
+### Estrutura de Componentes
 
-```
+```nautilus
 app/
   MeuComponente/
     meucomponente.py   # Lógica do componente
@@ -426,6 +429,7 @@ app/
 ## API do Script de Componente
 
 No escopo do `.py` do componente, estão disponíveis:
+
 - `element`: DOM do componente
 - `props`: dicionário de propriedades
 - `children`: HTML dos filhos
@@ -437,6 +441,7 @@ No escopo do `.py` do componente, estão disponíveis:
 ## Exemplo de Componente
 
 ### app/components/Butaun/butaun.py
+
 ```python
 # Exemplo de uso de props, children e comunicação ascendente
 def on_injected(element):
@@ -448,6 +453,7 @@ inject_html(on_injected)
 ```
 
 ### app/components/Butaun/butaun.html
+
 ```html
 <div class="card">
   <div class="card-content">
@@ -467,11 +473,13 @@ inject_html(on_injected)
 - **Contexto:** qualquer valor colocado em `context` é herdado pelos filhos.
 
 ## Performance e Limites
+
 - O sistema faz cache dos HTMLs já buscados.
 - Limite de profundidade recursiva configurável (default: 20).
 - Recomenda-se evitar árvores muito profundas ou componentes que se auto-aninham sem controle.
 
 ## Dicas
+
 - Sempre use `inject_html()` no início do `.py` do componente.
 - Use `on_injected(element)` para manipular o DOM após a injeção.
 - Use `emit_to_parent` para comunicação ascendente.
