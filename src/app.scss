@@ -17,36 +17,73 @@
 }
 
 $colors: (
-	primary: var(--mdc-theme-primary),
-	secondary: var(--mdc-theme-secondary),
-	background: var(--mdc-theme-background),
-	surface: var(--mdc-theme-surface),
-	error: var(--mdc-theme-error),
-	on-primary: var(--mdc-theme-on-primary),
-	on-secondary: var(--mdc-theme-on-secondary),
-	on-surface: var(--mdc-theme-on-surface),
-	on-error: var(--mdc-theme-on-error),
-	text-on-background: var(--mdc-theme-text-primary-on-background),
-	text-secondary-on-background: var(--mdc-theme-text-secondary-on-background),
-	text-hint-on-background: var(--mdc-theme-text-hint-on-background),
-	text-disabled-on-background: var(--mdc-theme-text-disabled-on-background),
-	text-icon-on-background: var(--mdc-theme-text-icon-on-background),
-	text-primary-on-light: var(--mdc-theme-text-primary-on-light),
-	text-secondary-on-light: var(--mdc-theme-text-secondary-on-light),
-	text-hint-on-light: var(--mdc-theme-text-hint-on-light),
-	text-disabled-on-light: var(--mdc-theme-text-disabled-on-light),
-	text-icon-on-light: var(--mdc-theme-text-icon-on-light),
-	text-primary-on-dark: var(--mdc-theme-text-primary-on-dark),
-	text-secondary-on-dark: var(--mdc-theme-text-secondary-on-dark),
-	text-hint-on-dark: var(--mdc-theme-text-hint-on-dark),
-	text-disabled-on-dark: var(--mdc-theme-text-disabled-on-dark),
-	text-icon-on-dark: var(--mdc-theme-text-icon-on-dark)
+	primary: #006a60,
+	secondary: #64558f,
+	background: #fff,
+	surface: #d5dbdd,
+	error: #904a43,
+	on-primary: #fff,
+	on-secondary: #fff,
+	on-surface: #000,
+	on-error: #fff,
+	text-on-background: rgba(0, 0, 0, 0.87),
+	text-secondary-on-background: rgba(0, 0, 0, 0.54),
+	text-hint-on-background: rgba(0, 0, 0, 0.38),
+	text-disabled-on-background: rgba(0, 0, 0, 0.38),
+	text-icon-on-background: rgba(0, 0, 0, 0.38),
+	text-primary-on-light: rgba(0, 0, 0, 0.87),
+	text-secondary-on-light: rgba(0, 0, 0, 0.54),
+	text-hint-on-light: rgba(0, 0, 0, 0.38),
+	text-disabled-on-light: rgba(0, 0, 0, 0.38),
+	text-icon-on-light: rgba(0, 0, 0, 0.38),
+	text-primary-on-dark: white,
+	text-secondary-on-dark: rgba(255, 255, 255, 0.7),
+	text-hint-on-dark: rgba(255, 255, 255, 0.5),
+	text-disabled-on-dark: rgba(255, 255, 255, 0.5),
+	text-icon-on-dark: rgba(255, 255, 255, 0.5)
 );
+
+// Mixin para facilitar o uso das cores
+@mixin theme-color($property, $color-name) {
+	#{$property}: var(--mdc-theme-#{$color-name});
+}
+
+// Função para acessar as cores (retorna a variável CSS)
+@function theme-color($color-name) {
+	@return var(--mdc-theme-#{$color-name});
+}
 :root {
 	--font-body:
 		'Noto Sans Display', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Noto Sans Mono', 'Fira Mono', monospace;
+
+	/* Material Design Theme Variables */
+	--mdc-theme-primary: #006a60;
+	--mdc-theme-secondary: #64558f;
+	--mdc-theme-background: #fff;
+	--mdc-theme-surface: #d5dbdd;
+	--mdc-theme-error: #904a43;
+	--mdc-theme-on-primary: #fff;
+	--mdc-theme-on-secondary: #fff;
+	--mdc-theme-on-surface: #000;
+	--mdc-theme-on-error: #fff;
+	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87);
+	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.54);
+	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-primary-on-light: rgba(0, 0, 0, 0.87);
+	--mdc-theme-text-secondary-on-light: rgba(0, 0, 0, 0.54);
+	--mdc-theme-text-hint-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-disabled-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-icon-on-light: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-primary-on-dark: white;
+	--mdc-theme-text-secondary-on-dark: rgba(255, 255, 255, 0.7);
+	--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+
 	font-family: var(--font-body);
 }
 
@@ -99,4 +136,34 @@ h2 {
 
 #sveltekit.body {
 	display: contents;
+}
+
+/* Dark Theme Variables */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--mdc-theme-primary: #82d5c8;
+		--mdc-theme-secondary: #c7a7de;
+		--mdc-theme-background: #000;
+		--mdc-theme-surface: #0f141a;
+		--mdc-theme-error: #ffb4ab;
+		--mdc-theme-on-primary: #000;
+		--mdc-theme-on-secondary: #000;
+		--mdc-theme-on-surface: #fff;
+		--mdc-theme-on-error: #000;
+		--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);
+		--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.54);
+		--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38);
+		--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38);
+		--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38);
+		--mdc-theme-text-primary-on-light: rgba(0, 0, 0, 0.87);
+		--mdc-theme-text-secondary-on-light: rgba(0, 0, 0, 0.54);
+		--mdc-theme-text-hint-on-light: rgba(0, 0, 0, 0.38);
+		--mdc-theme-text-disabled-on-light: rgba(0, 0, 0, 0.38);
+		--mdc-theme-text-icon-on-light: rgba(0, 0, 0, 0.38);
+		--mdc-theme-text-primary-on-dark: white;
+		--mdc-theme-text-secondary-on-dark: rgba(255, 255, 255, 0.7);
+		--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
+		--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
+		--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+	}
 }

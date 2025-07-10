@@ -1,6 +1,12 @@
 <script>
+	import { setLocale } from '$lib/paraglide/runtime';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { m } from '$lib/paraglide/messages.js';
+
 	import Counter from '$lib/components/Counter.svelte';
 	import PyodideInteractive from '$lib/components/PyodideInteractive.svelte';
+	import Welcome from '$lib/components/Welcome.svelte';
 </script>
 
 <svelte:head>
@@ -9,6 +15,7 @@
 </svelte:head>
 
 <section>
+	<!-- <Welcome welcome={true} /> -->
 	<PyodideInteractive />
 	<Counter />
 </section>

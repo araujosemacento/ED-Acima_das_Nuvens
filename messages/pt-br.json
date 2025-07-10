@@ -1,4 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from pt-br!"
+	"welcome": "Bem-vindo",
+	"initial_disclaimer": "O jogo a seguir é uma aventura estilo RPG baseada em texto e inspirada na estética de terminais de comando, onde você toma o controle das ações de um dentre cinco personagens distintos, cada um com suas diferentes formas de vivenciar a narrativa. Suas decisões determinam o desenrolar da narrativa em questão, então pense bem e tente se agarrar aos detalhes. Gostaria de continuar?",
+	"start_game": "Vamo lá!"
 }
