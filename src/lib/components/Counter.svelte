@@ -34,9 +34,13 @@
 <style>
 	.counter {
 		display: flex;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		border-top: 1px solid var(--mdc-theme-text-hint-on-background);
+		border-bottom: 1px solid var(--mdc-theme-text-hint-on-background);
 		margin: 1rem 0;
+		background-color: var(--mdc-theme-surface);
+		border-radius: 8px;
+		overflow: hidden;
+		transition: all 0.2s ease-in-out;
 	}
 
 	.counter button {
@@ -46,13 +50,17 @@
 		align-items: center;
 		justify-content: center;
 		border: 0;
-		background-color: transparent;
+		background-color: var(--mdc-theme-background);
+		color: var(--mdc-theme-on-surface);
 		touch-action: manipulation;
 		font-size: 2rem;
+		transition: all 0.2s ease-in-out;
+		cursor: pointer;
 	}
 
 	.counter button:hover {
-		background-color: var(--color-bg-1);
+		background-color: var(--mdc-theme-primary);
+		color: var(--mdc-theme-on-primary);
 	}
 
 	svg {
@@ -63,7 +71,12 @@
 	path {
 		vector-effect: non-scaling-stroke;
 		stroke-width: 2px;
-		stroke: #444;
+		stroke: var(--mdc-theme-text-primary-on-background);
+		transition: stroke 0.2s ease-in-out;
+	}
+
+	.counter button:hover path {
+		stroke: var(--mdc-theme-on-primary);
 	}
 
 	.counter-viewport {
@@ -72,6 +85,7 @@
 		overflow: hidden;
 		text-align: center;
 		position: relative;
+		background-color: var(--mdc-theme-surface);
 	}
 
 	.counter-viewport strong {
@@ -80,8 +94,9 @@
 		width: 100%;
 		height: 100%;
 		font-weight: 400;
-		color: var(--color-theme-1);
+		color: var(--mdc-theme-primary);
 		font-size: 4rem;
+		font-family: var(--font-body);
 		align-items: center;
 		justify-content: center;
 	}
