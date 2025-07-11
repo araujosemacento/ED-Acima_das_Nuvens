@@ -1,0 +1,113 @@
+name: Code Quality
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type checking
+        run: bun run prepare
+
+      - name: Lint and format check
+        run: bun run lint
+
+      - name: Theme generation test
+        run: |
+          echo "🎨 Testing theme generation..."
+          bun run prepare-themes
+          if [ -f "static/smui.css" ] && [ -f "static/smui-dark.css" ]; then
+            echo "✅ Themes generated successfully"
+            ls -la static/smui*.css
+          else
+            echo "❌ Theme generation failed"
+            exit 1
+          fi
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check documentation structure
+        run: |
+          echo "📚 Checking documentation structure..."
+
+          # Verify main docs exist
+          for doc in "README.md" "LICENSE"; do
+            if [ -f "$doc" ]; then
+              echo "✅ $doc exists"
+            else
+              echo "❌ $doc missing"
+              exit 1
+            fi
+          done
+
+          # Verify i18n files exist
+          for lang in "pt-br" "en"; do
+            if [ -f "messages/$lang.json" ]; then
+              echo "✅ messages/$lang.json exists"
+            else
+              echo "❌ messages/$lang.json missing"
+              exit 1
+            fi
+          done
+
+          # Verify Python examples exist
+          if [ -f "static/scripts/exemplo.py" ]; then
+            echo "✅ Python examples exist"
+          else
+            echo "❌ Python examples missing"
+            exit 1
+          fi
+
+          echo "✅ All documentation files present"
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build test
+        run: |
+          echo "🏗️ Testing build process..."
+          bun run build
+          if [ -d "build" ]; then
+            echo "✅ Build completed successfully"
+            ls -la build/
+          else
+            echo "❌ Build failed"
+            exit 1
+          fi

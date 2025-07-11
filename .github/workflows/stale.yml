@@ -1,0 +1,109 @@
+name: 'Close stale issues and PRs'
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Executa diariamente às 2:00 AM UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stale Bot
+        uses: actions/stale@v9
+        with:
+          # Issues
+          stale-issue-message: |
+            👋 Esta issue está marcada como obsoleta porque não houve atividade recente.
+
+            Se esta issue ainda é relevante, por favor:
+            - 🔄 Comente para remover o rótulo "stale"
+            - 📝 Adicione informações adicionais se necessário
+            - 🏷️ Adicione rótulos apropriados se aplicável
+
+            Se não houver atividade nos próximos 7 dias, esta issue será fechada automaticamente.
+
+            Obrigado pela sua contribuição! 🙏
+
+          close-issue-message: |
+            🔒 Esta issue foi fechada automaticamente devido à falta de atividade.
+
+            Se você ainda está enfrentando este problema:
+            - 🆕 Abra uma nova issue
+            - 📝 Inclua informações atualizadas
+            - 🔗 Referencie esta issue se necessário
+
+            Obrigado! 🙏
+
+          # Pull Requests
+          stale-pr-message: |
+            👋 Este Pull Request está marcado como obsoleto porque não houve atividade recente.
+
+            Se este PR ainda é relevante, por favor:
+            - 🔄 Comente para remover o rótulo "stale"
+            - 🔄 Faça rebase/merge com a branch principal
+            - 📝 Atualize a descrição se necessário
+
+            Se não houver atividade nos próximos 7 dias, este PR será fechado automaticamente.
+
+            Obrigado pela sua contribuição! 🙏
+
+          close-pr-message: |
+            🔒 Este Pull Request foi fechado automaticamente devido à falta de atividade.
+
+            Se você ainda quer contribuir com estas mudanças:
+            - 🆕 Abra um novo Pull Request
+            - 🔄 Faça rebase com a branch principal
+            - 📝 Atualize a descrição
+
+            Obrigado! 🙏
+
+          # Configurações de tempo
+          days-before-issue-stale: 30
+          days-before-pr-stale: 21
+          days-before-issue-close: 7
+          days-before-pr-close: 7
+
+          # Labels
+          stale-issue-label: '🕒 stale'
+          stale-pr-label: '🕒 stale'
+
+          # Exceções - não marcar como stale
+          exempt-issue-labels: |
+            🔥 priority: high
+            📅 priority: medium
+            🚧 in progress
+            🛑 blocked
+            📋 backlog
+            🎉 release
+            🟢 good first issue
+            🟡 help wanted
+
+          exempt-pr-labels: |
+            🚧 in progress
+            🔍 needs review
+            🛑 blocked
+            💥 breaking change
+            🎉 release
+
+          # Configurações adicionais
+          remove-stale-when-updated: true
+          remove-issue-stale-when-updated: true
+          remove-pr-stale-when-updated: true
+
+          # Não processar issues/PRs com estas labels
+          exempt-all-issue-assignees: true
+          exempt-all-pr-assignees: true
+
+          # Configurações de rate limiting
+          operations-per-run: 100
+
+          # Não processar issues/PRs em draft
+          exempt-draft-pr: true
+
+          # Mensagens de debug
+          debug-only: false

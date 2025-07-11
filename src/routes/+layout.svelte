@@ -1,26 +1,25 @@
 <script>
 	import '../app.scss';
-	import { setLocale, locales } from "$lib/paraglide/runtime";
-	import { onMount } from "svelte";
+	import { setLocale, locales } from '$lib/paraglide/runtime';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	onMount(() => {
 		const browserLanguages = navigator.languages || [navigator.language];
-		
+
 		// Encontra o primeiro idioma suportado
-		const supportedLanguage = browserLanguages.find(lang => {
+		const supportedLanguage = browserLanguages.find((lang) => {
 			const normalized = lang.toLowerCase().replace('_', '-');
-			return locales.includes(normalized) ||
-				   locales.includes(normalized.split('-')[0]);
+			return locales.includes(normalized) || locales.includes(normalized.split('-')[0]);
 		});
-		
+
 		if (supportedLanguage) {
 			const normalized = supportedLanguage.toLowerCase().replace('_', '-');
-			const targetLang = locales.includes(normalized) 
-				? normalized 
-				: locales.find(tag => tag.startsWith(normalized.split('-')[0]));
-			
+			const targetLang = locales.includes(normalized)
+				? normalized
+				: locales.find((tag) => tag.startsWith(normalized.split('-')[0]));
+
 			if (targetLang) {
 				setLocale(targetLang);
 			}

@@ -54,7 +54,7 @@
 	 */
 	function update(event) {
 		event.preventDefault();
-		const key = (event.target).getAttribute('data-key');
+		const key = event.target.getAttribute('data-key');
 
 		if (key === 'backspace') {
 			currentGuess = currentGuess.slice(0, -1);

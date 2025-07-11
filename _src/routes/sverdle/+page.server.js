@@ -53,7 +53,7 @@ export const actions = {
 		const game = new Game(cookies.get('sverdle'));
 
 		const data = await request.formData();
-		const guess = (data.getAll('guess'));
+		const guess = data.getAll('guess');
 
 		if (!game.enter(guess)) {
 			return fail(400, { badGuess: true });

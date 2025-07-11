@@ -5,7 +5,7 @@
 	// Estados mínimos para UI - Store já gerencia tudo internamente
 	let result = $state(null);
 	let isExecuting = $state(false);
-	let pythonCode = $state("2 ** 10");
+	let pythonCode = $state('2 ** 10');
 
 	// Uso direto dos estados derivados da store
 	let statusMessage = $state($pyodideStore.statusMessage);
@@ -42,7 +42,7 @@
 
 	// Auto-execução ao carregar
 	$effect(() => {
-		pyodideStore.statusMessage.subscribe(msg => {
+		pyodideStore.statusMessage.subscribe((msg) => {
 			statusMessage = msg;
 		});
 	});
@@ -75,15 +75,11 @@
 				bind:value={pythonCode}
 				placeholder="Digite código Python..."
 				disabled={isExecuting}
-				onkeydown={e => e.key === 'Enter' && executePython()}
+				onkeydown={(e) => e.key === 'Enter' && executePython()}
 			/>
 		</div>
 
-		<button
-			onclick={executePython}
-			disabled={isExecuting}
-			class="execute-btn"
-		>
+		<button onclick={executePython} disabled={isExecuting} class="execute-btn">
 			{isExecuting ? '⏳ Executando...' : '▶️ Executar'}
 		</button>
 
@@ -97,16 +93,19 @@
 		<div class="examples">
 			<h4>💡 Exemplos para testar:</h4>
 			<div class="example-buttons">
-				<button onclick={() => pythonCode = "import math; math.sqrt(64)"} class="example-btn">
+				<button onclick={() => (pythonCode = 'import math; math.sqrt(64)')} class="example-btn">
 					🔢 Matemática
 				</button>
-				<button onclick={() => pythonCode = "list(range(1, 11))"} class="example-btn">
+				<button onclick={() => (pythonCode = 'list(range(1, 11))')} class="example-btn">
 					📋 Lista
 				</button>
-				<button onclick={() => pythonCode = "str({'nome': 'Pyodide', 'versão': '0.28.0'})"} class="example-btn">
+				<button
+					onclick={() => (pythonCode = "str({'nome': 'Pyodide', 'versão': '0.28.0'})")}
+					class="example-btn"
+				>
 					📚 Dicionário
 				</button>
-				<button onclick={() => pythonCode = "[x**2 for x in range(5)]"} class="example-btn">
+				<button onclick={() => (pythonCode = '[x**2 for x in range(5)]')} class="example-btn">
 					🔥 List Comprehension
 				</button>
 			</div>

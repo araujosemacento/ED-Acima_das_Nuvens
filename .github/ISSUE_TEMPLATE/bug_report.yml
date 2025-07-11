@@ -1,0 +1,77 @@
+name: 🐛 Bug Report
+description: Relatar um problema no projeto ED | Acima das Nuvens
+title: '[Bug]: '
+labels: ['bug', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar um bug! Por favor, forneça o máximo de detalhes possível.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Descrição do Bug
+      description: Uma descrição clara e concisa do problema
+      placeholder: Descreva o que aconteceu...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Passos para Reproduzir
+      description: Passos para reproduzir o comportamento
+      placeholder: |
+        1. Vá para '...'
+        2. Clique em '...'
+        3. Role até '...'
+        4. Veja o erro
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Comportamento Esperado
+      description: Uma descrição clara do que você esperava que acontecesse
+      placeholder: Descreva o comportamento esperado...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Se aplicável, adicione screenshots para ajudar a explicar o problema
+      placeholder: Cole screenshots aqui...
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Navegadores Afetados
+      description: Em quais navegadores você observou o problema?
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Opera
+        - Outro
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Dispositivo
+      description: Em qual dispositivo você observou o problema?
+      placeholder: ex. iPhone 12, Desktop, etc.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto Adicional
+      description: Adicione qualquer outro contexto sobre o problema aqui
+      placeholder: Qualquer informação adicional que possa ajudar...

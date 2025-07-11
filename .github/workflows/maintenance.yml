@@ -1,0 +1,133 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Security audit
+        run: |
+          echo "🔐 Running security audit..."
+          # Bun doesn't have built-in audit yet, so we'll use npm audit
+          if command -v npm > /dev/null; then
+            npm audit --audit-level=high
+          else
+            echo "ℹ️ npm not available, skipping security audit"
+          fi
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "📦 Checking for outdated dependencies..."
+          bun outdated || echo "All dependencies are up to date"
+
+  theme-integrity:
+    name: Theme Integrity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Verify theme generation
+        run: |
+          echo "🎨 Verifying theme generation integrity..."
+          bun run prepare-themes
+
+          # Check if themes are properly generated
+          if [ -f "static/smui.css" ] && [ -f "static/smui-dark.css" ]; then
+            echo "✅ Themes generated successfully"
+            
+            # Check if themes contain required CSS custom properties
+            if grep -q "var(--mdc-theme-primary)" static/smui.css; then
+              echo "✅ Light theme contains required Material Design variables"
+            else
+              echo "❌ Light theme missing Material Design variables"
+              exit 1
+            fi
+            
+            if grep -q "var(--mdc-theme-primary)" static/smui-dark.css; then
+              echo "✅ Dark theme contains required Material Design variables"
+            else
+              echo "❌ Dark theme missing Material Design variables"
+              exit 1
+            fi
+          else
+            echo "❌ Theme generation failed"
+            exit 1
+          fi
+
+  educational-content:
+    name: Educational Content Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Python educational scripts
+        run: |
+          echo "📚 Validating educational Python scripts..."
+
+          # Check if Python scripts are syntactically correct
+          python3 -m py_compile static/scripts/exemplo.py
+
+          # Check if educational functions are present
+          required_functions=("saudacao" "calcular_fibonacci" "operacoes_matematicas")
+
+          for func in "${required_functions[@]}"; do
+            if grep -q "def $func" static/scripts/exemplo.py; then
+              echo "✅ Educational function '$func' found"
+            else
+              echo "❌ Educational function '$func' missing"
+              exit 1
+            fi
+          done
+
+      - name: Check internationalization completeness
+        run: |
+          echo "🌍 Checking internationalization completeness..."
+
+          # Extract all message keys from both language files
+          pt_keys=$(python3 -c "import json; print('\n'.join(sorted(json.load(open('messages/pt-br.json')).keys())))")
+          en_keys=$(python3 -c "import json; print('\n'.join(sorted(json.load(open('messages/en.json')).keys())))")
+
+          if [ "$pt_keys" = "$en_keys" ]; then
+            echo "✅ All message keys are present in both languages"
+          else
+            echo "❌ Message keys mismatch between languages"
+            echo "PT-BR keys:" && echo "$pt_keys"
+            echo "EN keys:" && echo "$en_keys"
+            exit 1
+          fi
+
+      - name: Educational content report
+        run: |
+          echo "📊 Educational content validation completed"
+          echo "✅ All educational resources are valid and ready"

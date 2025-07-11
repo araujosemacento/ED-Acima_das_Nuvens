@@ -1,0 +1,81 @@
+name: ✨ Feature Request
+description: Sugerir uma nova funcionalidade para o projeto ED | Acima das Nuvens
+title: '[Feature]: '
+labels: ['enhancement', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por sugerir uma nova funcionalidade! Por favor, forneça o máximo de detalhes possível.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Descrição da Funcionalidade
+      description: Uma descrição clara e concisa da funcionalidade desejada
+      placeholder: Descreva a funcionalidade que você gostaria de ver...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-solution
+    attributes:
+      label: Problema que Resolve
+      description: Que problema esta funcionalidade resolve?
+      placeholder: Esta funcionalidade resolve o problema de...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Solução Proposta
+      description: Descreva como você imagina que esta funcionalidade deveria funcionar
+      placeholder: Eu gostaria que...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component-area
+    attributes:
+      label: Área do Componente
+      description: Qual área do projeto esta funcionalidade afetaria?
+      multiple: true
+      options:
+        - '🎮 Jogo Narrativo'
+        - '🐍 Integração Pyodide'
+        - '🎨 Interface/UI'
+        - '🌍 Internacionalização'
+        - '🔧 Configuração/Build'
+        - '📱 Responsividade'
+        - '♿ Acessibilidade'
+        - '🎯 Outro'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade
+      description: Qual a prioridade desta funcionalidade?
+      options:
+        - '🔥 Alta - Funcionalidade crítica'
+        - '📈 Média - Melhoria importante'
+        - '📝 Baixa - Melhoria desejável'
+        - '💡 Sugestão - Ideia para o futuro'
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: Descreva quaisquer soluções alternativas ou funcionalidades que você considerou
+      placeholder: Outras abordagens que considerei...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto Adicional
+      description: Adicione qualquer outro contexto ou screenshots sobre a solicitação de funcionalidade aqui
+      placeholder: Qualquer informação adicional que possa ajudar...

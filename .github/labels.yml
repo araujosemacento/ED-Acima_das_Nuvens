@@ -1,0 +1,149 @@
+# Configuração de Labels Automáticas para Issues e PRs
+
+labels:
+  # Tipos de Issues
+  - name: '🐛 bug'
+    color: 'd73a4a'
+    description: 'Algo não está funcionando corretamente'
+
+  - name: '✨ enhancement'
+    color: 'a2eeef'
+    description: 'Nova funcionalidade ou melhoria'
+
+  - name: '📚 educational'
+    color: '7057ff'
+    description: 'Conteúdo educacional ou exercícios'
+
+  - name: '🎨 ui/ux'
+    color: 'e99695'
+    description: 'Melhorias na interface ou experiência do usuário'
+
+  - name: '🐍 python'
+    color: '3776ab'
+    description: 'Relacionado ao código Python ou Pyodide'
+
+  - name: '🎮 game'
+    color: '0e8a16'
+    description: 'Relacionado ao jogo narrativo'
+
+  - name: '🌍 i18n'
+    color: 'fbca04'
+    description: 'Internacionalização e traduções'
+
+  - name: '♿ accessibility'
+    color: '5319e7'
+    description: 'Melhorias de acessibilidade'
+
+  - name: '⚡ performance'
+    color: 'ff9500'
+    description: 'Otimizações de performance'
+
+  - name: '🔒 security'
+    color: 'b60205'
+    description: 'Questões de segurança'
+
+  # Prioridades
+  - name: '🔥 priority: high'
+    color: 'd73a4a'
+    description: 'Alta prioridade - precisa ser resolvido rapidamente'
+
+  - name: '📅 priority: medium'
+    color: 'fbca04'
+    description: 'Prioridade média - pode esperar um pouco'
+
+  - name: '🕒 priority: low'
+    color: '0e8a16'
+    description: 'Baixa prioridade - quando houver tempo'
+
+  # Estados
+  - name: '🚧 in progress'
+    color: '1d76db'
+    description: 'Atualmente sendo trabalhado'
+
+  - name: '🔍 needs review'
+    color: '0075ca'
+    description: 'Precisa de revisão'
+
+  - name: '❓ needs info'
+    color: 'd4c5f9'
+    description: 'Precisa de mais informações'
+
+  - name: '✅ ready'
+    color: '0e8a16'
+    description: 'Pronto para implementação'
+
+  - name: '🛑 blocked'
+    color: 'd73a4a'
+    description: 'Bloqueado por dependências'
+
+  - name: '📋 backlog'
+    color: 'c2e0c6'
+    description: 'No backlog para implementação futura'
+
+  # Dificuldades
+  - name: '🟢 good first issue'
+    color: '7057ff'
+    description: 'Boa primeira contribuição'
+
+  - name: '🟡 help wanted'
+    color: '008672'
+    description: 'Contribuições extras são bem-vindas'
+
+  - name: '🔴 expert needed'
+    color: 'd73a4a'
+    description: 'Requer conhecimento especializado'
+
+  # Tipos de PR
+  - name: '💥 breaking change'
+    color: 'd73a4a'
+    description: 'Mudança que quebra compatibilidade'
+
+  - name: '🔧 chore'
+    color: 'fef2c0'
+    description: 'Manutenção e tarefas de limpeza'
+
+  - name: '📝 docs'
+    color: '0075ca'
+    description: 'Melhorias na documentação'
+
+  - name: '🎯 refactor'
+    color: 'e99695'
+    description: 'Refatoração de código'
+
+  - name: '🧪 test'
+    color: 'd4edda'
+    description: 'Adição ou melhorias de testes'
+
+  # Áreas do projeto
+  - name: '📦 dependencies'
+    color: '0366d6'
+    description: 'Atualizações de dependências'
+
+  - name: '🚀 ci/cd'
+    color: '28a745'
+    description: 'Continuous Integration/Deployment'
+
+  - name: '🏗️ build'
+    color: '17a2b8'
+    description: 'Sistema de build'
+
+  - name: '⚙️ config'
+    color: '6c757d'
+    description: 'Arquivos de configuração'
+
+  # Status especiais
+  - name: '🎉 release'
+    color: '28a745'
+    description: 'Preparação para release'
+
+  - name: '🔄 duplicate'
+    color: 'cfd3d7'
+    description: 'Issue ou PR duplicado'
+
+  - name: '❌ wontfix'
+    color: 'ffffff'
+    description: 'Não será implementado'
+
+  - name: '❓ question'
+    color: 'd876e3'
+    description: 'Pergunta ou dúvida'
