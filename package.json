@@ -12,7 +12,9 @@
 		"lint": "prettier --check . && eslint .",
 		"prepare-themes": "bun run smui-theme-light && bun run smui-theme-dark",
 		"smui-theme-light": "bun smui-theme compile static/smui.css -i src/theme",
-		"smui-theme-dark": "bun smui-theme compile static/smui-dark.css -i src/theme/dark"
+		"smui-theme-dark": "bun smui-theme compile static/smui-dark.css -i src/theme/dark",
+		"accessibility-check": "node src/theme/accessibility-checker.js",
+		"accessibility-test": "start src/theme/accessibility-test.html"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

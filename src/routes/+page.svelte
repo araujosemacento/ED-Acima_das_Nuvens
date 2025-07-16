@@ -4,9 +4,13 @@
 	import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages.js';
 
+	import { onMount } from 'svelte';
+
+	import Welcome from '$lib/components/Welcome.svelte';
 	import Counter from '$lib/components/Counter.svelte';
 	import PyodideInteractive from '$lib/components/PyodideInteractive.svelte';
-	import Welcome from '$lib/components/Welcome.svelte';
+	import ColorExamples from '$lib/components/ColorExamples.svelte';
+
 </script>
 
 <svelte:head>
@@ -15,9 +19,10 @@
 </svelte:head>
 
 <section>
-	<!-- <Welcome welcome={true} /> -->
+	<Welcome />
+	<!-- <ColorExamples />
 	<PyodideInteractive />
-	<Counter />
+	<Counter /> -->
 </section>
 
 <style>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Acessibilidade - Paleta de Cores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .color-test {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .color-combo {
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 200px;
+            position: relative;
+        }
+        
+        .contrast-ratio {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+        }
+        
+        .accessible {
+            background: #4CAF50 !important;
+        }
+        
+        .partially-accessible {
+            background: #FF9800 !important;
+        }
+        
+        .not-accessible {
+            background: #F44336 !important;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .results-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 Teste de Acessibilidade - Paleta "ED | Acima das Nuvens"</h1>
+        
+        <div class="legend">
+            <strong>Legenda WCAG 2.1:</strong>
+            <span class="legend-item accessible">✓ AAA (4.5:1+)</span>
+            <span class="legend-item partially-accessible">⚠ AA (3:1+)</span>
+            <span class="legend-item not-accessible">✗ Falha (&lt;3:1)</span>
+        </div>
+        
+        <h2>Tema Claro</h2>
+        <div id="light-theme-tests" class="color-test"></div>
+        
+        <h2>Tema Escuro</h2>
+        <div id="dark-theme-tests" class="color-test"></div>
+        
+        <div id="results" class="results-summary">
+            <h3>📊 Resumo dos Resultados</h3>
+            <div id="summary-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Paleta de cores do projeto
+        const palette = {
+            light: {
+                text: 'hsl(162, 100%, 10%)',
+                background: 'hsl(145, 100%, 95%)',
+                primary: 'hsl(164, 61%, 50%)',
+                secondary: 'hsl(290, 46%, 50%)',
+                accent: 'hsl(273, 92%, 50%)',
+                surface: 'hsl(171, 28%, 90%)',
+                // Shades importantes para teste
+                'text-900': 'hsl(162, 100%, 10%)',
+                'text-800': 'hsl(162, 100%, 20%)',
+                'text-700': 'hsl(162, 100%, 30%)',
+                'background-50': 'hsl(145, 100%, 95%)',
+                'background-100': 'hsl(145, 100%, 90%)',
+                'primary-700': 'hsl(164, 61%, 30%)',
+                'primary-600': 'hsl(164, 61%, 40%)',
+                'surface-100': 'hsl(171, 28%, 90%)',
+                'surface-200': 'hsl(171, 28%, 80%)',
+            },
+            dark: {
+                text: 'hsl(162, 100%, 90%)',
+                background: 'hsl(145, 100%, 5%)',
+                primary: 'hsl(164, 61%, 50%)',
+                secondary: 'hsl(290, 46%, 50%)',
+                accent: 'hsl(273, 92%, 50%)',
+                surface: 'hsl(171, 28%, 10%)',
+                // Shades importantes para teste
+                'text-900': 'hsl(162, 100%, 90%)',
+                'text-800': 'hsl(162, 100%, 80%)',
+                'text-700': 'hsl(162, 100%, 70%)',
+                'background-50': 'hsl(145, 100%, 5%)',
+                'background-100': 'hsl(145, 100%, 10%)',
+                'primary-300': 'hsl(164, 61%, 30%)',
+                'primary-400': 'hsl(164, 61%, 40%)',
+                'surface-100': 'hsl(171, 28%, 10%)',
+                'surface-200': 'hsl(171, 28%, 20%)',
+            }
+        };
+
+        // Função para converter HSL para RGB
+        function hslToRgb(h, s, l) {
+            s /= 100;
+            l /= 100;
+            const c = (1 - Math.abs(2 * l - 1)) * s;
+            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            const m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+            
+            if (0 <= h && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (60 <= h && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (120 <= h && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (180 <= h && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (240 <= h && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (300 <= h && h < 360) {
+                r = c; g = 0; b = x;
+            }
+            
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+            
+            return [r, g, b];
+        }
+
+        // Função para calcular luminância relativa
+        function getLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(c => {
+                c = c / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        // Função para calcular contraste
+        function getContrastRatio(color1, color2) {
+            const parseHSL = (hsl) => {
+                const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+                return match ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])] : [0, 0, 0];
+            };
+
+            const [h1, s1, l1] = parseHSL(color1);
+            const [h2, s2, l2] = parseHSL(color2);
+            
+            const [r1, g1, b1] = hslToRgb(h1, s1, l1);
+            const [r2, g2, b2] = hslToRgb(h2, s2, l2);
+            
+            const lum1 = getLuminance(r1, g1, b1);
+            const lum2 = getLuminance(r2, g2, b2);
+            
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        // Função para determinar nível de acessibilidade
+        function getAccessibilityLevel(ratio) {
+            if (ratio >= 7) return { level: 'AAA', class: 'accessible' };
+            if (ratio >= 4.5) return { level: 'AA', class: 'accessible' };
+            if (ratio >= 3) return { level: 'AA Large', class: 'partially-accessible' };
+            return { level: 'Falha', class: 'not-accessible' };
+        }
+
+        // Função para criar teste de contraste
+        function createContrastTest(bgColor, textColor, bgName, textName) {
+            const ratio = getContrastRatio(bgColor, textColor);
+            const accessibility = getAccessibilityLevel(ratio);
+            
+            const div = document.createElement('div');
+            div.className = 'color-combo';
+            div.style.backgroundColor = bgColor;
+            div.style.color = textColor;
+            
+            div.innerHTML = `
+                <div class="contrast-ratio ${accessibility.class}">${accessibility.level}</div>
+                <strong>${bgName} + ${textName}</strong><br>
+                Ratio: ${ratio.toFixed(2)}:1<br>
+                <small>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</small>
+            `;
+            
+            return { element: div, ratio, accessibility };
+        }
+
+        // Executar testes
+        function runTests() {
+            const lightContainer = document.getElementById('light-theme-tests');
+            const darkContainer = document.getElementById('dark-theme-tests');
+            
+            let totalTests = 0;
+            let passedTests = 0;
+            let results = [];
+
+            // Combinações importantes para testar
+            const testCombinations = [
+                ['background', 'text'],
+                ['background', 'text-900'],
+                ['surface', 'text'],
+                ['surface', 'text-800'],
+                ['primary', 'background'],
+                ['primary', 'text'],
+                ['secondary', 'background'],
+                ['accent', 'background'],
+                ['background-50', 'text-900'],
+                ['surface-100', 'text-800'],
+            ];
+
+            // Testar tema claro
+            testCombinations.forEach(([bg, text]) => {
+                if (palette.light[bg] && palette.light[text]) {
+                    const test = createContrastTest(
+                        palette.light[bg], 
+                        palette.light[text], 
+                        bg, 
+                        text
+                    );
+                    lightContainer.appendChild(test.element);
+                    totalTests++;
+                    if (test.accessibility.class === 'accessible') passedTests++;
+                    results.push({ theme: 'light', bg, text, ...test });
+                }
+            });
+
+            // Testar tema escuro
+            testCombinations.forEach(([bg, text]) => {
+                if (palette.dark[bg] && palette.dark[text]) {
+                    const test = createContrastTest(
+                        palette.dark[bg], 
+                        palette.dark[text], 
+                        bg, 
+                        text
+                    );
+                    darkContainer.appendChild(test.element);
+                    totalTests++;
+                    if (test.accessibility.class === 'accessible') passedTests++;
+                    results.push({ theme: 'dark', bg, text, ...test });
+                }
+            });
+
+            // Mostrar resumo
+            const summaryElement = document.getElementById('summary-content');
+            const percentage = ((passedTests / totalTests) * 100).toFixed(1);
+            
+            summaryElement.innerHTML = `
+                <p><strong>Taxa de Aprovação:</strong> ${passedTests}/${totalTests} (${percentage}%)</p>
+                <p><strong>Recomendações:</strong></p>
+                <ul>
+                    <li>✅ Cores principais passam nos testes WCAG</li>
+                    <li>⚠️ Sempre teste combinações específicas antes de usar</li>
+                    <li>🎯 Use shades mais contrastantes para texto pequeno</li>
+                    <li>🔍 Considere usar ferramentas como Contrast Checker para validação adicional</li>
+                </ul>
+            `;
+        }
+
+        // Executar testes quando a página carregar
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

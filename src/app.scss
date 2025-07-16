@@ -1,4 +1,8 @@
 @use '@fontsource/fira-mono';
+@use 'sass:map';
+@use 'sass:string';
+
+@use './theme/palette' as palette;
 
 @font-face {
 	font-family: 'Noto Sans Display';
@@ -16,41 +20,47 @@
 	font-display: swap;
 }
 
-$colors: (
-	primary: #006a60,
-	secondary: #64558f,
-	background: #fff,
-	surface: #d5dbdd,
-	error: #904a43,
-	on-primary: #fff,
-	on-secondary: #fff,
-	on-surface: #000,
-	on-error: #fff,
-	text-on-background: rgba(0, 0, 0, 0.87),
-	text-secondary-on-background: rgba(0, 0, 0, 0.54),
-	text-hint-on-background: rgba(0, 0, 0, 0.38),
-	text-disabled-on-background: rgba(0, 0, 0, 0.38),
-	text-icon-on-background: rgba(0, 0, 0, 0.38),
-	text-primary-on-light: rgba(0, 0, 0, 0.87),
-	text-secondary-on-light: rgba(0, 0, 0, 0.54),
-	text-hint-on-light: rgba(0, 0, 0, 0.38),
-	text-disabled-on-light: rgba(0, 0, 0, 0.38),
-	text-icon-on-light: rgba(0, 0, 0, 0.38),
-	text-primary-on-dark: white,
-	text-secondary-on-dark: rgba(255, 255, 255, 0.7),
-	text-hint-on-dark: rgba(255, 255, 255, 0.5),
-	text-disabled-on-dark: rgba(255, 255, 255, 0.5),
-	text-icon-on-dark: rgba(255, 255, 255, 0.5)
-);
+// Sistema de cores mais eficiente baseado na paleta
+$light-theme: map.get(palette.$themes, 'light');
+$dark-theme: map.get(palette.$themes, 'dark');
 
-// Mixin para facilitar o uso das cores
-@mixin theme-color($property, $color-name) {
-	#{$property}: var(--mdc-theme-#{$color-name});
+// Função principal para acessar cores da paleta
+@function theme-color($color-name, $theme: 'light') {
+	$theme-map: if($theme == 'dark', $dark-theme, $light-theme);
+	@if map.has-key($theme-map, $color-name) {
+		@return map.get($theme-map, $color-name);
+	}
+	@warn "Color '#{$color-name}' not found in '#{$theme}' theme";
+	@return null;
 }
 
-// Função para acessar as cores (retorna a variável CSS)
-@function theme-color($color-name) {
+// Função para criar variáveis CSS customizadas
+@function theme-var($color-name, $prefix: 'theme') {
+	@return var(--#{$prefix}-#{$color-name});
+}
+
+// Mixin para aplicar cores do tema
+@mixin theme-color($property, $color-name, $theme: 'light') {
+	#{$property}: theme-color($color-name, $theme);
+}
+
+// Mixin para cores responsivas (light/dark)
+@mixin theme-color-responsive($property, $color-name) {
+	#{$property}: theme-color($color-name, 'light');
+
+	@media (prefers-color-scheme: dark) {
+		#{$property}: theme-color($color-name, 'dark');
+	}
+}
+
+// Função para compatibilidade com Material Design
+@function mdc-theme-color($color-name) {
 	@return var(--mdc-theme-#{$color-name});
+}
+
+// Mixin para compatibilidade com Material Design
+@mixin mdc-theme-color($property, $color-name) {
+	#{$property}: mdc-theme-color($color-name);
 }
 :root {
 	--font-body:
@@ -58,33 +68,110 @@ $colors: (
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Noto Sans Mono', 'Fira Mono', monospace;
 
-	/* Material Design Theme Variables */
-	--mdc-theme-primary: #006a60;
-	--mdc-theme-secondary: #64558f;
-	--mdc-theme-background: #fff;
-	--mdc-theme-surface: #d5dbdd;
+	/* Variáveis CSS customizadas baseadas na paleta */
+	// Text colors
+	--theme-text: #{theme-color('text')};
+	--theme-text-50: #{theme-color('text-50')};
+	--theme-text-100: #{theme-color('text-100')};
+	--theme-text-200: #{theme-color('text-200')};
+	--theme-text-300: #{theme-color('text-300')};
+	--theme-text-400: #{theme-color('text-400')};
+	--theme-text-500: #{theme-color('text-500')};
+	--theme-text-600: #{theme-color('text-600')};
+	--theme-text-700: #{theme-color('text-700')};
+	--theme-text-800: #{theme-color('text-800')};
+	--theme-text-900: #{theme-color('text-900')};
+	--theme-text-950: #{theme-color('text-950')};
+
+	// Background colors
+	--theme-background: #{theme-color('background')};
+	--theme-background-50: #{theme-color('background-50')};
+	--theme-background-100: #{theme-color('background-100')};
+	--theme-background-200: #{theme-color('background-200')};
+	--theme-background-300: #{theme-color('background-300')};
+	--theme-background-400: #{theme-color('background-400')};
+	--theme-background-500: #{theme-color('background-500')};
+	--theme-background-600: #{theme-color('background-600')};
+	--theme-background-700: #{theme-color('background-700')};
+	--theme-background-800: #{theme-color('background-800')};
+	--theme-background-900: #{theme-color('background-900')};
+	--theme-background-950: #{theme-color('background-950')};
+
+	// Primary colors
+	--theme-primary: #{theme-color('primary')};
+	--theme-primary-50: #{theme-color('primary-50')};
+	--theme-primary-100: #{theme-color('primary-100')};
+	--theme-primary-200: #{theme-color('primary-200')};
+	--theme-primary-300: #{theme-color('primary-300')};
+	--theme-primary-400: #{theme-color('primary-400')};
+	--theme-primary-500: #{theme-color('primary-500')};
+	--theme-primary-600: #{theme-color('primary-600')};
+	--theme-primary-700: #{theme-color('primary-700')};
+	--theme-primary-800: #{theme-color('primary-800')};
+	--theme-primary-900: #{theme-color('primary-900')};
+	--theme-primary-950: #{theme-color('primary-950')};
+
+	// Secondary colors
+	--theme-secondary: #{theme-color('secondary')};
+	--theme-secondary-50: #{theme-color('secondary-50')};
+	--theme-secondary-100: #{theme-color('secondary-100')};
+	--theme-secondary-200: #{theme-color('secondary-200')};
+	--theme-secondary-300: #{theme-color('secondary-300')};
+	--theme-secondary-400: #{theme-color('secondary-400')};
+	--theme-secondary-500: #{theme-color('secondary-500')};
+	--theme-secondary-600: #{theme-color('secondary-600')};
+	--theme-secondary-700: #{theme-color('secondary-700')};
+	--theme-secondary-800: #{theme-color('secondary-800')};
+	--theme-secondary-900: #{theme-color('secondary-900')};
+	--theme-secondary-950: #{theme-color('secondary-950')};
+
+	// Accent colors
+	--theme-accent: #{theme-color('accent')};
+	--theme-accent-50: #{theme-color('accent-50')};
+	--theme-accent-100: #{theme-color('accent-100')};
+	--theme-accent-200: #{theme-color('accent-200')};
+	--theme-accent-300: #{theme-color('accent-300')};
+	--theme-accent-400: #{theme-color('accent-400')};
+	--theme-accent-500: #{theme-color('accent-500')};
+	--theme-accent-600: #{theme-color('accent-600')};
+	--theme-accent-700: #{theme-color('accent-700')};
+	--theme-accent-800: #{theme-color('accent-800')};
+	--theme-accent-900: #{theme-color('accent-900')};
+	--theme-accent-950: #{theme-color('accent-950')};
+
+	// Surface colors
+	--theme-surface: #{theme-color('surface')};
+	--theme-surface-50: #{theme-color('surface-50')};
+	--theme-surface-100: #{theme-color('surface-100')};
+	--theme-surface-200: #{theme-color('surface-200')};
+	--theme-surface-300: #{theme-color('surface-300')};
+	--theme-surface-400: #{theme-color('surface-400')};
+	--theme-surface-500: #{theme-color('surface-500')};
+	--theme-surface-600: #{theme-color('surface-600')};
+	--theme-surface-700: #{theme-color('surface-700')};
+	--theme-surface-800: #{theme-color('surface-800')};
+	--theme-surface-900: #{theme-color('surface-900')};
+	--theme-surface-950: #{theme-color('surface-950')};
+
+	/* Compatibilidade com Material Design */
+	--mdc-theme-primary: #{theme-color('primary')};
+	--mdc-theme-secondary: #{theme-color('secondary')};
+	--mdc-theme-background: #{theme-color('background')};
+	--mdc-theme-surface: #{theme-color('surface')};
 	--mdc-theme-error: #904a43;
-	--mdc-theme-on-primary: #fff;
-	--mdc-theme-on-secondary: #fff;
-	--mdc-theme-on-surface: #000;
-	--mdc-theme-on-error: #fff;
-	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87);
-	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.54);
-	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-primary-on-light: rgba(0, 0, 0, 0.87);
-	--mdc-theme-text-secondary-on-light: rgba(0, 0, 0, 0.54);
-	--mdc-theme-text-hint-on-light: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-disabled-on-light: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-icon-on-light: rgba(0, 0, 0, 0.38);
-	--mdc-theme-text-primary-on-dark: white;
-	--mdc-theme-text-secondary-on-dark: rgba(255, 255, 255, 0.7);
-	--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
-	--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
-	--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+	--mdc-theme-on-primary: #{theme-color('background')};
+	--mdc-theme-on-secondary: #{theme-color('background')};
+	--mdc-theme-on-surface: #{theme-color('text')};
+	--mdc-theme-on-error: #{theme-color('background')};
+	--mdc-theme-text-primary-on-background: #{theme-color('text')};
+	--mdc-theme-text-secondary-on-background: #{theme-color('text-700')};
+	--mdc-theme-text-hint-on-background: #{theme-color('text-500')};
+	--mdc-theme-text-disabled-on-background: #{theme-color('text-400')};
+	--mdc-theme-text-icon-on-background: #{theme-color('text-600')};
 
 	font-family: var(--font-body);
+	background-color: var(--theme-background);
+	color: var(--theme-text);
 }
 
 body {
@@ -138,32 +225,246 @@ h2 {
 	display: contents;
 }
 
+/* Estilos personalizados para scrollbar */
+/* Firefox */
+* {
+	/* stylelint-disable-next-line property-no-unknown */
+	scrollbar-width: thin;
+	/* stylelint-disable-next-line property-no-unknown */
+	scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+}
+
+/* Webkit scrollbar (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--theme-surface-100);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--theme-primary-400);
+	border-radius: 4px;
+	border: 1px solid var(--theme-surface-200);
+	transition: background-color 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--theme-primary-500);
+}
+
+::-webkit-scrollbar-thumb:active {
+	background: var(--theme-primary-600);
+}
+
+::-webkit-scrollbar-corner {
+	background: var(--theme-surface-100);
+}
+
+/* Scrollbar para elementos específicos com temas alternativos */
+/* Uso: <div class="scrollbar-secondary">...</div> */
+.scrollbar-secondary {
+	/* stylelint-disable-next-line property-no-unknown */
+	scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
+}
+
+.scrollbar-secondary::-webkit-scrollbar-thumb {
+	background: var(--theme-secondary-400);
+}
+
+.scrollbar-secondary::-webkit-scrollbar-thumb:hover {
+	background: var(--theme-secondary-500);
+}
+
+.scrollbar-secondary::-webkit-scrollbar-thumb:active {
+	background: var(--theme-secondary-600);
+}
+
+/* Uso: <div class="scrollbar-accent">...</div> */
+.scrollbar-accent {
+	/* stylelint-disable-next-line property-no-unknown */
+	scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb {
+	background: var(--theme-accent-400);
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb:hover {
+	background: var(--theme-accent-500);
+}
+
+.scrollbar-accent::-webkit-scrollbar-thumb:active {
+	background: var(--theme-accent-600);
+}
+
 /* Dark Theme Variables */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--mdc-theme-primary: #82d5c8;
-		--mdc-theme-secondary: #c7a7de;
-		--mdc-theme-background: #000;
-		--mdc-theme-surface: #0f141a;
+		/* Variáveis CSS customizadas - tema escuro */
+		// Text colors
+		--theme-text: #{theme-color('text', 'dark')};
+		--theme-text-50: #{theme-color('text-50', 'dark')};
+		--theme-text-100: #{theme-color('text-100', 'dark')};
+		--theme-text-200: #{theme-color('text-200', 'dark')};
+		--theme-text-300: #{theme-color('text-300', 'dark')};
+		--theme-text-400: #{theme-color('text-400', 'dark')};
+		--theme-text-500: #{theme-color('text-500', 'dark')};
+		--theme-text-600: #{theme-color('text-600', 'dark')};
+		--theme-text-700: #{theme-color('text-700', 'dark')};
+		--theme-text-800: #{theme-color('text-800', 'dark')};
+		--theme-text-900: #{theme-color('text-900', 'dark')};
+		--theme-text-950: #{theme-color('text-950', 'dark')};
+
+		// Background colors
+		--theme-background: #{theme-color('background', 'dark')};
+		--theme-background-50: #{theme-color('background-50', 'dark')};
+		--theme-background-100: #{theme-color('background-100', 'dark')};
+		--theme-background-200: #{theme-color('background-200', 'dark')};
+		--theme-background-300: #{theme-color('background-300', 'dark')};
+		--theme-background-400: #{theme-color('background-400', 'dark')};
+		--theme-background-500: #{theme-color('background-500', 'dark')};
+		--theme-background-600: #{theme-color('background-600', 'dark')};
+		--theme-background-700: #{theme-color('background-700', 'dark')};
+		--theme-background-800: #{theme-color('background-800', 'dark')};
+		--theme-background-900: #{theme-color('background-900', 'dark')};
+		--theme-background-950: #{theme-color('background-950', 'dark')};
+
+		// Primary colors
+		--theme-primary: #{theme-color('primary', 'dark')};
+		--theme-primary-50: #{theme-color('primary-50', 'dark')};
+		--theme-primary-100: #{theme-color('primary-100', 'dark')};
+		--theme-primary-200: #{theme-color('primary-200', 'dark')};
+		--theme-primary-300: #{theme-color('primary-300', 'dark')};
+		--theme-primary-400: #{theme-color('primary-400', 'dark')};
+		--theme-primary-500: #{theme-color('primary-500', 'dark')};
+		--theme-primary-600: #{theme-color('primary-600', 'dark')};
+		--theme-primary-700: #{theme-color('primary-700', 'dark')};
+		--theme-primary-800: #{theme-color('primary-800', 'dark')};
+		--theme-primary-900: #{theme-color('primary-900', 'dark')};
+		--theme-primary-950: #{theme-color('primary-950', 'dark')};
+
+		// Secondary colors
+		--theme-secondary: #{theme-color('secondary', 'dark')};
+		--theme-secondary-50: #{theme-color('secondary-50', 'dark')};
+		--theme-secondary-100: #{theme-color('secondary-100', 'dark')};
+		--theme-secondary-200: #{theme-color('secondary-200', 'dark')};
+		--theme-secondary-300: #{theme-color('secondary-300', 'dark')};
+		--theme-secondary-400: #{theme-color('secondary-400', 'dark')};
+		--theme-secondary-500: #{theme-color('secondary-500', 'dark')};
+		--theme-secondary-600: #{theme-color('secondary-600', 'dark')};
+		--theme-secondary-700: #{theme-color('secondary-700', 'dark')};
+		--theme-secondary-800: #{theme-color('secondary-800', 'dark')};
+		--theme-secondary-900: #{theme-color('secondary-900', 'dark')};
+		--theme-secondary-950: #{theme-color('secondary-950', 'dark')};
+
+		// Accent colors
+		--theme-accent: #{theme-color('accent', 'dark')};
+		--theme-accent-50: #{theme-color('accent-50', 'dark')};
+		--theme-accent-100: #{theme-color('accent-100', 'dark')};
+		--theme-accent-200: #{theme-color('accent-200', 'dark')};
+		--theme-accent-300: #{theme-color('accent-300', 'dark')};
+		--theme-accent-400: #{theme-color('accent-400', 'dark')};
+		--theme-accent-500: #{theme-color('accent-500', 'dark')};
+		--theme-accent-600: #{theme-color('accent-600', 'dark')};
+		--theme-accent-700: #{theme-color('accent-700', 'dark')};
+		--theme-accent-800: #{theme-color('accent-800', 'dark')};
+		--theme-accent-900: #{theme-color('accent-900', 'dark')};
+		--theme-accent-950: #{theme-color('accent-950', 'dark')};
+
+		// Surface colors
+		--theme-surface: #{theme-color('surface', 'dark')};
+		--theme-surface-50: #{theme-color('surface-50', 'dark')};
+		--theme-surface-100: #{theme-color('surface-100', 'dark')};
+		--theme-surface-200: #{theme-color('surface-200', 'dark')};
+		--theme-surface-300: #{theme-color('surface-300', 'dark')};
+		--theme-surface-400: #{theme-color('surface-400', 'dark')};
+		--theme-surface-500: #{theme-color('surface-500', 'dark')};
+		--theme-surface-600: #{theme-color('surface-600', 'dark')};
+		--theme-surface-700: #{theme-color('surface-700', 'dark')};
+		--theme-surface-800: #{theme-color('surface-800', 'dark')};
+		--theme-surface-900: #{theme-color('surface-900', 'dark')};
+		--theme-surface-950: #{theme-color('surface-950', 'dark')};
+
+		/* Compatibilidade com Material Design - tema escuro */
+		--mdc-theme-primary: #{theme-color('primary', 'dark')};
+		--mdc-theme-secondary: #{theme-color('secondary', 'dark')};
+		--mdc-theme-background: #{theme-color('background', 'dark')};
+		--mdc-theme-surface: #{theme-color('surface', 'dark')};
 		--mdc-theme-error: #ffb4ab;
-		--mdc-theme-on-primary: #000;
-		--mdc-theme-on-secondary: #000;
-		--mdc-theme-on-surface: #fff;
-		--mdc-theme-on-error: #000;
-		--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);
-		--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.54);
-		--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38);
-		--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38);
-		--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38);
-		--mdc-theme-text-primary-on-light: rgba(0, 0, 0, 0.87);
-		--mdc-theme-text-secondary-on-light: rgba(0, 0, 0, 0.54);
-		--mdc-theme-text-hint-on-light: rgba(0, 0, 0, 0.38);
-		--mdc-theme-text-disabled-on-light: rgba(0, 0, 0, 0.38);
-		--mdc-theme-text-icon-on-light: rgba(0, 0, 0, 0.38);
-		--mdc-theme-text-primary-on-dark: white;
-		--mdc-theme-text-secondary-on-dark: rgba(255, 255, 255, 0.7);
-		--mdc-theme-text-hint-on-dark: rgba(255, 255, 255, 0.5);
-		--mdc-theme-text-disabled-on-dark: rgba(255, 255, 255, 0.5);
-		--mdc-theme-text-icon-on-dark: rgba(255, 255, 255, 0.5);
+		--mdc-theme-on-primary: #{theme-color('background', 'dark')};
+		--mdc-theme-on-secondary: #{theme-color('background', 'dark')};
+		--mdc-theme-on-surface: #{theme-color('text', 'dark')};
+		--mdc-theme-on-error: #{theme-color('background', 'dark')};
+		--mdc-theme-text-primary-on-background: #{theme-color('text', 'dark')};
+		--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'dark')};
+		--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'dark')};
+		--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'dark')};
+		--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'dark')};
+	}
+
+	/* Scrollbar dark theme */
+	* {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+	}
+
+	::-webkit-scrollbar-track {
+		background: var(--theme-surface-100);
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: var(--theme-primary-400);
+		border-color: var(--theme-surface-200);
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--theme-primary-500);
+	}
+
+	::-webkit-scrollbar-thumb:active {
+		background: var(--theme-primary-600);
+	}
+
+	::-webkit-scrollbar-corner {
+		background: var(--theme-surface-100);
+	}
+
+	/* Scrollbar temas alternativos - dark theme */
+	.scrollbar-secondary {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
+	}
+
+	.scrollbar-secondary::-webkit-scrollbar-thumb {
+		background: var(--theme-secondary-400);
+	}
+
+	.scrollbar-secondary::-webkit-scrollbar-thumb:hover {
+		background: var(--theme-secondary-500);
+	}
+
+	.scrollbar-secondary::-webkit-scrollbar-thumb:active {
+		background: var(--theme-secondary-600);
+	}
+
+	.scrollbar-accent {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
+	}
+
+	.scrollbar-accent::-webkit-scrollbar-thumb {
+		background: var(--theme-accent-400);
+	}
+
+	.scrollbar-accent::-webkit-scrollbar-thumb:hover {
+		background: var(--theme-accent-500);
+	}
+
+	.scrollbar-accent::-webkit-scrollbar-thumb:active {
+		background: var(--theme-accent-600);
 	}
 }
