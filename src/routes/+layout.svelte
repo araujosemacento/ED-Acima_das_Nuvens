@@ -1,6 +1,7 @@
 <script>
 	import '../app.scss';
 	import { setLocale, locales } from '$lib/paraglide/runtime';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
@@ -24,13 +25,17 @@
 				setLocale(targetLang);
 			}
 		}
+
+		// A inicialização do tema agora é feita no ThemeToggle
+		// para evitar duplicação e conflitos
 	});
 </script>
 
-<div class="app">
-	<main>
+<div class="app theme-background-transition">
+	<main class="theme-background-transition">
 		{@render children()}
 	</main>
+	<ThemeToggle />
 </div>
 
 <style>
@@ -38,8 +43,8 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
-		background-color: var(--mdc-theme-background);
-		color: var(--mdc-theme-text-primary-on-background);
+		background-color: var(--theme-background);
+		color: var(--theme-text);
 		font-family: var(--font-body);
 	}
 
@@ -52,6 +57,12 @@
 		max-width: 64rem;
 		margin: 0 auto;
 		box-sizing: border-box;
-		background-color: var(--mdc-theme-background);
+		background-color: var(--theme-background);
+	}
+
+	@media (max-width: 576px) {
+		main {
+			padding: 0.75rem;
+		}
 	}
 </style>

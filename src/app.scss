@@ -44,13 +44,10 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	#{$property}: theme-color($color-name, $theme);
 }
 
-// Mixin para cores responsivas (light/dark)
+// Mixin para cores responsivas - agora controlado via JavaScript
 @mixin theme-color-responsive($property, $color-name) {
-	#{$property}: theme-color($color-name, 'light');
-
-	@media (prefers-color-scheme: dark) {
-		#{$property}: theme-color($color-name, 'dark');
-	}
+	// As cores agora são controladas via JavaScript e arquivos CSS SMUI separados
+	#{$property}: var(--mdc-theme-#{$color-name});
 }
 
 // Função para compatibilidade com Material Design
@@ -170,8 +167,8 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	--mdc-theme-text-icon-on-background: #{theme-color('text-600')};
 
 	font-family: var(--font-body);
-	background-color: var(--theme-background);
-	color: var(--theme-text);
+	background-color: var(--mdc-theme-background) !important;
+	color: var(--mdc-theme-text-primary-on-background) !important;
 }
 
 body {
@@ -301,170 +298,337 @@ h2 {
 	background: var(--theme-accent-600);
 }
 
-/* Dark Theme Variables */
-@media (prefers-color-scheme: dark) {
-	:root {
-		/* Variáveis CSS customizadas - tema escuro */
-		// Text colors
-		--theme-text: #{theme-color('text', 'dark')};
-		--theme-text-50: #{theme-color('text-50', 'dark')};
-		--theme-text-100: #{theme-color('text-100', 'dark')};
-		--theme-text-200: #{theme-color('text-200', 'dark')};
-		--theme-text-300: #{theme-color('text-300', 'dark')};
-		--theme-text-400: #{theme-color('text-400', 'dark')};
-		--theme-text-500: #{theme-color('text-500', 'dark')};
-		--theme-text-600: #{theme-color('text-600', 'dark')};
-		--theme-text-700: #{theme-color('text-700', 'dark')};
-		--theme-text-800: #{theme-color('text-800', 'dark')};
-		--theme-text-900: #{theme-color('text-900', 'dark')};
-		--theme-text-950: #{theme-color('text-950', 'dark')};
+/* Agora as variáveis de tema são controladas exclusivamente via JavaScript
+   As definições de tema escuro estão nos arquivos SMUI compilados */
 
-		// Background colors
-		--theme-background: #{theme-color('background', 'dark')};
-		--theme-background-50: #{theme-color('background-50', 'dark')};
-		--theme-background-100: #{theme-color('background-100', 'dark')};
-		--theme-background-200: #{theme-color('background-200', 'dark')};
-		--theme-background-300: #{theme-color('background-300', 'dark')};
-		--theme-background-400: #{theme-color('background-400', 'dark')};
-		--theme-background-500: #{theme-color('background-500', 'dark')};
-		--theme-background-600: #{theme-color('background-600', 'dark')};
-		--theme-background-700: #{theme-color('background-700', 'dark')};
-		--theme-background-800: #{theme-color('background-800', 'dark')};
-		--theme-background-900: #{theme-color('background-900', 'dark')};
-		--theme-background-950: #{theme-color('background-950', 'dark')};
+/* Sistema de temas dinâmico - aplicado via JavaScript com classes do DOM */
 
-		// Primary colors
-		--theme-primary: #{theme-color('primary', 'dark')};
-		--theme-primary-50: #{theme-color('primary-50', 'dark')};
-		--theme-primary-100: #{theme-color('primary-100', 'dark')};
-		--theme-primary-200: #{theme-color('primary-200', 'dark')};
-		--theme-primary-300: #{theme-color('primary-300', 'dark')};
-		--theme-primary-400: #{theme-color('primary-400', 'dark')};
-		--theme-primary-500: #{theme-color('primary-500', 'dark')};
-		--theme-primary-600: #{theme-color('primary-600', 'dark')};
-		--theme-primary-700: #{theme-color('primary-700', 'dark')};
-		--theme-primary-800: #{theme-color('primary-800', 'dark')};
-		--theme-primary-900: #{theme-color('primary-900', 'dark')};
-		--theme-primary-950: #{theme-color('primary-950', 'dark')};
+/* Tema claro - redefine todas as variáveis usando a paleta light */
+:global(.theme-light) {
+	color-scheme: light;
 
-		// Secondary colors
-		--theme-secondary: #{theme-color('secondary', 'dark')};
-		--theme-secondary-50: #{theme-color('secondary-50', 'dark')};
-		--theme-secondary-100: #{theme-color('secondary-100', 'dark')};
-		--theme-secondary-200: #{theme-color('secondary-200', 'dark')};
-		--theme-secondary-300: #{theme-color('secondary-300', 'dark')};
-		--theme-secondary-400: #{theme-color('secondary-400', 'dark')};
-		--theme-secondary-500: #{theme-color('secondary-500', 'dark')};
-		--theme-secondary-600: #{theme-color('secondary-600', 'dark')};
-		--theme-secondary-700: #{theme-color('secondary-700', 'dark')};
-		--theme-secondary-800: #{theme-color('secondary-800', 'dark')};
-		--theme-secondary-900: #{theme-color('secondary-900', 'dark')};
-		--theme-secondary-950: #{theme-color('secondary-950', 'dark')};
+	/* Text colors */
+	--theme-text: #{theme-color('text', 'light')};
+	--theme-text-50: #{theme-color('text-50', 'light')};
+	--theme-text-100: #{theme-color('text-100', 'light')};
+	--theme-text-200: #{theme-color('text-200', 'light')};
+	--theme-text-300: #{theme-color('text-300', 'light')};
+	--theme-text-400: #{theme-color('text-400', 'light')};
+	--theme-text-500: #{theme-color('text-500', 'light')};
+	--theme-text-600: #{theme-color('text-600', 'light')};
+	--theme-text-700: #{theme-color('text-700', 'light')};
+	--theme-text-800: #{theme-color('text-800', 'light')};
+	--theme-text-900: #{theme-color('text-900', 'light')};
+	--theme-text-950: #{theme-color('text-950', 'light')};
 
-		// Accent colors
-		--theme-accent: #{theme-color('accent', 'dark')};
-		--theme-accent-50: #{theme-color('accent-50', 'dark')};
-		--theme-accent-100: #{theme-color('accent-100', 'dark')};
-		--theme-accent-200: #{theme-color('accent-200', 'dark')};
-		--theme-accent-300: #{theme-color('accent-300', 'dark')};
-		--theme-accent-400: #{theme-color('accent-400', 'dark')};
-		--theme-accent-500: #{theme-color('accent-500', 'dark')};
-		--theme-accent-600: #{theme-color('accent-600', 'dark')};
-		--theme-accent-700: #{theme-color('accent-700', 'dark')};
-		--theme-accent-800: #{theme-color('accent-800', 'dark')};
-		--theme-accent-900: #{theme-color('accent-900', 'dark')};
-		--theme-accent-950: #{theme-color('accent-950', 'dark')};
+	/* Background colors */
+	--theme-background: #{theme-color('background', 'light')};
+	--theme-background-50: #{theme-color('background-50', 'light')};
+	--theme-background-100: #{theme-color('background-100', 'light')};
+	--theme-background-200: #{theme-color('background-200', 'light')};
+	--theme-background-300: #{theme-color('background-300', 'light')};
+	--theme-background-400: #{theme-color('background-400', 'light')};
+	--theme-background-500: #{theme-color('background-500', 'light')};
+	--theme-background-600: #{theme-color('background-600', 'light')};
+	--theme-background-700: #{theme-color('background-700', 'light')};
+	--theme-background-800: #{theme-color('background-800', 'light')};
+	--theme-background-900: #{theme-color('background-900', 'light')};
+	--theme-background-950: #{theme-color('background-950', 'light')};
 
-		// Surface colors
-		--theme-surface: #{theme-color('surface', 'dark')};
-		--theme-surface-50: #{theme-color('surface-50', 'dark')};
-		--theme-surface-100: #{theme-color('surface-100', 'dark')};
-		--theme-surface-200: #{theme-color('surface-200', 'dark')};
-		--theme-surface-300: #{theme-color('surface-300', 'dark')};
-		--theme-surface-400: #{theme-color('surface-400', 'dark')};
-		--theme-surface-500: #{theme-color('surface-500', 'dark')};
-		--theme-surface-600: #{theme-color('surface-600', 'dark')};
-		--theme-surface-700: #{theme-color('surface-700', 'dark')};
-		--theme-surface-800: #{theme-color('surface-800', 'dark')};
-		--theme-surface-900: #{theme-color('surface-900', 'dark')};
-		--theme-surface-950: #{theme-color('surface-950', 'dark')};
+	/* Primary colors */
+	--theme-primary: #{theme-color('primary', 'light')};
+	--theme-primary-50: #{theme-color('primary-50', 'light')};
+	--theme-primary-100: #{theme-color('primary-100', 'light')};
+	--theme-primary-200: #{theme-color('primary-200', 'light')};
+	--theme-primary-300: #{theme-color('primary-300', 'light')};
+	--theme-primary-400: #{theme-color('primary-400', 'light')};
+	--theme-primary-500: #{theme-color('primary-500', 'light')};
+	--theme-primary-600: #{theme-color('primary-600', 'light')};
+	--theme-primary-700: #{theme-color('primary-700', 'light')};
+	--theme-primary-800: #{theme-color('primary-800', 'light')};
+	--theme-primary-900: #{theme-color('primary-900', 'light')};
+	--theme-primary-950: #{theme-color('primary-950', 'light')};
 
-		/* Compatibilidade com Material Design - tema escuro */
-		--mdc-theme-primary: #{theme-color('primary', 'dark')};
-		--mdc-theme-secondary: #{theme-color('secondary', 'dark')};
-		--mdc-theme-background: #{theme-color('background', 'dark')};
-		--mdc-theme-surface: #{theme-color('surface', 'dark')};
-		--mdc-theme-error: #ffb4ab;
-		--mdc-theme-on-primary: #{theme-color('background', 'dark')};
-		--mdc-theme-on-secondary: #{theme-color('background', 'dark')};
-		--mdc-theme-on-surface: #{theme-color('text', 'dark')};
-		--mdc-theme-on-error: #{theme-color('background', 'dark')};
-		--mdc-theme-text-primary-on-background: #{theme-color('text', 'dark')};
-		--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'dark')};
-		--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'dark')};
-		--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'dark')};
-		--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'dark')};
-	}
+	/* Surface colors */
+	--theme-surface: #{theme-color('surface', 'light')};
+	--theme-surface-50: #{theme-color('surface-50', 'light')};
+	--theme-surface-100: #{theme-color('surface-100', 'light')};
+	--theme-surface-200: #{theme-color('surface-200', 'light')};
+	--theme-surface-300: #{theme-color('surface-300', 'light')};
+	--theme-surface-400: #{theme-color('surface-400', 'light')};
+	--theme-surface-500: #{theme-color('surface-500', 'light')};
+	--theme-surface-600: #{theme-color('surface-600', 'light')};
+	--theme-surface-700: #{theme-color('surface-700', 'light')};
+	--theme-surface-800: #{theme-color('surface-800', 'light')};
+	--theme-surface-900: #{theme-color('surface-900', 'light')};
+	--theme-surface-950: #{theme-color('surface-950', 'light')};
 
-	/* Scrollbar dark theme */
+	/* Compatibilidade com Material Design - redefinindo para tema claro */
+	--mdc-theme-primary: #{theme-color('primary', 'light')} !important;
+	--mdc-theme-secondary: #{theme-color('secondary', 'light')} !important;
+	--mdc-theme-background: #{theme-color('background', 'light')} !important;
+	--mdc-theme-surface: #{theme-color('surface', 'light')} !important;
+	--mdc-theme-error: #904a43;
+	--mdc-theme-on-primary: #{theme-color('background', 'light')} !important;
+	--mdc-theme-on-secondary: #{theme-color('background', 'light')} !important;
+	--mdc-theme-on-surface: #{theme-color('text', 'light')} !important;
+	--mdc-theme-on-error: #{theme-color('background', 'light')} !important;
+	--mdc-theme-text-primary-on-background: #{theme-color('text', 'light')} !important;
+	--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'light')} !important;
+	--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'light')} !important;
+	--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'light')} !important;
+	--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'light')} !important;
+
+	--theme-current: light;
+}
+
+/* Tema escuro - redefine todas as variáveis usando a paleta dark */
+:global(.theme-dark) {
+	color-scheme: dark;
+
+	/* Text colors */
+	--theme-text: #{theme-color('text-950', 'dark')};
+	--theme-text-50: #{theme-color('text-50', 'dark')};
+	--theme-text-100: #{theme-color('text-100', 'dark')};
+	--theme-text-200: #{theme-color('text-200', 'dark')};
+	--theme-text-300: #{theme-color('text-300', 'dark')};
+	--theme-text-400: #{theme-color('text-400', 'dark')};
+	--theme-text-500: #{theme-color('text-500', 'dark')};
+	--theme-text-600: #{theme-color('text-600', 'dark')};
+	--theme-text-700: #{theme-color('text-700', 'dark')};
+	--theme-text-800: #{theme-color('text-800', 'dark')};
+	--theme-text-900: #{theme-color('text-900', 'dark')};
+	--theme-text-950: #{theme-color('text-950', 'dark')};
+
+	/* Background colors */
+	--theme-background: #{theme-color('background-50', 'dark')};
+	--theme-background-50: #{theme-color('background-50', 'dark')};
+	--theme-background-100: #{theme-color('background-100', 'dark')};
+	--theme-background-200: #{theme-color('background-200', 'dark')};
+	--theme-background-300: #{theme-color('background-300', 'dark')};
+	--theme-background-400: #{theme-color('background-400', 'dark')};
+	--theme-background-500: #{theme-color('background-500', 'dark')};
+	--theme-background-600: #{theme-color('background-600', 'dark')};
+	--theme-background-700: #{theme-color('background-700', 'dark')};
+	--theme-background-800: #{theme-color('background-800', 'dark')};
+	--theme-background-900: #{theme-color('background-900', 'dark')};
+	--theme-background-950: #{theme-color('background-950', 'dark')};
+
+	/* Primary colors */
+	--theme-primary: #{theme-color('primary', 'dark')};
+	--theme-primary-50: #{theme-color('primary-50', 'dark')};
+	--theme-primary-100: #{theme-color('primary-100', 'dark')};
+	--theme-primary-200: #{theme-color('primary-200', 'dark')};
+	--theme-primary-300: #{theme-color('primary-300', 'dark')};
+	--theme-primary-400: #{theme-color('primary-400', 'dark')};
+	--theme-primary-500: #{theme-color('primary-500', 'dark')};
+	--theme-primary-600: #{theme-color('primary-600', 'dark')};
+	--theme-primary-700: #{theme-color('primary-700', 'dark')};
+	--theme-primary-800: #{theme-color('primary-800', 'dark')};
+	--theme-primary-900: #{theme-color('primary-900', 'dark')};
+	--theme-primary-950: #{theme-color('primary-950', 'dark')};
+
+	/* Surface colors */
+	--theme-surface: #{theme-color('surface-100', 'dark')};
+	--theme-surface-50: #{theme-color('surface-50', 'dark')};
+	--theme-surface-100: #{theme-color('surface-100', 'dark')};
+	--theme-surface-200: #{theme-color('surface-200', 'dark')};
+	--theme-surface-300: #{theme-color('surface-300', 'dark')};
+	--theme-surface-400: #{theme-color('surface-400', 'dark')};
+	--theme-surface-500: #{theme-color('surface-500', 'dark')};
+	--theme-surface-600: #{theme-color('surface-600', 'dark')};
+	--theme-surface-700: #{theme-color('surface-700', 'dark')};
+	--theme-surface-800: #{theme-color('surface-800', 'dark')};
+	--theme-surface-900: #{theme-color('surface-900', 'dark')};
+	--theme-surface-950: #{theme-color('surface-950', 'dark')};
+
+	/* Compatibilidade com Material Design - redefinindo para tema escuro */
+	--mdc-theme-primary: #{theme-color('primary', 'dark')} !important;
+	--mdc-theme-secondary: #{theme-color('secondary', 'dark')} !important;
+	--mdc-theme-background: #{theme-color('background', 'dark')} !important;
+	--mdc-theme-surface: #{theme-color('surface', 'dark')} !important;
+	--mdc-theme-error: #ff5449;
+	--mdc-theme-on-primary: #{theme-color('background', 'dark')} !important;
+	--mdc-theme-on-secondary: #{theme-color('background', 'dark')} !important;
+	--mdc-theme-on-surface: #{theme-color('text', 'dark')} !important;
+	--mdc-theme-on-error: #{theme-color('background', 'dark')} !important;
+	--mdc-theme-text-primary-on-background: #{theme-color('text', 'dark')} !important;
+	--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'dark')} !important;
+	--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'dark')} !important;
+	--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'dark')} !important;
+	--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'dark')} !important;
+
+	--theme-current: dark;
+}
+
+/* Theme Toggle Styles */
+:global(.theme-light) {
+	color-scheme: light;
+}
+
+:global(.theme-dark) {
+	color-scheme: dark;
+}
+
+:global(.theme-system) {
+	color-scheme: auto;
+}
+
+/* Sistema de temas dinâmico - controlado totalmente via JavaScript */
+:root {
+	/* Cores padrão do tema - inicialmente light */
+	--theme-background: var(--mdc-theme-background);
+	--theme-surface: var(--mdc-theme-surface);
+	--theme-text: var(--mdc-theme-text-primary-on-background);
+	--theme-outline: rgba(0, 0, 0, 0.12);
+	--theme-current: light;
+}
+
+/* Temas específicos - aplicados via JavaScript dinamicamente */
+:global(.theme-light) {
+	--theme-background: var(--mdc-theme-background);
+	--theme-surface: var(--mdc-theme-surface);
+	--theme-text: var(--mdc-theme-text-primary-on-background);
+	--theme-outline: rgba(0, 0, 0, 0.12);
+	--theme-current: light;
+}
+
+:global(.theme-dark) {
+	--theme-background: var(--mdc-theme-background);
+	--theme-surface: var(--mdc-theme-surface);
+	--theme-text: var(--mdc-theme-text-primary-on-background);
+	--theme-outline: rgba(255, 255, 255, 0.12);
+	--theme-current: dark;
+}
+
+:global(.theme-system) {
+	/* Para o modo sistema, ainda detectamos a preferência mas sem interferir */
+	--theme-current: auto;
+}
+
+/* Responsividade a mudanças dinâmicas - apenas para componentes que precisam */
+/* ========================================
+   SISTEMA DE TRANSIÇÕES GLOBAIS DE TEMA
+   ======================================== */
+
+/* Transições suaves para mudanças de tema - aplicadas globalmente */
+:root {
+	/* Duração das transições - 1.5 segundos para suavidade */
+	--theme-transition-duration: 1500ms;
+	--theme-transition-timing: ease-in-out;
+	--theme-transition-fast: 300ms;
+	--theme-transition-medium: 600ms;
+}
+
+/* Classes CSS específicas para diferentes tipos de transições de tema */
+
+/* ✅ PRIORIDADE MÁXIMA: Classes de transição com especificidade alta */
+.theme-transition,
+.theme-transition-long {
+	transition: all var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Classe para surfaces e backgrounds - PRIORIDADE MÁXIMA */
+.theme-surface,
+.theme-background,
+.theme-surface-transition,
+.theme-background-transition {
+	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Classe para texto - PRIORIDADE MÁXIMA */
+.theme-text,
+.theme-text-transition {
+	transition: color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Classe para elementos interativos - PRIORIDADE MÁXIMA */
+.theme-interactive,
+.theme-interactive-transition {
+	transition:
+		background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Classe para transições médias (600ms) */
+.theme-transition-medium {
+	transition: all var(--theme-transition-medium) var(--theme-transition-timing) !important;
+}
+
+/* Classe para transições rápidas (300ms) - para elementos que precisam ser responsivos */
+.theme-transition-fast {
+	transition: all var(--theme-transition-fast) var(--theme-transition-timing) !important;
+}
+
+/* Aplicar transições automáticas baseadas em seletores de elemento para compatibilidade */
+body,
+html,
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav {
+	transition: all var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* ✅ CORREÇÃO: Transições combinadas em uma única declaração para evitar sobrescrever */
+:global(.mdc-button),
+:global(.mdc-menu),
+:global(.mdc-menu-surface),
+:global(.mdc-list),
+:global(.mdc-list-item),
+:global(.mdc-card) {
+	transition:
+		background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* ✅ GARANTIA DE TRANSIÇÕES: Elementos que usam variáveis SMUI específicas */
+:global([class*='mdc-']) {
+	transition:
+		background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* ✅ TRANSIÇÕES GLOBAIS PARA GARANTIR ANIMAÇÃO EM TODOS OS ELEMENTOS */
+:global(*) {
+	transition:
+		background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Transições para pseudo-elementos */
+*::before,
+*::after {
+	transition: all var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+/* Excluir transições de elementos que podem causar problemas de performance */
+img,
+video,
+iframe,
+canvas,
+svg {
+	transition: none !important;
+}
+
+/* Respeitar preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
 	* {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+		transition: none !important;
 	}
 
-	::-webkit-scrollbar-track {
-		background: var(--theme-surface-100);
+	:root {
+		--theme-transition-duration: 0ms;
 	}
+}
 
-	::-webkit-scrollbar-thumb {
-		background: var(--theme-primary-400);
-		border-color: var(--theme-surface-200);
-	}
-
-	::-webkit-scrollbar-thumb:hover {
-		background: var(--theme-primary-500);
-	}
-
-	::-webkit-scrollbar-thumb:active {
-		background: var(--theme-primary-600);
-	}
-
-	::-webkit-scrollbar-corner {
-		background: var(--theme-surface-100);
-	}
-
-	/* Scrollbar temas alternativos - dark theme */
-	.scrollbar-secondary {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
-	}
-
-	.scrollbar-secondary::-webkit-scrollbar-thumb {
-		background: var(--theme-secondary-400);
-	}
-
-	.scrollbar-secondary::-webkit-scrollbar-thumb:hover {
-		background: var(--theme-secondary-500);
-	}
-
-	.scrollbar-secondary::-webkit-scrollbar-thumb:active {
-		background: var(--theme-secondary-600);
-	}
-
-	.scrollbar-accent {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
-	}
-
-	.scrollbar-accent::-webkit-scrollbar-thumb {
-		background: var(--theme-accent-400);
-	}
-
-	.scrollbar-accent::-webkit-scrollbar-thumb:hover {
-		background: var(--theme-accent-500);
-	}
-
-	.scrollbar-accent::-webkit-scrollbar-thumb:active {
-		background: var(--theme-accent-600);
-	}
+[data-theme-reactive] {
+	transition: all 0.2s ease;
 }

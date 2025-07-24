@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Teste de Correção de Transições - ED Acima das Nuvens</title>
+    <style>
+        :root {
+            /* Durações das transições - mesmo do projeto */
+            --theme-transition-duration: 1500ms;
+            --theme-transition-timing: ease-in-out;
+            --theme-transition-fast: 300ms;
+            --theme-transition-medium: 600ms;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+                       color var(--theme-transition-duration) var(--theme-transition-timing);
+        }
+
+        /* ============================================
+           SIMULAÇÃO DO PROBLEMA ORIGINAL
+           ============================================ */
+        .problem-example {
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid currentColor;
+            
+            /* ❌ PROBLEMA: Múltiplas declarações transition (a segunda sobrescreve) */
+            transition: background-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+            transition: color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+        }
+
+        /* ============================================
+           SOLUÇÃO CORRIGIDA
+           ============================================ */
+        .fixed-example {
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid currentColor;
+            
+            /* ✅ SOLUÇÃO: Transições combinadas em uma única declaração */
+            transition: 
+                background-color var(--theme-transition-duration) var(--theme-transition-timing),
+                color var(--theme-transition-duration) var(--theme-transition-timing),
+                border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+        }
+
+        /* Estilos para temas */
+        .theme-light {
+            background-color: hsl(145, 100%, 95%);
+            color: hsl(162, 100%, 10%);
+        }
+
+        .theme-dark {
+            background-color: hsl(145, 100%, 5%);
+            color: hsl(162, 100%, 90%);
+        }
+
+        /* Simulação das classes theme-interactive-transition */
+        .theme-interactive-transition {
+            transition: 
+                background-color var(--theme-transition-duration) var(--theme-transition-timing),
+                color var(--theme-transition-duration) var(--theme-transition-timing),
+                border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+        }
+
+        .theme-transition-fast {
+            transition: all var(--theme-transition-fast) var(--theme-transition-timing) !important;
+        }
+
+        .theme-transition-medium {
+            transition: all var(--theme-transition-medium) var(--theme-transition-timing) !important;
+        }
+
+        /* Controles */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-light {
+            background-color: #f0f0f0;
+            color: #333333;
+        }
+
+        .btn-dark {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .explanation {
+            background-color: rgba(100, 149, 237, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #6495ed;
+        }
+
+        .problem {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left-color: #dc3545;
+        }
+
+        .solution {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left-color: #28a745;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+
+        .test-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .timing-info {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left-color: #ffc107;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        /* Override rápido para demonstrar o problema */
+        .fast-override {
+            transition: all 300ms ease-in-out !important; /* 300ms sobrescreve 1500ms */
+        }
+
+        @media (max-width: 768px) {
+            .test-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <div class="controls">
+        <button class="btn-light" onclick="setTheme('light')">☀️ Light</button>
+        <button class="btn-dark" onclick="setTheme('dark')">🌙 Dark</button>
+        <button onclick="runDiagnostic()">🔍 Diagnóstico</button>
+    </div>
+
+    <h1>🔧 Teste de Correção de Transições Lentas</h1>
+
+    <div class="explanation">
+        <strong>Objetivo:</strong> Verificar se as correções aplicadas ao projeto ED Acima das Nuvens 
+        resolveram o problema de transições muito rápidas. As transições devem durar <strong>1.5 segundos</strong> 
+        com easing <code>ease-in-out</code>.
+    </div>
+
+    <div class="timing-info">
+        <strong>⏱️ Configuração de Timing:</strong><br>
+        • <code>--theme-transition-duration: 1500ms</code> (1.5 segundos)<br>
+        • <code>--theme-transition-timing: ease-in-out</code><br>
+        • <code>--theme-transition-fast: 300ms</code> (só para elementos específicos)<br>
+        • <code>--theme-transition-medium: 600ms</code> (meio termo)
+    </div>
+
+    <h2>❌ Problema Original (Múltiplas Declarações)</h2>
+    <div class="explanation problem">
+        <strong>Problema:</strong> Múltiplas declarações <code>transition</code> onde a segunda sobrescreve a primeira.
+    </div>
+    <div class="test-container">
+        <div class="problem-example">
+            <h3>Exemplo Problemático</h3>
+            <p>Este elemento tem <code>transition</code> declarado duas vezes. 
+               A segunda declaração sobrescreve a primeira, causando transições rápidas ou quebradas.</p>
+            <code>
+                transition: background-color 1500ms;<br>
+                transition: color 1500ms; /* ← Sobrescreve a anterior */
+            </code>
+        </div>
+        <div class="problem-example fast-override">
+            <h3>Override Rápido</h3>
+            <p>Este elemento tem uma classe <code>fast-override</code> que força 300ms, 
+               sobrescrevendo a transição longa configurada.</p>
+            <code>transition: all 300ms !important;</code>
+        </div>
+    </div>
+
+    <h2>✅ Solução Implementada</h2>
+    <div class="explanation solution">
+        <strong>Solução:</strong> Declarações <code>transition</code> combinadas em uma única linha 
+        e hierarquia correta de especificidade CSS.
+    </div>
+    <div class="test-container">
+        <div class="fixed-example theme-interactive-transition">
+            <h3>Transição Corrigida</h3>
+            <p>Este elemento usa a solução corrigida com múltiplas propriedades 
+               em uma única declaração <code>transition</code>.</p>
+            <code>
+                transition: <br>
+                &nbsp;&nbsp;background-color 1500ms ease-in-out,<br>
+                &nbsp;&nbsp;color 1500ms ease-in-out,<br>
+                &nbsp;&nbsp;border-color 1500ms ease-in-out;
+            </code>
+        </div>
+        <div class="fixed-example theme-transition-medium">
+            <h3>Transição Média (600ms)</h3>
+            <p>Este elemento usa a classe <code>theme-transition-medium</code> 
+               para elementos que precisam de resposta mais rápida.</p>
+            <code>transition: all 600ms ease-in-out;</code>
+        </div>
+    </div>
+
+    <h2>🧪 Teste de Hierarquia CSS</h2>
+    <div class="explanation">
+        <strong>Teste:</strong> Elementos com diferentes classes de transição para verificar 
+        se a especificidade está funcionando corretamente.
+    </div>
+    <div class="test-container">
+        <div class="fixed-example theme-transition-fast">
+            <h3>Fast (300ms)</h3>
+            <p>Para elementos de UI que precisam de feedback rápido.</p>
+        </div>
+        <div class="fixed-example theme-transition-medium">
+            <h3>Medium (600ms)</h3>
+            <p>Para elementos secundários do tema.</p>
+        </div>
+    </div>
+
+    <h2>📊 Resultado Esperado</h2>
+    <div class="explanation solution">
+        <h3>✅ Se as correções funcionaram:</h3>
+        <ul>
+            <li><strong>Transições longas:</strong> Elementos principais devem animar por 1.5 segundos</li>
+            <li><strong>Suavidade:</strong> Animação deve usar <code>ease-in-out</code> para entrada/saída suave</li>
+            <li><strong>Consistência:</strong> Todos os elementos devem começar e terminar a transição ao mesmo tempo</li>
+            <li><strong>Cores coordenadas:</strong> Background, texto e bordas devem mudar simultaneamente</li>
+        </ul>
+
+        <h3>❌ Se ainda há problemas:</h3>
+        <ul>
+            <li><strong>Transições rápidas:</strong> Mudança quase instantânea (&lt; 500ms)</li>
+            <li><strong>Elementos dessincronizados:</strong> Alguns elementos mudam rápido, outros devagar</li>
+            <li><strong>Pulos visuais:</strong> Mudanças abruptas sem animação</li>
+        </ul>
+    </div>
+
+    <div id="diagnostic-results" style="display: none;" class="explanation">
+        <h3>🔍 Resultados do Diagnóstico:</h3>
+        <div id="diagnostic-content"></div>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            const body = document.body;
+            const timestamp = Date.now();
+            
+            console.log(`🎨 Mudando tema para: ${theme} (${timestamp})`);
+            
+            // Remove classes existentes
+            body.classList.remove('theme-light', 'theme-dark');
+            
+            // Aplica nova classe
+            body.classList.add(`theme-${theme}`);
+            
+            console.log(`✅ Classe aplicada: theme-${theme}`);
+            
+            // Monitora quando a transição termina
+            const startTime = Date.now();
+            body.addEventListener('transitionend', function onTransitionEnd(e) {
+                if (e.target === body && e.propertyName === 'background-color') {
+                    const duration = Date.now() - startTime;
+                    console.log(`⏱️ Transição completada em: ${duration}ms`);
+                    console.log(`🎯 Esperado: 1500ms | Atual: ${duration}ms`);
+                    
+                    if (duration >= 1400 && duration <= 1600) {
+                        console.log('✅ Transição funcionando corretamente!');
+                    } else if (duration < 500) {
+                        console.log('❌ Transição muito rápida - problema não resolvido');
+                    } else {
+                        console.log('⚠️ Transição com duração inesperada');
+                    }
+                    
+                    body.removeEventListener('transitionend', onTransitionEnd);
+                }
+            });
+        }
+
+        function runDiagnostic() {
+            const diagnosticDiv = document.getElementById('diagnostic-results');
+            const contentDiv = document.getElementById('diagnostic-content');
+            
+            const root = document.documentElement;
+            const computed = getComputedStyle(root);
+            
+            const duration = computed.getPropertyValue('--theme-transition-duration');
+            const timing = computed.getPropertyValue('--theme-transition-timing');
+            const fast = computed.getPropertyValue('--theme-transition-fast');
+            const medium = computed.getPropertyValue('--theme-transition-medium');
+            
+            const bodyTransition = getComputedStyle(document.body).transition;
+            
+            contentDiv.innerHTML = `
+                <strong>Variáveis CSS:</strong><br>
+                • Duration: <code>${duration.trim()}</code><br>
+                • Timing: <code>${timing.trim()}</code><br>
+                • Fast: <code>${fast.trim()}</code><br>
+                • Medium: <code>${medium.trim()}</code><br><br>
+                
+                <strong>Transição do Body:</strong><br>
+                <code style="word-break: break-all;">${bodyTransition}</code><br><br>
+                
+                <strong>Status:</strong><br>
+                ${duration.trim() === '1500ms' ? '✅' : '❌'} Duration configurado corretamente<br>
+                ${timing.trim() === 'ease-in-out' ? '✅' : '❌'} Timing configurado corretamente<br>
+                ${bodyTransition.includes('1500ms') ? '✅' : '❌'} Body usando transição longa<br>
+            `;
+            
+            diagnosticDiv.style.display = 'block';
+            diagnosticDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Log inicial
+        console.log('🧪 Teste de Correção de Transições Carregado');
+        console.log('🎯 Objetivo: Verificar transições de 1.5 segundos');
+        console.log('📝 Clique em Light/Dark e observe o console para análise detalhada');
+        
+        // Executa diagnóstico inicial
+        setTimeout(runDiagnostic, 1000);
+    </script>
+</body>
+</html>

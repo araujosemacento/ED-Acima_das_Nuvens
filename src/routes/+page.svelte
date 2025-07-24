@@ -7,7 +7,7 @@
 	<meta name="description" content="A SvelteKit application" />
 </svelte:head>
 
-<section>
+<section class="theme-background-transition theme-text-transition">
 	<Welcome />
 </section>
 
@@ -18,8 +18,8 @@
 		justify-content: center;
 		align-items: center;
 		flex: 0.6;
-		background-color: var(--mdc-theme-background);
-		color: var(--mdc-theme-text-primary-on-background);
+		background-color: var(--theme-background);
+		color: var(--theme-text);
 		font-family: var(--font-body);
 		padding: 2rem;
 		gap: 2rem;

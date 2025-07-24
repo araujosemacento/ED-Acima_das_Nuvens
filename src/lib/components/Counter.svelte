@@ -40,7 +40,6 @@
 		background-color: var(--mdc-theme-surface);
 		border-radius: 8px;
 		overflow: hidden;
-		transition: all 0.2s ease-in-out;
 	}
 
 	.counter button {
@@ -54,7 +53,6 @@
 		color: var(--mdc-theme-on-surface);
 		touch-action: manipulation;
 		font-size: 2rem;
-		transition: all 0.2s ease-in-out;
 		cursor: pointer;
 	}
 
@@ -72,7 +70,6 @@
 		vector-effect: non-scaling-stroke;
 		stroke-width: 2px;
 		stroke: var(--mdc-theme-text-primary-on-background);
-		transition: stroke 0.2s ease-in-out;
 	}
 
 	.counter button:hover path {

@@ -59,16 +59,16 @@
 	});
 </script>
 
-<div class="pyodide-section">
-	<h3>🐍 Pyodide Interactive</h3>
+<div class="pyodide-section theme-surface-transition theme-text-transition">
+	<h3 class="theme-text-transition">🐍 Pyodide Interactive</h3>
 
-	<div class="status">
+	<div class="status theme-text-transition">
 		<p>{statusMessage}</p>
 	</div>
 
-	<div class="python-executor">
+	<div class="python-executor theme-surface-transition">
 		<div class="input-group">
-			<label for="python-code">Código Python:</label>
+			<label for="python-code" class="theme-text-transition">Código Python:</label>
 			<input
 				id="python-code"
 				type="text"
@@ -76,27 +76,28 @@
 				placeholder="Digite código Python..."
 				disabled={isExecuting}
 				onkeydown={(e) => e.key === 'Enter' && executePython()}
+				class="theme-background-transition theme-text-transition"
 			/>
 		</div>
 
-		<button onclick={executePython} disabled={isExecuting} class="execute-btn">
+		<button onclick={executePython} disabled={isExecuting} class="execute-btn theme-interactive-transition">
 			{isExecuting ? '⏳ Executando...' : '▶️ Executar'}
 		</button>
 
 		{#if result !== null}
-			<div class="result">
+			<div class="result theme-background-transition theme-text-transition">
 				<strong>Resultado:</strong>
 				<code>{result}</code>
 			</div>
 		{/if}
 
-		<div class="examples">
-			<h4>💡 Exemplos para testar:</h4>
+		<div class="examples theme-surface-transition">
+			<h4 class="theme-text-transition">💡 Exemplos para testar:</h4>
 			<div class="example-buttons">
-				<button onclick={() => (pythonCode = 'import math; math.sqrt(64)')} class="example-btn">
+				<button onclick={() => (pythonCode = 'import math; math.sqrt(64)')} class="example-btn theme-interactive-transition">
 					🔢 Matemática
 				</button>
-				<button onclick={() => (pythonCode = 'list(range(1, 11))')} class="example-btn">
+				<button onclick={() => (pythonCode = 'list(range(1, 11))')} class="example-btn theme-interactive-transition">
 					📋 Lista
 				</button>
 				<button
@@ -117,10 +118,10 @@
 	.pyodide-section {
 		margin: 2rem 0;
 		padding: 1.5rem;
-		border: 1px solid var(--mdc-theme-text-hint-on-background);
+		border: 1px solid var(--theme-outline);
 		border-radius: 12px;
-		background-color: var(--mdc-theme-surface);
-		color: var(--mdc-theme-on-surface);
+		background-color: var(--theme-surface);
+		color: var(--theme-text);
 		text-align: center;
 		max-width: 600px;
 		width: 100%;
@@ -130,14 +131,15 @@
 
 	.pyodide-section h3 {
 		margin-top: 0;
-		color: var(--mdc-theme-text-primary-on-background);
+		color: var(--theme-text);
 		font-size: 1.2rem;
 		font-weight: 500;
 	}
 
 	.pyodide-section p {
 		margin: 0.5rem 0;
-		color: var(--mdc-theme-text-secondary-on-background);
+		color: var(--theme-text);
+		opacity: 0.8;
 	}
 
 	.status p {
@@ -162,29 +164,29 @@
 
 	.input-group label {
 		font-weight: 500;
-		color: var(--mdc-theme-text-primary-on-background);
+		color: var(--theme-text);
 		font-family: var(--font-body);
 	}
 
 	.input-group input {
 		padding: 0.75rem;
-		border: 1px solid var(--mdc-theme-text-hint-on-background);
+		border: 1px solid var(--theme-outline);
 		border-radius: 6px;
 		font-size: 1rem;
 		font-family: var(--font-mono);
-		background-color: var(--mdc-theme-background);
-		color: var(--mdc-theme-text-primary-on-background);
+		background-color: var(--theme-background);
+		color: var(--theme-text);
 		transition: all 0.2s ease-in-out;
 	}
 
 	.input-group input:focus {
 		outline: none;
 		border-color: var(--mdc-theme-primary);
-		box-shadow: 0 0 0 2px var(--mdc-theme-primary, rgba(0, 122, 204, 0.2));
+		box-shadow: 0 0 0 2px rgba(var(--mdc-theme-primary-rgb, 0, 122, 204), 0.2);
 	}
 
 	.input-group input:disabled {
-		background-color: var(--mdc-theme-text-disabled-on-background);
+		background-color: var(--theme-surface);
 		cursor: not-allowed;
 		opacity: 0.6;
 	}
