@@ -1,25 +1,31 @@
 @use 'sass:color';
+@use 'sass:map';
 
 @use '@material/theme/color-palette';
+@use '../palette' as palette;
 
-// Svelte Colors! (Dark Theme)
+// Extrair cores da paleta personalizada
+$light-theme: map.get(palette.$themes, 'light');
+$dark-theme: map.get(palette.$themes, 'dark');
+
+// Svelte Colors integrados com a paleta personalizada (Dark Theme)
 @use '@material/theme/index' as theme with (
-	$primary: #82d5c8,
-	$secondary: color.scale(#cebdfe, $whiteness: -10%),
-	$surface: color.adjust(#0f1416, $blue: +4),
-	$background: #343a3c,
+	$primary: map.get($dark-theme, 'primary'),
+	$secondary: map.get($dark-theme, 'secondary'),
+	$surface: map.get($dark-theme, 'surface'),
+	$background: map.get($dark-theme, 'background'),
 	$error: #ffb4ab
 );
 
 html,
 body {
-	background-color: #343a3c;
+	background-color: theme.$background;
 	color: theme.$on-surface;
 }
 
 a {
-	color: #ffb0c8;
+	color: map.get($dark-theme, 'accent');
 }
 a:visited {
-	color: color.scale(#ffb0c8, $lightness: -35%);
+	color: color.scale(map.get($dark-theme, 'accent'), $lightness: -35%);
 }
