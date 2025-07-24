@@ -513,55 +513,61 @@ h2 {
 
 /* Transições suaves para mudanças de tema - aplicadas globalmente */
 :root {
-	/* Duração das transições - 1.5 segundos para suavidade */
-	--theme-transition-duration: 1500ms;
+	/* Duração das transições - DESABILITADAS para tema, apenas para elementos menores */
+	--theme-transition-duration: 0ms; /* Desabilitado - usando JavaScript */
 	--theme-transition-timing: ease-in-out;
-	--theme-transition-fast: 300ms;
-	--theme-transition-medium: 600ms;
+	--theme-transition-fast: 150ms; /* Apenas para elementos pequenos */
+	--theme-transition-medium: 300ms; /* Apenas para elementos médios */
+	--element-transition-duration: 200ms; /* Para elementos individuais */
 }
 
-/* Classes CSS específicas para diferentes tipos de transições de tema */
+/* Classes CSS específicas para diferentes tipos de transições */
 
-/* ✅ PRIORIDADE MÁXIMA: Classes de transição com especificidade alta */
+/* ✅ TRANSIÇÕES DESABILITADAS PARA TEMA - JavaScript assumiu controle */
 .theme-transition,
 .theme-transition-long {
-	transition: all var(--theme-transition-duration) var(--theme-transition-timing) !important;
+	transition: none !important; /* Desabilitado - JavaScript controla */
 }
 
-/* Classe para surfaces e backgrounds - PRIORIDADE MÁXIMA */
+/* Classe para surfaces e backgrounds - DESABILITADAS */
 .theme-surface,
 .theme-background,
 .theme-surface-transition,
 .theme-background-transition {
-	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+	transition: none !important; /* Desabilitado - JavaScript controla */
 }
 
-/* Classe para texto - PRIORIDADE MÁXIMA */
+/* Classe para texto - DESABILITADA */
 .theme-text,
 .theme-text-transition {
-	transition: color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+	transition: none !important; /* Desabilitado - JavaScript controla */
 }
 
-/* Classe para elementos interativos - PRIORIDADE MÁXIMA */
+/* Classe para elementos interativos - REDUZIDAS apenas para propriedades não relacionadas ao tema */
 .theme-interactive,
 .theme-interactive-transition {
 	transition:
-		background-color var(--theme-transition-duration) var(--theme-transition-timing),
-		color var(--theme-transition-duration) var(--theme-transition-timing),
-		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+		transform var(--element-transition-duration) var(--theme-transition-timing),
+		box-shadow var(--element-transition-duration) var(--theme-transition-timing),
+		opacity var(--element-transition-duration) var(--theme-transition-timing) !important;
+	/* Removido: background-color, color, border-color - agora controlados por JavaScript */
 }
 
-/* Classe para transições médias (600ms) */
+/* Classe para transições médias - APENAS para elementos não relacionados ao tema */
 .theme-transition-medium {
-	transition: all var(--theme-transition-medium) var(--theme-transition-timing) !important;
+	transition:
+		transform var(--theme-transition-medium) var(--theme-transition-timing),
+		opacity var(--theme-transition-medium) var(--theme-transition-timing) !important;
 }
 
-/* Classe para transições rápidas (300ms) - para elementos que precisam ser responsivos */
+/* Classe para transições rápidas - APENAS para elementos não relacionados ao tema */
 .theme-transition-fast {
-	transition: all var(--theme-transition-fast) var(--theme-transition-timing) !important;
+	transition:
+		transform var(--theme-transition-fast) var(--theme-transition-timing),
+		opacity var(--theme-transition-fast) var(--theme-transition-timing) !important;
 }
 
-/* Aplicar transições automáticas baseadas em seletores de elemento para compatibilidade */
+/* DESABILITADAS: Transições automáticas baseadas em seletores de elemento */
 body,
 html,
 main,
@@ -571,10 +577,10 @@ aside,
 header,
 footer,
 nav {
-	transition: all var(--theme-transition-duration) var(--theme-transition-timing) !important;
+	transition: none !important; /* JavaScript controla cores de tema */
 }
 
-/* ✅ CORREÇÃO: Transições combinadas em uma única declaração para evitar sobrescrever */
+/* DESABILITADAS: Correção para elementos SMUI */
 :global(.mdc-button),
 :global(.mdc-menu),
 :global(.mdc-menu-surface),
@@ -582,31 +588,31 @@ nav {
 :global(.mdc-list-item),
 :global(.mdc-card) {
 	transition:
-		background-color var(--theme-transition-duration) var(--theme-transition-timing),
-		color var(--theme-transition-duration) var(--theme-transition-timing),
-		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+		transform var(--element-transition-duration) var(--theme-transition-timing),
+		box-shadow var(--element-transition-duration) var(--theme-transition-timing) !important;
+	/* Removido: background-color, color, border-color - JavaScript controla */
 }
 
-/* ✅ GARANTIA DE TRANSIÇÕES: Elementos que usam variáveis SMUI específicas */
+/* DESABILITADAS: Garantia para elementos SMUI */
 :global([class*='mdc-']) {
 	transition:
-		background-color var(--theme-transition-duration) var(--theme-transition-timing),
-		color var(--theme-transition-duration) var(--theme-transition-timing),
-		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+		transform var(--element-transition-duration) var(--theme-transition-timing),
+		box-shadow var(--element-transition-duration) var(--theme-transition-timing) !important;
+	/* Removido: background-color, color, border-color - JavaScript controla */
 }
 
-/* ✅ TRANSIÇÕES GLOBAIS PARA GARANTIR ANIMAÇÃO EM TODOS OS ELEMENTOS */
+/* ✅ TRANSIÇÕES GLOBAIS DESABILITADAS PARA CORES DE TEMA */
 :global(*) {
-	transition:
-		background-color var(--theme-transition-duration) var(--theme-transition-timing),
-		color var(--theme-transition-duration) var(--theme-transition-timing),
-		border-color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+	transition: none !important; /* JavaScript assumiu controle total das cores */
 }
 
-/* Transições para pseudo-elementos */
+/* Transições para pseudo-elementos - DESABILITADAS para cores de tema */
 *::before,
 *::after {
-	transition: all var(--theme-transition-duration) var(--theme-transition-timing);
+	transition:
+		transform var(--element-transition-duration) var(--theme-transition-timing),
+		opacity var(--element-transition-duration) var(--theme-transition-timing);
+	/* Removido: all - JavaScript controla cores */
 }
 
 /* Excluir transições de elementos que podem causar problemas de performance */
@@ -626,9 +632,10 @@ svg {
 
 	:root {
 		--theme-transition-duration: 0ms;
+		--element-transition-duration: 0ms;
 	}
 }
 
 [data-theme-reactive] {
-	transition: all 0.2s ease;
+	transition: none; /* JavaScript controla */
 }

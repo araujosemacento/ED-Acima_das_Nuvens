@@ -75,14 +75,26 @@ function createThemeStore() {
         }
     );
 
-    // Aplica o tema ao DOM
+    // Aplica o tema ao DOM usando JavaScript puro para transições
     const applyTheme = (theme) => {
         if (!browser) return;
+
+        // Inicia medição de performance da transição
+        const transitionId = `theme-${Date.now()}`;
+        logger.transition('START', {
+            id: transitionId,
+            type: 'mudança de tema',
+            from: document.documentElement.classList.contains('theme-dark') ? 'dark' : 'light',
+            to: theme,
+            duration: 300 // Duração esperada para JavaScript
+        });
 
         logger.theme('APPLY_THEME', {
             'Tema solicitado': theme,
             'Browser disponível': browser,
-            'Document ready': !!document.documentElement
+            'Document ready': !!document.documentElement,
+            'ID da transição': transitionId,
+            'Estratégia': 'JavaScript puro (CSS abandonado)'
         });
 
         // Remove classes de tema existentes
@@ -104,62 +116,157 @@ function createThemeStore() {
             'Classes atuais': Array.from(document.documentElement.classList)
         });
 
-        // Força atualização das variáveis CSS customizadas usando apenas CSS Variables
+        // Implementar transição JavaScript pura
         const root = document.documentElement;
 
-        // ✅ SOLUÇÃO CORRIGIDA: Garante que CSS transitions funcionem ANTES do JavaScript
-        const applyThemeWithRealTransition = (newTheme) => {
-            // Estratégia 1: Primeiro aplica as classes CSS (que têm transições)
-            // As classes CSS já foram aplicadas acima, agora esperamos um frame
+        // Obter cores atuais
+        const currentBg = getComputedStyle(root).getPropertyValue('--mdc-theme-background').trim();
+        const currentSurface = getComputedStyle(root).getPropertyValue('--mdc-theme-surface').trim();
+        const currentText = getComputedStyle(root).getPropertyValue('--mdc-theme-on-surface').trim();
 
-            // Estratégia 2: Aguarda um frame para garantir que as transições CSS sejam ativadas
-            requestAnimationFrame(() => {
-                // Força layout flush antes de aplicar JavaScript
-                const computedStyle = getComputedStyle(root);
-                const currentBg = computedStyle.getPropertyValue('--mdc-theme-background');
+        logger.dom('CURRENT_COLORS', 'CAPTURED', {
+            'Background atual': currentBg,
+            'Surface atual': currentSurface,
+            'Texto atual': currentText
+        });
 
-                // Estratégia 3: Aplica propriedades JavaScript APENAS como fallback
-                // Mas remove para permitir que CSS funcione primeiro
-                logger.dom('TRANSITION_TRIGGER', 'CSS_FIRST_STRATEGY', {
-                    'Theme requested': newTheme,
-                    'Previous background': currentBg,
-                    'Strategy': 'CSS classes first, JS as fallback only'
-                });
-
-                // ✅ COMENTADO: Permite que CSS funcione primeiro
-                // Apenas mantemos se necessário para compatibilidade SMUI
-                if (newTheme === THEME_TYPES.DARK) {
-                    root.style.setProperty('--theme-current', 'dark');
-                    // Aplicamos APENAS se as classes CSS não estiverem funcionando
-                    const computedBg = getComputedStyle(root).getPropertyValue('--mdc-theme-background');
-                    if (!computedBg || computedBg === currentBg) {
-                        // Fallback apenas se CSS classes falharam
-                        root.style.setProperty('--mdc-theme-background', 'hsl(145, 100%, 5%)');
-                        root.style.setProperty('--mdc-theme-surface', 'hsl(171, 28%, 10%)');
-                        root.style.setProperty('--mdc-theme-on-surface', 'hsl(162, 100%, 90%)');
-                        root.style.setProperty('--mdc-theme-text-primary-on-background', 'hsl(162, 100%, 90%)');
-                        logger.dom('FALLBACK', 'APPLIED', { reason: 'CSS classes not working' });
-                    }
-                } else {
-                    root.style.setProperty('--theme-current', 'light');
-                    // Aplicamos APENAS se as classes CSS não estiverem funcionando
-                    const computedBg = getComputedStyle(root).getPropertyValue('--mdc-theme-background');
-                    if (!computedBg || computedBg === currentBg) {
-                        // Fallback apenas se CSS classes falharam
-                        root.style.setProperty('--mdc-theme-background', 'hsl(145, 100%, 95%)');
-                        root.style.setProperty('--mdc-theme-surface', 'hsl(171, 28%, 90%)');
-                        root.style.setProperty('--mdc-theme-on-surface', 'hsl(162, 100%, 10%)');
-                        root.style.setProperty('--mdc-theme-text-primary-on-background', 'hsl(162, 100%, 10%)');
-                        logger.dom('FALLBACK', 'APPLIED', { reason: 'CSS classes not working' });
-                    }
-                }
-            });
+        // Definir cores de destino
+        const targetColors = theme === THEME_TYPES.DARK ? {
+            background: 'hsl(145, 100%, 5%)',
+            surface: 'hsl(171, 28%, 10%)',
+            text: 'hsl(162, 100%, 90%)',
+            primary: 'hsl(162, 100%, 50%)',
+            secondary: 'hsl(164, 61%, 50%)'
+        } : {
+            background: 'hsl(145, 100%, 95%)',
+            surface: 'hsl(171, 28%, 90%)',
+            text: 'hsl(162, 100%, 10%)',
+            primary: 'hsl(162, 100%, 30%)',
+            secondary: 'hsl(164, 61%, 30%)'
         };
 
-        // Aplica o tema priorizando CSS transitions
-        applyThemeWithRealTransition(theme);
+        logger.dom('TARGET_COLORS', 'DEFINED', {
+            'Cores de destino': targetColors,
+            'Tema': theme
+        });
 
-        logger.dom('CSS_VARIABLES', 'UPDATE', {
+        // Desabilitar todas as transições CSS temporariamente
+        root.style.setProperty('--theme-transition-duration', '0ms');
+
+        // Implementar transição JavaScript suave
+        const duration = 300; // ms
+        const steps = 60; // 60fps
+        const stepDuration = duration / steps;
+        let currentStep = 0;
+
+        logger.info(`Iniciando transição JavaScript: ${steps} passos em ${duration}ms`);
+
+        // Função para interpolar cores HSL
+        const interpolateHSL = (start, end, progress) => {
+            // Parse HSL strings
+            const parseHSL = (hsl) => {
+                const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+                return match ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])] : [0, 0, 0];
+            };
+
+            const startHSL = parseHSL(start);
+            const endHSL = parseHSL(end);
+
+            const h = Math.round(startHSL[0] + (endHSL[0] - startHSL[0]) * progress);
+            const s = Math.round(startHSL[1] + (endHSL[1] - startHSL[1]) * progress);
+            const l = Math.round(startHSL[2] + (endHSL[2] - startHSL[2]) * progress);
+
+            const result = `hsl(${h}, ${s}%, ${l}%)`;
+
+            // Log interpolação apenas para alguns passos para não sobrecarregar
+            if (progress === 0 || progress === 1 || progress % 0.2 < 0.05) {
+                logger.colorInterpolation(start, end, progress, result);
+            }
+
+            return result;
+        };
+
+        // Função de easing
+        const easeInOut = (t) => {
+            const result = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+            // Log easing apenas para alguns pontos chave
+            if (t === 0 || t === 0.5 || t === 1) {
+                logger.animation('EASING', {
+                    'Entrada (t)': t,
+                    'Saída (eased)': result,
+                    'Tipo': t < 0.5 ? 'aceleração' : 'desaceleração'
+                });
+            }
+
+            return result;
+        };
+
+        logger.animation('START', {
+            'Duração total': `${duration}ms`,
+            'Passos planejados': steps,
+            'FPS esperado': '60fps',
+            'Tipo de easing': 'ease-in-out',
+            'Cores de origem': { currentBg, currentSurface, currentText },
+            'Cores de destino': targetColors
+        });
+
+        const animate = () => {
+            currentStep++;
+            const progress = Math.min(currentStep / steps, 1);
+            const easedProgress = easeInOut(progress);
+
+            // Interpolar cores
+            const newBg = interpolateHSL(currentBg || 'hsl(145, 100%, 95%)', targetColors.background, easedProgress);
+            const newSurface = interpolateHSL(currentSurface || 'hsl(171, 28%, 90%)', targetColors.surface, easedProgress);
+            const newText = interpolateHSL(currentText || 'hsl(162, 100%, 10%)', targetColors.text, easedProgress);
+
+            // Aplicar cores interpoladas
+            root.style.setProperty('--mdc-theme-background', newBg);
+            root.style.setProperty('--mdc-theme-surface', newSurface);
+            root.style.setProperty('--mdc-theme-on-surface', newText);
+            root.style.setProperty('--mdc-theme-text-primary-on-background', newText);
+            root.style.setProperty('--mdc-theme-primary', targetColors.primary);
+            root.style.setProperty('--mdc-theme-secondary', targetColors.secondary);
+            root.style.setProperty('--theme-current', theme);
+
+            // Log progresso a cada 20%
+            if (currentStep % Math.floor(steps / 5) === 0) {
+                logger.animation('PROGRESS', {
+                    'Progresso linear': `${Math.round(progress * 100)}%`,
+                    'Progresso com easing': `${Math.round(easedProgress * 100)}%`,
+                    'Passo atual': `${currentStep}/${steps}`,
+                    'Background atual': newBg,
+                    'Tempo decorrido': `${Math.round(currentStep * stepDuration)}ms`
+                });
+            }
+
+            if (progress < 1) {
+                // Continuar animação
+                setTimeout(animate, stepDuration);
+            } else {
+                // Animação concluída
+                logger.animation('COMPLETE', {
+                    'Tema final aplicado': theme,
+                    'Background final': targetColors.background,
+                    'Passos executados': currentStep,
+                    'Duração real': `${duration}ms`,
+                    'Performance': 'JavaScript puro - 60fps'
+                });
+
+                logger.transition('END', {
+                    id: transitionId,
+                    type: 'mudança de tema (JavaScript puro)',
+                    expectedDuration: duration
+                });
+
+                // Reativar transições CSS para outros elementos (se necessário)
+                root.style.setProperty('--theme-transition-duration', '150ms');
+            }
+        };
+
+        // Iniciar animação
+        animate(); logger.dom('CSS_VARIABLES', 'UPDATE', {
             '--theme-current': root.style.getPropertyValue('--theme-current'),
             'Computed background': getComputedStyle(root).getPropertyValue('--mdc-theme-background'),
             'Applied directly': root.style.getPropertyValue('--mdc-theme-background')

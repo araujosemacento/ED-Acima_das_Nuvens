@@ -47,20 +47,20 @@
 	const getDisplayIcon = () => {
 		// Para debug: mostra valores atuais
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON_DEBUG', {
-			'Has user interaction': hasUserInteraction,
-			'User theme': userTheme,
-			'Current theme (from store)': currentTheme,
-			'Store type': typeof currentTheme
+			'Usuário já interagiu': hasUserInteraction,
+			'Tema escolhido pelo usuário': userTheme,
+			'Tema atual (da store)': currentTheme,
+			'Tipo da store': typeof currentTheme
 		});
 
 		// Se o usuário escolheu explicitamente light ou dark, mostra o ícone da escolha
 		if (hasUserInteraction && (userTheme === THEME_TYPES.LIGHT || userTheme === THEME_TYPES.DARK)) {
 			const icon = getThemeIcon(userTheme);
 			logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-				'Has user interaction': hasUserInteraction,
-				'User theme': userTheme,
-				'Icon chosen': icon,
-				'Path': 'User explicit choice (light/dark)'
+				'Usuário já interagiu': hasUserInteraction,
+				'Tema escolhido pelo usuário': userTheme,
+				'Ícone selecionado': icon,
+				'Caminho da lógica': 'Escolha explícita do usuário (claro/escuro)'
 			});
 			return icon;
 		}
@@ -69,11 +69,11 @@
 		// currentTheme sempre será 'light' ou 'dark', nunca 'system'
 		const icon = getThemeIcon(currentTheme);
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-			'Has user interaction': hasUserInteraction,
-			'User theme': userTheme,
-			'Current theme (effective)': currentTheme,
-			'Icon chosen': icon,
-			'Path': 'Effective theme (resolved from system or default)'
+			'Usuário já interagiu': hasUserInteraction,
+			'Tema escolhido pelo usuário': userTheme,
+			'Tema atual (efetivo)': currentTheme,
+			'Ícone selecionado': icon,
+			'Caminho da lógica': 'Tema efetivo (resolvido do sistema ou padrão)'
 		});
 		return icon;
 	};
@@ -83,9 +83,9 @@
 		// Store principal para o tema atual efetivo (light/dark, nunca 'system')
 		const unsubscribeMain = themeStore.subscribe(theme => {
 			logger.component('ThemeToggle', 'MAIN_THEME_UPDATE', {
-				'Old current theme': currentTheme,
-				'New current theme (effective)': theme,
-				'This should be light or dark': theme
+				'Tema atual anterior': currentTheme,
+				'Novo tema efetivo': theme,
+				'Deveria ser claro ou escuro': theme
 			});
 			currentTheme = theme;
 		});
@@ -93,8 +93,8 @@
 		// Store para a escolha do usuário (pode ser 'system', 'light', 'dark')
 		const unsubscribeUser = themeStore.userTheme.subscribe(theme => {
 			logger.component('ThemeToggle', 'USER_THEME_UPDATE', {
-				'Old user theme': userTheme,
-				'New user theme (choice)': theme
+				'Tema do usuário anterior': userTheme,
+				'Nova escolha do usuário': theme
 			});
 			userTheme = theme;
 		});
@@ -102,15 +102,15 @@
 		// Store para saber se o usuário já interagiu
 		const unsubscribeInteraction = themeStore.hasUserInteraction.subscribe(interacted => {
 			logger.component('ThemeToggle', 'INTERACTION_UPDATE', {
-				'Old has interaction': hasUserInteraction,
-				'New has interaction': interacted
+				'Tinha interação anterior': hasUserInteraction,
+				'Nova interação': interacted
 			});
 			hasUserInteraction = interacted;
 		});
 		
 		return () => {
 			logger.component('ThemeToggle', 'UNSUBSCRIBE_ALL', {
-				'Cleaning up subscriptions': true
+				'Limpando inscrições': true
 			});
 			unsubscribeMain();
 			unsubscribeUser();
@@ -121,23 +121,23 @@
 	// Função para selecionar um tema
 	const selectTheme = (theme) => {
 		logger.component('ThemeToggle', 'SELECT_THEME', {
-			'Theme requested': theme,
-			'Current user theme': userTheme,
-			'Current effective theme': currentTheme,
-			'Has interaction': hasUserInteraction
+			'Tema solicitado': theme,
+			'Tema atual do usuário': userTheme,
+			'Tema efetivo atual': currentTheme,
+			'Já houve interação': hasUserInteraction
 		});
 		
 		themeStore.setTheme(theme);
 		
 		logger.component('ThemeToggle', 'THEME_SET_CALLED', {
-			'Theme set to': theme
+			'Tema definido para': theme
 		});
 	};
 
 	// A inicialização do tema agora é automática no store
 	onMount(() => {
 		logger.component('ThemeToggle', 'MOUNT', {
-			'Theme store auto-initialized': true
+			'Store de tema inicializada automaticamente': true
 		});
 	});
 </script>
