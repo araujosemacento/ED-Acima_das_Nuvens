@@ -47,20 +47,18 @@
 	const getDisplayIcon = () => {
 		// Para debug: mostra valores atuais
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON_DEBUG', {
-			'Usuário já interagiu': hasUserInteraction,
-			'Tema escolhido pelo usuário': userTheme,
-			'Tema atual (da store)': currentTheme,
-			'Tipo da store': typeof currentTheme
+			'Interagiu': hasUserInteraction,
+			'Escolha': userTheme,
+			'Atual': currentTheme
 		});
 
 		// Se o usuário escolheu explicitamente light ou dark, mostra o ícone da escolha
 		if (hasUserInteraction && (userTheme === THEME_TYPES.LIGHT || userTheme === THEME_TYPES.DARK)) {
 			const icon = getThemeIcon(userTheme);
 			logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-				'Usuário já interagiu': hasUserInteraction,
-				'Tema escolhido pelo usuário': userTheme,
-				'Ícone selecionado': icon,
-				'Caminho da lógica': 'Escolha explícita do usuário (claro/escuro)'
+				'Tipo': 'Escolha do usuário',
+				'Tema': userTheme,
+				'Ícone': icon
 			});
 			return icon;
 		}
@@ -69,11 +67,9 @@
 		// currentTheme sempre será 'light' ou 'dark', nunca 'system'
 		const icon = getThemeIcon(currentTheme);
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-			'Usuário já interagiu': hasUserInteraction,
-			'Tema escolhido pelo usuário': userTheme,
-			'Tema atual (efetivo)': currentTheme,
-			'Ícone selecionado': icon,
-			'Caminho da lógica': 'Tema efetivo (resolvido do sistema ou padrão)'
+			'Tipo': 'Tema efetivo',
+			'Tema': currentTheme,
+			'Ícone': icon
 		});
 		return icon;
 	};
@@ -83,9 +79,8 @@
 		// Store principal para o tema atual efetivo (light/dark, nunca 'system')
 		const unsubscribeMain = themeStore.subscribe(theme => {
 			logger.component('ThemeToggle', 'MAIN_THEME_UPDATE', {
-				'Tema atual anterior': currentTheme,
-				'Novo tema efetivo': theme,
-				'Deveria ser claro ou escuro': theme
+				'De': currentTheme,
+				'Para': theme
 			});
 			currentTheme = theme;
 		});
@@ -93,8 +88,7 @@
 		// Store para a escolha do usuário (pode ser 'system', 'light', 'dark')
 		const unsubscribeUser = themeStore.userTheme.subscribe(theme => {
 			logger.component('ThemeToggle', 'USER_THEME_UPDATE', {
-				'Tema do usuário anterior': userTheme,
-				'Nova escolha do usuário': theme
+				'Escolha': theme
 			});
 			userTheme = theme;
 		});
@@ -102,16 +96,13 @@
 		// Store para saber se o usuário já interagiu
 		const unsubscribeInteraction = themeStore.hasUserInteraction.subscribe(interacted => {
 			logger.component('ThemeToggle', 'INTERACTION_UPDATE', {
-				'Tinha interação anterior': hasUserInteraction,
-				'Nova interação': interacted
+				'Interagiu': interacted
 			});
 			hasUserInteraction = interacted;
 		});
 		
 		return () => {
-			logger.component('ThemeToggle', 'UNSUBSCRIBE_ALL', {
-				'Limpando inscrições': true
-			});
+			logger.component('ThemeToggle', 'UNSUBSCRIBE_ALL');
 			unsubscribeMain();
 			unsubscribeUser();
 			unsubscribeInteraction();
@@ -121,25 +112,20 @@
 	// Função para selecionar um tema
 	const selectTheme = (theme) => {
 		logger.component('ThemeToggle', 'SELECT_THEME', {
-			'Tema solicitado': theme,
-			'Tema atual do usuário': userTheme,
-			'Tema efetivo atual': currentTheme,
-			'Já houve interação': hasUserInteraction
+			'Tema': theme
 		});
 		
 		themeStore.setTheme(theme);
 		
 		logger.component('ThemeToggle', 'THEME_SET_CALLED', {
-			'Tema definido para': theme
+			'Definido': theme
 		});
 	};
 
 	// A inicialização do tema agora é automática no store
 	onMount(() => {
-		logger.component('ThemeToggle', 'MOUNT', {
-			'Store de tema inicializada automaticamente': true
+		logger.component('ThemeToggle', 'MOUNT');
 		});
-	});
 </script>
 
 <div class="theme-toggle-container">

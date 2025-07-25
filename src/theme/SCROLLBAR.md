@@ -1,23 +1,19 @@
-# Scrollbar Customizada - ED | Acima das Nuvens
+# Scrollbar Customizada
 
-## Visão Geral
+Sistema de scrollbar integrado com Material Design e paleta de cores do projeto.
 
-O projeto possui um sistema de scrollbar customizada que se integra perfeitamente com a paleta de cores definida em `_palette.scss`. Os estilos seguem o Material Design e são responsivos para tema claro e escuro.
+## 🎨 Características
 
-## Recursos Implementados
-
-### 1. Scrollbar Padrão
-
-- **Cor do thumb**: `--theme-primary-400` (base)
-- **Cor do track**: `--theme-surface-100`
-- **Bordas**: `--theme-surface-200`
+- **Thumb**: `--theme-primary-400`
+- **Track**: `--theme-surface-100`
 - **Largura**: 8px
-- **Efeitos**: Hover e active com transições suaves
+- **Transições**: Hover e active suaves
 
-### 2. Compatibilidade Cross-Browser
+## 🌐 Compatibilidade
 
-- **Firefox**: Usando `scrollbar-width` e `scrollbar-color`
-- **Webkit** (Chrome, Safari, Edge): Usando pseudo-elementos `::-webkit-scrollbar`
+- **Firefox**: `scrollbar-width` e `scrollbar-color`
+- **Webkit**: `::-webkit-scrollbar` pseudo-elementos
+- **Auto-adapta**: Temas claro/escuro
 - **Suporte responsivo**: Tema claro/escuro automático
 
 ### 3. Temas Alternativos

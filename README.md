@@ -1,38 +1,100 @@
-# sv
+# 🌥️ ED | Acima das Nuvens
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+> Plataforma educacional interativa para ensino de estruturas de dados e algoritmos através de narrativa gamificada inspirada em João e o Pé de Feijão.
 
-## Creating a project
+## 🎯 Visão Geral
 
-If you're seeing this, you've probably already done this step. Congrats!
+**ED | Acima das Nuvens** combina:
 
-```bash
-# create a new project in the current directory
-npx sv create
+- **Jogo narrativo RPG** baseado em texto
+- **Plataforma educacional** para Python e estruturas de dados
+- **Interface moderna** com animações de nuvens e sistema de temas
 
-# create a new project in my-app
-npx sv create my-app
-```
+## 🚀 Acesso Rápido
 
-## Developing
+**🌐 Demo:** [araujosemacento.github.io/ED-Acima_das_Nuvens](https://araujosemacento.github.io/ED-Acima_das_Nuvens/)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## 🛠️ Stack Técnica
 
-```bash
-npm run dev
+- **Frontend:** SvelteKit 5 + Svelte 5 (runes)
+- **UI:** Svelte Material UI (SMUI) v8.0.0-beta.3
+- **Python:** Pyodide (execução no browser)
+- **Styling:** SCSS + CSS Custom Properties
+- **I18n:** Paraglide JS (pt-br/en)
+- **Ícones:** Ionicons 7.1.0 (1338+ SVGs)
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
+## 📦 Desenvolvimento
 
 ```bash
-npm run build
+# Instalar dependências
+bun install
+
+# Preparar temas Material Design
+bun run prepare-themes
+
+# Desenvolvimento
+bun run dev
+
+# Build para produção
+bun run build
 ```
 
-You can preview the production build with `npm run preview`.
+## 🎨 Funcionalidades
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### Sistema de Temas
+
+- **Detecção automática** do tema do sistema
+- **Transições suaves** em JavaScript puro (300ms, 60fps)
+- **Material Design 3** completo
+
+### Animações de Nuvens
+
+- **17 assets SVG** com movimento orgânico
+- **8 direções + parada** em padrão "choppy"
+- **Responsivo** com diferentes tamanhos
+
+### Python Interativo
+
+- **Pyodide** para execução segura no browser
+- **Scripts educacionais** em `/static/scripts/`
+- **API simplificada** com cache automático
+
+### Internacionalização
+
+- **Português BR** e **Inglês**
+- **Paraglide JS** para performance otimizada
+- **Fallbacks** automáticos
+
+## 📚 Conteúdo Educacional
+
+Scripts Python em `/static/scripts/`:
+
+- Estruturas de dados básicas
+- Algoritmos de ordenação
+- Conceitos de programação
+- Exercícios interativos
+
+## 🏗️ Estrutura
+
+```text
+src/
+├── lib/
+│   ├── components/     # Componentes Svelte
+│   ├── stores/        # Gerenciamento de estado
+│   └── utils/         # Utilitários
+├── routes/            # Rotas SvelteKit
+└── theme/             # Sistema de temas
+
+static/
+├── assets/nuvens/     # Assets de nuvens (light/dark)
+├── scripts/           # Scripts Python educacionais
+└── fonts/             # Fontes Noto customizadas
+```
+
+## 📝 Licença
+
+MIT License - veja [LICENSE](LICENSE) para detalhes.
+
+---
+
+Desenvolvido com ❤️ para educação

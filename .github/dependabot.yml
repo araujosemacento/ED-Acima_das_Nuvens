@@ -1,42 +1,23 @@
 version: 2
 updates:
-  # Bun dependencies
+  # Dependências JavaScript/Bun
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'weekly'
       day: 'monday'
-      time: '09:00'
-    open-pull-requests-limit: 10
-    reviewers:
-      - 'araujosemacento'
-    labels:
-      - 'dependencies'
-      - 'bun'
+    open-pull-requests-limit: 5
     commit-message:
-      prefix: 'chore'
-      include: 'scope'
+      prefix: 'chore(deps)'
     groups:
-      svelte-ecosystem:
+      svelte:
         patterns:
           - '@sveltejs/*'
           - 'svelte*'
           - 'vite*'
-      material-design:
+      smui:
         patterns:
           - '@smui/*'
-          - 'svelte-material-ui'
-          - '@material/*'
-          - 'smui-theme'
-      dev-tools:
-        patterns:
-          - 'eslint*'
-          - 'prettier*'
-          - '@eslint/*'
-      fonts:
-        patterns:
-          - '@fontsource/*'
-          - '@neoconfetti/*'
       i18n:
         patterns:
           - '@inlang/*'
@@ -46,15 +27,7 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
-    open-pull-requests-limit: 5
-    reviewers:
-      - 'araujosemacento'
-    labels:
-      - 'dependencies'
-      - 'github-actions'
+      interval: 'monthly'
+    open-pull-requests-limit: 3
     commit-message:
-      prefix: 'ci'
-      include: 'scope'
+      prefix: 'ci(deps)'

@@ -1,33 +1,39 @@
-# 🔧 Configuração do GitHub - ED | Acima das Nuvens
+# ⚙️ Configuração GitHub
 
-Este diretório contém todas as configurações do GitHub Actions, templates de issues e pull requests, e configurações automatizadas para o projeto **ED | Acima das Nuvens**.
+Configurações automatizadas para **ED | Acima das Nuvens**.
 
 ## 📋 Estrutura
 
 ```text
 .github/
-├── workflows/              # GitHub Actions workflows
-│   ├── pages.yml              # Deploy para GitHub Pages
-│   ├── lint.yml              # Qualidade de código (ESLint, Prettier)
-│   ├── test.yml              # Testes automatizados
-│   ├── maintenance.yml       # Manutenção e limpeza
-│   ├── release-drafter.yml   # Geração automática de releases
-│   └── stale.yml             # Gerenciamento de issues/PRs obsoletas
-├── ISSUE_TEMPLATE/         # Templates de issues
-│   ├── bug_report.yml        # Relatório de bugs
-│   ├── feature_request.yml   # Solicitação de funcionalidades
-│   └── educational_content.yml # Conteúdo educacional
-├── dependabot.yml          # Configuração do Dependabot
-├── repository.yml          # Configurações do repositório
-├── pull_request_template.md # Template de pull request
-├── release-drafter.yml     # Configuração do Release Drafter
-├── labels.yml              # Labels automáticas
-└── README.md              # Este arquivo
+├── workflows/
+│   └── pages.yml           # Deploy GitHub Pages
+├── dependabot.yml          # Atualizações automáticas
+├── pull_request_template.md # Template de PR
+└── copilot-instructions.md # Instruções para Copilot
 ```
 
-## 🚀 Workflows Disponíveis
+## 🚀 Workflows
 
-### 1. **Deploy (pages.yml)**
+### Deploy (pages.yml)
+
+- **Trigger:** Push na main
+- **Deploy:** GitHub Pages automático
+- **Build:** Bun + prepare-themes
+
+## 🤖 Dependabot
+
+Atualizações semanais para:
+
+- **Svelte/SvelteKit** + Vite
+- **SMUI** (Svelte Material UI)
+- **i18n** (Paraglide)
+- **GitHub Actions** (mensal)
+
+## 📝 Templates
+
+- **Pull Request:** Checklist padronizado
+- **Copilot Instructions:** Diretrizes de desenvolvimento
 
 - **Trigger**: Push para `main` ou manual
 - **Função**: Build e deploy para GitHub Pages

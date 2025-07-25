@@ -155,7 +155,7 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	--mdc-theme-secondary: #{theme-color('secondary')};
 	--mdc-theme-background: #{theme-color('background')};
 	--mdc-theme-surface: #{theme-color('surface')};
-	--mdc-theme-error: #904a43;
+	--mdc-theme-error: hsl(5, 50%, 50%);
 	--mdc-theme-on-primary: #{theme-color('background')};
 	--mdc-theme-on-secondary: #{theme-color('background')};
 	--mdc-theme-on-surface: #{theme-color('text')};
@@ -225,10 +225,27 @@ h2 {
 /* Estilos personalizados para scrollbar */
 /* Firefox */
 * {
-	/* stylelint-disable-next-line property-no-unknown */
-	scrollbar-width: thin;
-	/* stylelint-disable-next-line property-no-unknown */
-	scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+	/* Prefixo para Firefox - única implementação atual consistente */
+	@supports (-moz-appearance: none) {
+		/* Padrão CSS futuro */
+		-moz-appearance: none;
+	}
+	@supports (scrollbar-width: thin) {
+		/* Padrão CSS futuro */
+		scrollbar-width: thin;
+	}
+	/* Cores da scrollbar para Firefox */
+	@supports (-moz-scrollbar-color: var(--theme-primary-400) var(--theme-surface-100)) {
+		/* stylelint-disable-next-line property-no-unknown */
+		-moz-scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+	}
+	@supports (scrollbar-color: var(--theme-primary-400) var(--theme-surface-100)) {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+	}
+
+	/* Nota: scrollbar-color só funciona no Firefox atualmente.
+	   Para outros navegadores, usamos ::-webkit-scrollbar abaixo */
 }
 
 /* Webkit scrollbar (Chrome, Safari, Edge) */
@@ -265,7 +282,10 @@ h2 {
 /* Uso: <div class="scrollbar-secondary">...</div> */
 .scrollbar-secondary {
 	/* stylelint-disable-next-line property-no-unknown */
-	scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
+	@supports (scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100)) {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
+	}
 }
 
 .scrollbar-secondary::-webkit-scrollbar-thumb {
@@ -283,7 +303,10 @@ h2 {
 /* Uso: <div class="scrollbar-accent">...</div> */
 .scrollbar-accent {
 	/* stylelint-disable-next-line property-no-unknown */
-	scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
+	@supports (scrollbar-color: var(--theme-accent-400) var(--theme-surface-100)) {
+		/* stylelint-disable-next-line property-no-unknown */
+		scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
+	}
 }
 
 .scrollbar-accent::-webkit-scrollbar-thumb {
@@ -368,7 +391,7 @@ h2 {
 	--mdc-theme-secondary: #{theme-color('secondary', 'light')} !important;
 	--mdc-theme-background: #{theme-color('background', 'light')} !important;
 	--mdc-theme-surface: #{theme-color('surface', 'light')} !important;
-	--mdc-theme-error: #904a43;
+	--mdc-theme-error: hsl(5, 50%, 50%);
 	--mdc-theme-on-primary: #{theme-color('background', 'light')} !important;
 	--mdc-theme-on-secondary: #{theme-color('background', 'light')} !important;
 	--mdc-theme-on-surface: #{theme-color('text', 'light')} !important;
@@ -447,7 +470,7 @@ h2 {
 	--mdc-theme-secondary: #{theme-color('secondary', 'dark')} !important;
 	--mdc-theme-background: #{theme-color('background', 'dark')} !important;
 	--mdc-theme-surface: #{theme-color('surface', 'dark')} !important;
-	--mdc-theme-error: #ff5449;
+	--mdc-theme-error: hsl(5, 100%, 50%);
 	--mdc-theme-on-primary: #{theme-color('background', 'dark')} !important;
 	--mdc-theme-on-secondary: #{theme-color('background', 'dark')} !important;
 	--mdc-theme-on-surface: #{theme-color('text', 'dark')} !important;

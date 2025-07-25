@@ -3,182 +3,45 @@
 	import Button from '@smui/button';
 	import { themeStore } from '$lib/stores/theme.js';
 	import { onMount } from 'svelte';
+	import { logger } from '$lib/stores/logger.js';
+	import { cloudAnimationsStore, registerCloudElement } from '$lib/stores/cloudAnimations.js';
+
+	// Estado para controlar se as animações estão ativas
+	let cloudman = true;
 
 	// Array com todos os assets de nuvens (1-17)
 	const cloudAssets = Array.from({ length: 17 }, (_, i) => i + 1);
 
-	// Map para armazenar referências dos elementos e animações
-	const cloudElements = new Map();
-	const cloudAnimations = new Map();
-
-	// Configurações da animação
-	const ANIMATION_CONFIG = {
-		stepDuration: 200, // ms por step (efeito choppy)
-		minSteps: 15,
-		maxSteps: 25,
-		minTotalDuration: 8000, // ms
-		maxTotalDuration: 20000, // ms
-		movementRadius: 60, // pixels de movimento máximo por step
-		boundaryMargin: 10 // % de margem das bordas
-	};
-
-	// Direções de movimento possíveis (8 direções + parada)
-	const MOVEMENT_DIRECTIONS = [
-		{ x: 0, y: 0 },     // parada
-		{ x: -1, y: 0 },    // ←
-		{ x: 1, y: 0 },     // →
-		{ x: 0, y: -1 },    // ↑
-		{ x: 0, y: 1 },     // ↓
-		{ x: -1, y: -1 },   // ↖
-		{ x: 1, y: -1 },    // ↗
-		{ x: -1, y: 1 },    // ↙
-		{ x: 1, y: 1 }      // ↘
-	];
-
-	/**
-	 * Gera posição inicial aleatória para uma nuvem
-	 */
-	function generateInitialPosition() {
-		return {
-			x: Math.random() * (100 - ANIMATION_CONFIG.boundaryMargin * 2) + ANIMATION_CONFIG.boundaryMargin,
-			y: Math.random() * (100 - ANIMATION_CONFIG.boundaryMargin * 2) + ANIMATION_CONFIG.boundaryMargin
-		};
-	}
-
-	/**
-	 * Gera sequência de movimento errático para uma nuvem
-	 */
-	function generateMovementSequence(startPos) {
-		const steps = Math.floor(Math.random() * (ANIMATION_CONFIG.maxSteps - ANIMATION_CONFIG.minSteps + 1)) + ANIMATION_CONFIG.minSteps;
-		const sequence = [];
-		let currentPos = { ...startPos };
-
-		for (let i = 0; i < steps; i++) {
-			// Escolhe direção aleatória
-			const direction = MOVEMENT_DIRECTIONS[Math.floor(Math.random() * MOVEMENT_DIRECTIONS.length)];
-			
-			// Calcula nova posição
-			const movement = Math.random() * ANIMATION_CONFIG.movementRadius;
-			const newPos = {
-				x: Math.max(ANIMATION_CONFIG.boundaryMargin, 
-					Math.min(100 - ANIMATION_CONFIG.boundaryMargin, 
-						currentPos.x + (direction.x * movement / window.innerWidth * 100))),
-				y: Math.max(ANIMATION_CONFIG.boundaryMargin, 
-					Math.min(100 - ANIMATION_CONFIG.boundaryMargin, 
-						currentPos.y + (direction.y * movement / window.innerHeight * 100)))
-			};
-
-			sequence.push({
-				transform: `translate(${newPos.x}vw, ${newPos.y}vh)`,
-				offset: i / (steps - 1)
-			});
-
-			currentPos = newPos;
-		}
-
-		// Garante retorno à posição inicial (loop fechado)
-		sequence[sequence.length - 1] = {
-			transform: `translate(${startPos.x}vw, ${startPos.y}vh)`,
-			offset: 1
-		};
-
-		return sequence;
-	}
-
-	/**
-	 * Cria animação choppy para um elemento de nuvem
-	 */
-	function createChoppyAnimation(element, assetId) {
-		const startPos = generateInitialPosition();
-		const keyframes = generateMovementSequence(startPos);
-		
-		// Define posição inicial
-		element.style.left = `${startPos.x}vw`;
-		element.style.top = `${startPos.y}vh`;
-
-		// Duração aleatória
-		const duration = Math.random() * (ANIMATION_CONFIG.maxTotalDuration - ANIMATION_CONFIG.minTotalDuration) + ANIMATION_CONFIG.minTotalDuration;
-		
-		// Delay inicial aleatório
-		const delay = Math.random() * 5000;
-
-		// Cria animação com Web Animations API
-		const animation = element.animate(keyframes, {
-			duration: duration,
-			delay: delay,
-			iterations: Infinity,
-			easing: 'steps(1, end)', // Efeito choppy
-			fill: 'both'
-		});
-
-		cloudAnimations.set(assetId, {
-			animation,
-			config: { startPos, duration, delay },
-			element
-		});
-
-		return animation;
-	}
-
-	/**
-	 * Inicializa animações de todas as nuvens
-	 */
-	function initializeCloudAnimations() {
-		cloudElements.forEach((element, assetId) => {
-			createChoppyAnimation(element, assetId);
-		});
-	}
-
-	/**
-	 * API pública para controle das animações (extensibilidade futura)
-	 */
-	export const cloudAnimationController = {
-		pause: () => cloudAnimations.forEach(({ animation }) => animation.pause()),
-		play: () => cloudAnimations.forEach(({ animation }) => animation.play()),
-		setSpeed: (multiplier) => cloudAnimations.forEach(({ animation }) => {
-			animation.playbackRate = multiplier;
-		}),
-		pauseCloud: (assetId) => {
-			const cloud = cloudAnimations.get(assetId);
-			if (cloud) cloud.animation.pause();
-		},
-		restartCloud: (assetId) => {
-			const cloud = cloudAnimations.get(assetId);
-			if (cloud) {
-				cloud.animation.cancel();
-				createChoppyAnimation(cloud.element, assetId);
-			}
-		},
-		getCloudState: (assetId) => cloudAnimations.get(assetId)?.config || null
-	};
-
-	/**
-	 * Ação Svelte para registrar elementos de nuvem
-	 */
-	function registerCloudElement(element, assetId) {
-		cloudElements.set(assetId, element);
-		
-		return {
-			destroy() {
-				cloudElements.delete(assetId);
-				const animation = cloudAnimations.get(assetId);
-				if (animation) {
-					animation.animation.cancel();
-					cloudAnimations.delete(assetId);
-				}
-			}
-		};
-	}
+	// Reativo: sincroniza cloudman com a store
+	$: cloudAnimationsStore.setActive(cloudman);
 
 	// Lifecycle
 	onMount(() => {
+		logger.animation('COMPONENT_MOUNT', {
+			'Componente': 'Welcome',
+			'Animações ativas': cloudman
+		});
+
 		// Pequeno delay para garantir que elementos estejam renderizados
-		setTimeout(initializeCloudAnimations, 100);
+		setTimeout(() => {
+			logger.animation('MOUNT_INIT_CALL', {
+				'Ação': 'Inicializando animações das nuvens'
+			});
+			
+			cloudAnimationsStore.initializeAllAnimations();
+		}, 100);
 		
 		// Cleanup ao desmontar
 		return () => {
-			cloudAnimations.forEach(({ animation }) => animation.cancel());
-			cloudAnimations.clear();
+			logger.animation('COMPONENT_UNMOUNT', {
+				'Componente': 'Welcome'
+			});
+
+			cloudAnimationsStore.cleanup();
+			
+			logger.animation('COMPONENT_UNMOUNT_COMPLETE', {
+				'Status': 'Limpeza concluída'
+			});
 		};
 	});
 </script>

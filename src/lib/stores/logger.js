@@ -4,25 +4,85 @@ import { dev } from '$app/environment';
  * Store de Logger para Desenvolvimento
  * Só executa logs em ambiente de desenvolvimento
  * Mensagens humanizadas em português brasileiro
+ * 
+ * Modos:
+ * - default: Logs essenciais e legíveis para humanos
+ * - verbose: Logs detalhados para máquinas/IA e debugging avançado
  */
 class DevLogger {
     constructor() {
-        this.isDev = !dev;
-        this.prefix = '🐛 [DESENVOLVIMENTO]';
-        this.transitionTimers = new Map(); // Para medição de performance das transições
+        this.isDev = dev;
+        this.prefix = '� [ED]';
+        this.verboseMode = false; // Modo verbose desabilitado por padrão
+        this.transitionTimers = new Map();
         this.thresholds = {
-            transition: 300, // Tempo esperado máximo para transições CSS (ms)
-            animation: 500   // Tempo esperado máximo para animações (ms)
+            transition: 300,
+            animation: 500
         };
+
+        // Configurar modo verbose via localStorage ou query param
+        this.initVerboseMode();
     }
 
     /**
-     * Log genérico com timestamp humanizado
+     * Inicializa o modo verbose baseado em preferências
+     */
+    initVerboseMode() {
+        if (!this.isDev) return;
+
+        try {
+            // Verificar query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('verbose') === 'true') {
+                this.verboseMode = true;
+                localStorage.setItem('ed-logger-verbose', 'true');
+                return;
+            }
+
+            // Verificar localStorage
+            const stored = localStorage.getItem('ed-logger-verbose');
+            this.verboseMode = stored === 'true';
+        } catch {
+            // Fallback silencioso se localStorage não estiver disponível
+            this.verboseMode = false;
+        }
+    }
+
+    /**
+     * Habilita/desabilita o modo verbose
+     */
+    setVerbose(enabled = true) {
+        if (!this.isDev) return;
+
+        this.verboseMode = enabled;
+        try {
+            localStorage.setItem('ed-logger-verbose', enabled.toString());
+        } catch {
+            // Ignorar erro se localStorage não estiver disponível
+        }
+
+        this.info(`Modo verbose ${enabled ? 'ativado' : 'desativado'} 🔧`);
+    }
+
+    /**
+     * Verifica se o modo verbose está ativo
+     */
+    isVerbose() {
+        return this.isDev && this.verboseMode;
+    }
+
+    /**
+     * Log genérico com timestamp humanizado (simplificado)
      */
     log(message, ...args) {
         if (!this.isDev) return;
-        const time = new Date().toLocaleTimeString('pt-BR');
-        console.log(`${this.prefix} ${time} - ${message}`, ...args);
+
+        if (this.verboseMode) {
+            const time = new Date().toLocaleTimeString('pt-BR');
+            console.log(`${this.prefix} ${time} - ${message}`, ...args);
+        } else {
+            console.log(`${this.prefix} ${message}`, ...args);
+        }
     }
 
     /**
@@ -59,59 +119,67 @@ class DevLogger {
             'DETECT_SYSTEM': '🔍 Detectando tema do sistema',
             'AUTO_RESTORE_USER_PREFERENCE': '🔄 Restaurando preferência do usuário',
             'APPLY_THEME': '🎨 Aplicando tema',
-            'THEME_APPLIED': '✅ Tema aplicado com sucesso',
-            'SET_THEME_CALLED': '👆 Usuário selecionou tema',
-            'AUTO_APPLY_THEME': '🔄 Aplicação automática do tema',
-            'AUTO_INIT_COMPLETE': '🚀 Inicialização do sistema de temas completa',
-            'SYSTEM_THEME_AUTO_CHANGED': '🌓 Sistema mudou automaticamente o tema',
-            'TRANSITION_START': '🎬 Iniciando transição de tema',
-            'TRANSITION_END': '🎭 Transição de tema finalizada',
+            'THEME_APPLIED': '✅ Tema aplicado',
+            'SET_THEME_CALLED': '👆 Tema selecionado pelo usuário',
+            'AUTO_APPLY_THEME': '🔄 Aplicação automática',
+            'AUTO_INIT_COMPLETE': '🚀 Sistema de temas inicializado',
+            'SYSTEM_THEME_AUTO_CHANGED': '🌓 Sistema mudou o tema automaticamente',
+            'TRANSITION_START': '🎬 Transição iniciada',
+            'TRANSITION_END': '🎭 Transição finalizada',
             'TRANSITION_TIMEOUT': '⏰ Transição demorou mais que o esperado'
         };
 
         const message = actionMessages[action] || `🎨 TEMA: ${action}`;
 
-        console.group(`${this.prefix} ${message}`);
-        console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        }));
+        if (this.verboseMode) {
+            // Modo verbose: logs detalhados com grupos
+            console.group(`${this.prefix} ${message}`);
+            console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            }));
 
-        if (data) {
-            this.formatDataOutput(data);
+            if (data) {
+                this.formatDataOutput(data);
+            }
+            console.groupEnd();
+        } else {
+            // Modo padrão: log simples
+            if (data && Object.keys(data).length > 0) {
+                const summary = this.getDataSummary(data);
+                console.log(`${this.prefix} ${message}${summary ? ` - ${summary}` : ''}`);
+            } else {
+                console.log(`${this.prefix} ${message}`);
+            }
         }
-        console.groupEnd();
     }
 
     /**
-     * Log para performance de transições
+     * Log para performance de transições (simplificado)
      */
     transition(action, data = {}) {
         if (!this.isDev) return;
-
-        const time = new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        });
 
         switch (action) {
             case 'START': {
                 const transitionId = data.id || 'default';
                 this.transitionTimers.set(transitionId, performance.now());
-                console.group(`${this.prefix} 🎬 Iniciando transição: ${data.type || 'tema'}`);
-                console.log('🕒 Iniciado em:', time);
-                console.log('🆔 ID da transição:', transitionId);
-                if (data.from && data.to) {
-                    console.log(`🔄 Mudança: ${data.from} → ${data.to}`);
+
+                if (this.verboseMode) {
+                    console.group(`${this.prefix} 🎬 Transição iniciada: ${data.type || 'tema'}`);
+                    console.log('🕒 Iniciado em:', new Date().toLocaleTimeString('pt-BR', {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3
+                    }));
+                    console.log('🆔 ID:', transitionId);
+                    if (data.from && data.to) console.log(`🔄 Mudança: ${data.from} → ${data.to}`);
+                    if (data.duration) console.log(`⏱️ Duração esperada: ${data.duration}ms`);
+                    console.groupEnd();
+                } else {
+                    const change = data.from && data.to ? ` ${data.from} → ${data.to}` : '';
+                    console.log(`${this.prefix} 🎬 Transição iniciada${change}`);
                 }
-                if (data.duration) {
-                    console.log(`⏱️ Duração esperada: ${data.duration}ms`);
-                }
-                console.groupEnd();
                 break;
             }
 
@@ -124,25 +192,25 @@ class DevLogger {
                     const expected = data.expectedDuration || this.thresholds.transition;
                     const isSlowly = duration > expected;
 
-                    console.group(`${this.prefix} ${isSlowly ? '🐌' : '⚡'} Transição finalizada: ${data.type || 'tema'}`);
-                    console.log('🕒 Finalizada em:', time);
-                    console.log(`⏱️ Duração real: ${duration.toFixed(2)}ms`);
-                    console.log(`🎯 Duração esperada: ${expected}ms`);
+                    if (this.verboseMode || isSlowly) {
+                        const icon = isSlowly ? '🐌' : '⚡';
+                        console.log(`${this.prefix} ${icon} Transição finalizada em ${duration.toFixed(0)}ms${isSlowly ? ' (lenta!)' : ''}`);
 
-                    if (isSlowly) {
-                        console.log(`⚠️ Transição demorou ${(duration - expected).toFixed(2)}ms a mais que o esperado`);
-                        this.warn(`Transição lenta detectada! Duração: ${duration.toFixed(2)}ms (esperado: ${expected}ms)`);
+                        if (this.verboseMode) {
+                            console.group(`${this.prefix} ${icon} Detalhes da transição`);
+                            console.log(`⏱️ Duração: ${duration.toFixed(2)}ms`);
+                            console.log(`🎯 Esperado: ${expected}ms`);
+                            if (isSlowly) {
+                                console.log(`⚠️ Atraso: ${(duration - expected).toFixed(2)}ms`);
+                            }
+                            console.groupEnd();
+                        }
                     } else {
-                        console.log('✅ Transição dentro do tempo esperado');
+                        console.log(`${this.prefix} ⚡ Transição finalizada em ${duration.toFixed(0)}ms`);
                     }
 
                     this.transitionTimers.delete(endId);
-                    console.groupEnd();
-
-                    // Retorna se a transição foi lenta para que o caller possa tomar ação
                     return isSlowly;
-                } else {
-                    this.warn('Fim de transição detectado sem início correspondente', { id: endId });
                 }
                 break;
             }
@@ -153,14 +221,9 @@ class DevLogger {
 
                 if (timeoutStart) {
                     const elapsed = performance.now() - timeoutStart;
-                    console.group(`${this.prefix} ⏰ Timeout de transição`);
-                    console.log('🕒 Timeout em:', time);
-                    console.log(`⏱️ Tempo decorrido: ${elapsed.toFixed(2)}ms`);
-                    console.log(`⚠️ A transição não finalizou no tempo esperado`);
-                    console.groupEnd();
-
+                    console.log(`${this.prefix} ⏰ Timeout da transição após ${elapsed.toFixed(0)}ms`);
                     this.transitionTimers.delete(timeoutId);
-                    return true; // Indica que houve timeout
+                    return true;
                 }
                 break;
             }
@@ -216,44 +279,85 @@ class DevLogger {
     }
 
     /**
-     * Log para interações de componentes com mensagens humanizadas
+     * Cria um resumo dos dados para o modo padrão
+     */
+    getDataSummary(data) {
+        if (!data || typeof data !== 'object') return '';
+
+        const keys = Object.keys(data);
+        if (keys.length === 0) return '';
+
+        // Identifica valores importantes
+        const importantValues = [];
+
+        keys.forEach(key => {
+            const value = data[key];
+            const lowerKey = key.toLowerCase();
+
+            // Valores que são interessantes para resumo
+            if (lowerKey.includes('tema') || lowerKey.includes('theme')) {
+                importantValues.push(value);
+            } else if (lowerKey.includes('componente') || lowerKey.includes('component')) {
+                importantValues.push(value);
+            } else if (lowerKey.includes('de') && lowerKey.includes('para')) {
+                importantValues.push(`${data[key]}`);
+            }
+        });
+
+        if (importantValues.length > 0) {
+            return importantValues.join(' → ');
+        }
+
+        // Fallback: primeiro valor se não encontrou nada específico
+        return keys.length === 1 ? String(data[keys[0]]) : `${keys.length} propriedades`;
+    }
+
+    /**
+     * Log para interações de componentes (simplificado)
      */
     component(componentName, action, data = {}) {
         if (!this.isDev) return;
 
         const actionMessages = {
-            'GET_DISPLAY_ICON_DEBUG': '🔍 Verificando qual ícone exibir',
-            'GET_DISPLAY_ICON': '🎯 Ícone do tema selecionado',
-            'MAIN_THEME_UPDATE': '🔄 Atualização do tema principal',
-            'USER_THEME_UPDATE': '👤 Atualização da escolha do usuário',
-            'INTERACTION_UPDATE': '👆 Atualização de interação',
-            'UNSUBSCRIBE_ALL': '🧹 Limpando inscrições',
-            'SELECT_THEME': '🎨 Selecionando novo tema',
-            'THEME_SET_CALLED': '✅ Função de definir tema chamada',
+            'GET_DISPLAY_ICON_DEBUG': '🔍 Verificando ícone',
+            'GET_DISPLAY_ICON': '🎯 Ícone selecionado',
+            'MAIN_THEME_UPDATE': '🔄 Tema atualizado',
+            'USER_THEME_UPDATE': '👤 Preferência atualizada',
+            'INTERACTION_UPDATE': '👆 Interação registrada',
+            'UNSUBSCRIBE_ALL': '🧹 Limpeza realizada',
+            'SELECT_THEME': '🎨 Tema selecionado',
+            'THEME_SET_CALLED': '✅ Função chamada',
             'MOUNT': '🚀 Componente montado'
         };
 
         const message = actionMessages[action] || action;
 
-        console.group(`${this.prefix} 🧩 ${componentName.toUpperCase()}: ${message}`);
-        console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        }));
-        this.formatDataOutput(data);
-        console.groupEnd();
+        if (this.verboseMode) {
+            // Modo verbose: logs detalhados
+            console.group(`${this.prefix} 🧩 ${componentName.toUpperCase()}: ${message}`);
+            console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            }));
+            this.formatDataOutput(data);
+            console.groupEnd();
+        } else {
+            // Modo padrão: log simples
+            const summary = this.getDataSummary(data);
+            console.log(`${this.prefix} 🧩 ${componentName}: ${message}${summary ? ` - ${summary}` : ''}`);
+        }
     }
 
     /**
-     * Log para stores com mensagens humanizadas
+     * Log para stores (simplificado)
      */
     store(storeName, action, oldValue, newValue) {
         if (!this.isDev) return;
 
         const actionMessages = {
-            'DERIVED_UPDATE': '🔄 Atualização do valor derivado',
+            'DERIVED_UPDATE': '🔄 Valor derivado atualizado',
             'SET': '📝 Valor definido',
             'UPDATE': '🔄 Valor atualizado',
             'SUBSCRIBE': '👂 Nova inscrição',
@@ -262,44 +366,82 @@ class DevLogger {
 
         const message = actionMessages[action] || action;
 
-        console.group(`${this.prefix} 📦 STORE ${storeName.toUpperCase()}: ${message}`);
-        console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        }));
-        if (oldValue !== undefined) console.log('📋 Valor anterior:', oldValue);
-        if (newValue !== undefined) console.log('📋 Novo valor:', newValue);
-        console.groupEnd();
+        if (this.verboseMode) {
+            console.group(`${this.prefix} 📦 STORE ${storeName.toUpperCase()}: ${message}`);
+            console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            }));
+            if (oldValue !== undefined) console.log('📋 Valor anterior:', oldValue);
+            if (newValue !== undefined) console.log('📋 Novo valor:', newValue);
+            console.groupEnd();
+        } else {
+            // Modo padrão: apenas mudanças de valor importantes
+            if (action === 'SET' || action === 'UPDATE') {
+                const change = oldValue !== undefined && newValue !== undefined
+                    ? ` ${oldValue} → ${newValue}`
+                    : newValue !== undefined ? ` → ${newValue}` : '';
+                console.log(`${this.prefix} 📦 ${storeName}: ${message}${change}`);
+            }
+        }
     }
 
     /**
-     * Log para eventos do DOM com mensagens humanizadas
+     * Log para eventos do DOM (simplificado)
      */
     dom(element, event, data = {}) {
         if (!this.isDev) return;
 
         const eventMessages = {
-            'REMOVE_CLASSES': '🧹 Removendo classes CSS',
-            'ADD_CLASS': '➕ Adicionando classe CSS',
+            'REMOVE_CLASSES': '🧹 Classes removidas',
+            'ADD_CLASS': '➕ Classe adicionada',
             'CSS_FIRST_STRATEGY': '🎨 Estratégia CSS primeiro',
-            'FALLBACK': '🔄 Aplicando fallback',
+            'FALLBACK': '🔄 Fallback aplicado',
             'CSS_VARIABLES': '🎨 Variáveis CSS atualizadas',
-            'TRANSITION_TRIGGER': '🎬 Trigger de transição',
-            'LAYOUT_FLUSH': '📐 Forçando recálculo de layout'
+            'TRANSITION_TRIGGER': '🎬 Transição disparada',
+            'LAYOUT_FLUSH': '📐 Layout recalculado'
         };
 
         const message = eventMessages[event] || event;
 
-        console.group(`${this.prefix} 🌐 DOM ${element}: ${message}`);
+        if (this.verboseMode) {
+            console.group(`${this.prefix} 🌐 DOM ${element}: ${message}`);
+            console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            }));
+            this.formatDataOutput(data);
+            console.groupEnd();
+        } else {
+            // Modo padrão: apenas eventos importantes
+            const importantEvents = ['CSS_VARIABLES', 'TRANSITION_TRIGGER', 'FALLBACK'];
+            if (importantEvents.includes(event)) {
+                console.log(`${this.prefix} 🌐 ${element}: ${message}`);
+            }
+        }
+    }
+
+    /**
+     * Log específico para interpolação de cores (simplificado)
+     */
+    colorInterpolation(from, to, progress, result) {
+        if (!this.isDev || !this.verboseMode) return; // Apenas no modo verbose
+
+        console.group(`${this.prefix} 🌈 Interpolação de Cores`);
         console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
             fractionalSecondDigits: 3
         }));
-        this.formatDataOutput(data);
+        console.log('📋 Cor inicial:', from);
+        console.log('📋 Cor final:', to);
+        console.log('📋 Progresso:', `${(progress * 100).toFixed(1)}%`);
+        console.log('📋 Resultado:', result);
         console.groupEnd();
     }
 
@@ -371,54 +513,54 @@ class DevLogger {
     }
 
     /**
-     * Log específico para animações JavaScript
+     * Log específico para animações JavaScript (simplificado)
      */
     animation(action, data = {}) {
         if (!this.isDev) return;
 
-        const time = new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        });
-
         const actionMessages = {
-            'START': '🎬 Iniciando animação JavaScript',
+            'START': '🎬 Animação iniciada',
             'STEP': '📈 Passo da animação',
-            'PROGRESS': '⏳ Progresso da animação',
+            'PROGRESS': '⏳ Progresso',
             'COMPLETE': '✅ Animação concluída',
             'ERROR': '❌ Erro na animação',
-            'INTERPOLATE': '🔄 Interpolação de cores',
-            'EASING': '📊 Aplicando easing'
+            'INTERPOLATE': '🔄 Interpolação',
+            'EASING': '📊 Easing aplicado',
+            'COMPONENT_MOUNT': '🚀 Componente montado',
+            'MOUNT_INIT_CALL': '� Inicializando animações',
+            'COMPONENT_UNMOUNT': '👋 Componente desmontado',
+            'COMPONENT_UNMOUNT_COMPLETE': '✅ Limpeza concluída',
+            'STORE_SET_ACTIVE': '⚡ Animações ativadas/desativadas',
+            'STORE_INIT_START': '🎯 Inicializando elementos',
+            'STORE_ANIMATION_CREATED': '✨ Animação criada',
+            'STORE_ANIMATION_READY': '� Animação pronta'
         };
 
-        const message = actionMessages[action] || `🎭 ANIMAÇÃO: ${action}`;
+        const message = actionMessages[action] || `🎭 ${action}`;
 
-        console.group(`${this.prefix} ${message}`);
-        console.log('🕒 Horário:', time);
-        this.formatDataOutput(data);
-        console.groupEnd();
-    }
+        if (this.verboseMode) {
+            // Modo verbose: logs detalhados
+            console.group(`${this.prefix} ${message}`);
+            console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            }));
+            this.formatDataOutput(data);
+            console.groupEnd();
+        } else {
+            // Modo padrão: log simples apenas para eventos importantes
+            const importantActions = [
+                'COMPONENT_MOUNT', 'COMPONENT_UNMOUNT', 'STORE_SET_ACTIVE',
+                'STORE_INIT_START', 'ERROR', 'COMPLETE'
+            ];
 
-    /**
-     * Log específico para interpolação de cores
-     */
-    colorInterpolation(from, to, progress, result) {
-        if (!this.isDev) return;
-
-        console.group(`${this.prefix} 🌈 Interpolação de Cores`);
-        console.log('🕒 Horário:', new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 3
-        }));
-        console.log('📋 Cor inicial:', from);
-        console.log('📋 Cor final:', to);
-        console.log('📋 Progresso:', `${(progress * 100).toFixed(1)}%`);
-        console.log('📋 Resultado:', result);
-        console.groupEnd();
+            if (importantActions.includes(action)) {
+                const summary = this.getDataSummary(data);
+                console.log(`${this.prefix} ${message}${summary ? ` - ${summary}` : ''}`);
+            }
+        }
     }
 
     /**
@@ -427,40 +569,50 @@ class DevLogger {
     showCapabilities() {
         if (!this.isDev) return;
 
-        console.group(`${this.prefix} 📚 Capacidades do Logger`);
-        console.log('🎨 Logs de tema com medição de performance');
-        console.log('🧩 Logs de componentes humanizados em português');
-        console.log('📦 Logs de stores com rastreamento de mudanças');
-        console.log('🌐 Logs de DOM com detalhes de manipulação');
-        console.log('⏱️ Medição automática de performance de transições');
-        console.log('🚨 Alertas automáticos para transições lentas');
-        console.log('🎭 Animações JavaScript puras com logs detalhados');
-        console.log('🌈 Interpolação de cores com rastreamento');
-        console.log('❌ CSS transitions desabilitadas - JavaScript assumiu controle');
+        console.group(`${this.prefix} 📚 Logger ED | Acima das Nuvens`);
 
-        console.group('📊 Métodos disponíveis:');
-        console.log('• logger.theme(action, data) - Logs de tema');
-        console.log('• logger.transition(action, data) - Medição de transições');
-        console.log('• logger.animation(action, data) - Logs de animações JavaScript');
-        console.log('• logger.colorInterpolation(from, to, progress, result) - Interpolação');
-        console.log('• logger.component(name, action, data) - Logs de componentes');
-        console.log('• logger.store(name, action, oldVal, newVal) - Logs de stores');
-        console.log('• logger.dom(element, event, data) - Logs de DOM');
-        console.log('• logger.getTransitionStats() - Estatísticas de performance');
-        console.log('• logger.setThresholds(transition, animation) - Configurar limites');
+        console.log(`🔧 Modo atual: ${this.verboseMode ? 'VERBOSE' : 'PADRÃO'}`);
+        console.log('');
+
+        if (this.verboseMode) {
+            console.log('📊 MODO VERBOSE - Logs detalhados para debugging');
+            console.log('• Timestamps precisos com milissegundos');
+            console.log('• Grupos expandidos com dados completos');
+            console.log('• Interpolação de cores rastreada');
+            console.log('• Todos os eventos de animação');
+            console.log('• Performance de transições detalhada');
+        } else {
+            console.log('�‍💻 MODO PADRÃO - Logs essenciais para humanos');
+            console.log('• Mensagens simples e diretas');
+            console.log('• Apenas eventos importantes');
+            console.log('• Resumos automáticos de dados');
+            console.log('• Alertas de performance preservados');
+        }
+
+        console.log('');
+        console.group('�️ Controles disponíveis:');
+        console.log('• logger.setVerbose(true) - Ativar modo verbose');
+        console.log('• logger.setVerbose(false) - Ativar modo padrão');
+        console.log('• logger.isVerbose() - Verificar modo atual');
+        console.log('• ?verbose=true na URL - Ativar verbose temporariamente');
         console.groupEnd();
 
-        console.group('🎯 Limites atuais de performance:');
-        console.log(`Transições: ${this.thresholds.transition}ms`);
-        console.log(`Animações: ${this.thresholds.animation}ms`);
+        console.group('📊 Métodos de log:');
+        console.log('• logger.theme(action, data) - Eventos de tema');
+        console.log('• logger.component(name, action, data) - Componentes');
+        console.log('• logger.animation(action, data) - Animações');
+        console.log('• logger.transition(action, data) - Transições');
+        console.log('• logger.store(name, action, oldVal, newVal) - Stores');
+        console.log('• logger.dom(element, event, data) - DOM');
         console.groupEnd();
 
-        console.group('🔄 Estratégia atual:');
-        console.log('✅ Transições CSS desabilitadas para cores de tema');
-        console.log('✅ JavaScript puro para animações de tema');
-        console.log('✅ Interpolação suave de cores HSL');
-        console.log('✅ Easing customizado (ease-in-out)');
-        console.log('✅ 60fps com 300ms de duração');
+        console.group('🎯 Características:');
+        console.log('✅ Português brasileiro humanizado');
+        console.log('✅ Redução de bloating de dados');
+        console.log('✅ Modo padrão otimizado para leitura humana');
+        console.log('✅ Modo verbose para análise técnica');
+        console.log('✅ Alertas automáticos para performance');
+        console.log('✅ Persistência de preferências');
         console.groupEnd();
 
         console.groupEnd();

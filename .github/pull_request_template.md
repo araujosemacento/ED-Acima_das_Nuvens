@@ -1,33 +1,41 @@
-# Pull Request Template
+# Pull Request
 
 ## 📋 Descrição
 
-<!-- Descreva brevemente as mudanças implementadas -->
+<!-- Descreva as mudanças implementadas -->
 
-## 🎯 Tipo de Mudança
+## 🎯 Tipo
 
-<!-- Marque o tipo de mudança que se aplica -->
+- [ ] 🐛 Bug fix
+- [ ] ✨ Nova funcionalidade
+- [ ] 🎨 UI/UX
+- [ ] 🔧 Refatoração
+- [ ] � Documentação
+- [ ] ⚡ Performance
 
-- [ ] 🐛 Bug fix (mudança que corrige um problema)
-- [ ] ✨ Nova funcionalidade (mudança que adiciona funcionalidade)
-- [ ] 💥 Breaking change (mudança que quebra compatibilidade)
-- [ ] 🎨 Melhoria de UI/UX (melhorias visuais ou de experiência)
-- [ ] 🔧 Refatoração (mudança que não adiciona funcionalidade nem corrige bug)
-- [ ] 📝 Documentação (mudança apenas na documentação)
-- [ ] 🌍 Internacionalização (traduções ou melhorias de i18n)
-- [ ] ⚡ Performance (melhoria de performance)
-- [ ] 🔒 Segurança (melhoria de segurança)
-
-## 🎯 Área Afetada
-
-<!-- Marque as áreas do projeto que foram modificadas -->
+## 🎯 Área
 
 - [ ] 🎮 Jogo narrativo
-- [ ] 🐍 Integração Pyodide
-- [ ] 🎨 Interface/UI (componentes Svelte)
-- [ ] 🌍 Internacionalização
-- [ ] 🔧 Configuração/Build
-- [ ] 📱 Responsividade
+- [ ] 🐍 Python/Pyodide
+- [ ] 🎨 Interface
+- [ ] 🌍 i18n
+- [ ] 🔧 Build/Config
+
+## ✅ Checklist
+
+- [ ] Código testado localmente
+- [ ] Build funcionando (`bun run build`)
+- [ ] Lint sem erros (`bun run lint`)
+- [ ] Componentes responsivos
+- [ ] Acessibilidade verificada
+
+## 📸 Screenshots
+
+<!-- Se aplicável, adicione screenshots das mudanças visuais -->
+
+## � Notas
+
+<!-- Informações adicionais para review -->
 - [ ] ♿ Acessibilidade
 - [ ] 🎯 Temas Material Design
 - [ ] 🔄 GitHub Actions/CI

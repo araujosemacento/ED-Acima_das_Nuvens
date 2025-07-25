@@ -2,22 +2,23 @@
 
 ## Visão Geral do Projeto
 
-Este é um projeto educacional interativo chamado **"ED | Acima das Nuvens"** que combina:
+**"ED | Acima das Nuvens"** é um projeto educacional interativo que combina:
 
 - **Jogo narrativo RPG** baseado em texto inspirado em João e o Pé de Feijão
 - **Plataforma educacional** para ensino de estruturas de dados e algoritmos usando Python
-- **Interface web moderna** construída com SvelteKit 5 e Material Design
+- **Interface web moderna** com animações de nuvens e sistema de temas
 
 ## Arquitetura Técnica
 
 ### Stack Principal
 
-- **Frontend**: SvelteKit 5 com Svelte 5 (nova sintaxe de runes)
-- **Linguagem**: JavaScript/TypeScript + Python (via Pyodide)
+- **Frontend**: SvelteKit 5 com Svelte 5 (runes)
+- **Linguagem**: JavaScript + Python (via Pyodide)
 - **UI Framework**: Svelte Material UI (SMUI) v8.0.0-beta.3
-- **Styling**: SCSS + Material Design theming
-- **Internacionalização**: Paraglide JS (suporte pt-br/en)
-- **Python Runtime**: Pyodide (execução de Python no browser)
+- **Styling**: SCSS + CSS Custom Properties
+- **Internacionalização**: Paraglide JS (pt-br/en)
+- **Python Runtime**: Pyodide (execução no browser)
+- **Ícones**: Ionicons 7.1.0 (1338+ SVGs disponíveis)
 - **Build**: Vite 6.2.6
 - **Deployment**: Static adapter
 
@@ -26,68 +27,69 @@ Este é um projeto educacional interativo chamado **"ED | Acima das Nuvens"** qu
 ```
 src/
 ├── lib/
-│   ├── components/          # Componentes Svelte reutilizáveis
-│   │   ├── Counter.svelte      # Contador animado (exemplo)
-│   │   ├── PyodideInteractive.svelte  # Interface Python interativa
-│   │   └── Welcome.svelte      # Tela de boas-vindas do jogo
+│   ├── components/          # Componentes Svelte
+│   │   ├── ColorExamples.svelte    # Demonstração do sistema de cores
+│   │   ├── Counter.svelte          # Contador animado
+│   │   ├── PyodideInteractive.svelte # Interface Python interativa
+│   │   ├── ThemeToggle.svelte      # Alternador de temas
+│   │   └── Welcome.svelte          # Tela principal com animações
 │   ├── stores/             # Stores Svelte
-│   │   └── pyodide.js         # Store para gerenciar Pyodide
+│   │   ├── cloudAnimations.js      # Animações de nuvens
+│   │   ├── logger.js               # Logger de desenvolvimento
+│   │   ├── pyodide.js             # Gerenciamento Pyodide
+│   │   └── theme.js               # Sistema de temas
+│   ├── utils/              # Utilitários
+│   │   └── ionicons.ts           # Helper para ícones
 │   └── paraglide/          # Sistema de i18n
-├── routes/                 # Rotas da aplicação
-├── theme/                  # Temas Material Design
-└── app.scss               # Estilos globais
+├── routes/                 # Rotas SvelteKit
+├── theme/                  # Temas Material Design + testes
+└── app.scss               # Estilos globais + transições
 
 static/
-├── scripts/               # Scripts Python
-│   └── exemplo.py           # Exemplo educacional Python
-└── fonts/                 # Fontes customizadas (Noto)
+├── assets/
+│   ├── ionicons/          # 1338 ícones SVG + JS
+│   └── nuvens/           # Assets de nuvens (light/dark)
+├── scripts/              # Scripts Python educacionais
+└── fonts/               # Fontes Noto customizadas
 ```
 
 ## Funcionalidades Principais
 
-### 1. Componente PyodideInteractive
+### 1. Sistema de Temas Avançado (theme.js)
 
-- **Arquivo**: `src/lib/components/PyodideInteractive.svelte`
-- **Propósito**: Interface para execução de código Python no browser
-- **Recursos**:
-  - Editor de código inline
-  - Execução assíncrona via Pyodide
-  - Exemplos pré-programados (matemática, listas, dicionários)
-  - Carregamento automático de scripts externos
+- **Store principal**: `themeStore` com detecção automática do sistema
+- **Tipos**: light, dark, system (detecção automática)
+- **Transições**: JavaScript puro com interpolação HSL suave (300ms, 60fps)
+- **Persistência**: localStorage + sincronização com preferências do sistema
+- **API**: `setTheme()`, `resetToSystem()`, `getCurrentTheme()`
 
-### 2. Store Pyodide
+### 2. Animações de Nuvens (cloudAnimations.js)
 
-- **Arquivo**: `src/lib/stores/pyodide.js`
-- **Propósito**: Gerenciamento robusto do runtime Pyodide
-- **API**:
+- **Store**: `cloudAnimationsStore` com registro automático de elementos
+- **Padrão**: Movimento "choppy" com 8 direções + parada
+- **Configuração**: 15-25 passos, 8-20s duração, raio de 60px
+- **Action**: `registerCloudElement` para uso em componentes
+- **Controles**: `setActive()`, `initializeAllAnimations()`, `cleanup()`
 
-  ```javascript
-  // Carregamento
-  await pyodideStore.load();
+### 3. PyodideInteractive (pyodide.js)
 
-  // Execução de código
-  const result = await pyodideStore.run('2 ** 10');
+- **API simplificada**: `load()`, `run()`, `runScript()`, `install()`
+- **Estados derivados**: `isReady`, `isLoading`, `hasError`, `statusMessage`
+- **Cache**: Scripts carregados ficam em memória
+- **Exemplos**: Scripts em `/static/scripts/` para demonstrações
 
-  // Execução de scripts
-  await pyodideStore.runScript('scripts/exemplo.py');
+### 4. Logger de Desenvolvimento (logger.js)
 
-  // Instalação de pacotes
-  await pyodideStore.install(['numpy', 'matplotlib']);
-  ```
+- **Humanizado**: Logs em português brasileiro com emojis
+- **Categorias**: `theme()`, `animation()`, `component()`, `store()`, `transition()`
+- **Performance**: Medição automática de transições com thresholds
+- **Produção**: Desabilitado automaticamente (`dev` check)
 
-### 3. Sistema de Internacionalização
+### 5. Componente Welcome
 
-- **Paraglide JS** para i18n
-- **Idiomas**: Português (pt-br) e Inglês (en)
-- **Detecção automática** de idioma do browser
-- **Mensagens**: `messages/pt-br.json` e `messages/en.json`
-
-### 4. Jogo Narrativo (Em Desenvolvimento)
-
-- **Base**: "João e o Pé de Feijão" adaptado
-- **Mecânica**: Escolhas que afetam o desfecho
-- **Personagens**: 5 protagonistas (João, Maria, Pib, Kit, Ed)
-- **Finais**: 3 tipos (Neutros, Desastrosos, Verdadeiros)
+- **Animações**: 17 assets de nuvens com movimento orgânico
+- **Responsivo**: Layout adaptativo com texto outline
+- **Integração**: Sistema de temas + animações + i18n
 
 ## Padrões de Desenvolvimento
 
@@ -107,17 +109,26 @@ $effect(() => {
 });
 ```
 
-### Material Design
+### Sistema de Temas CSS
 
-- Uso consistente de **CSS Custom Properties** para temas
-- **Variáveis**: `--mdc-theme-primary`, `--mdc-theme-background`, etc.
-- **Componentes SMUI**: Button, Cards, etc.
+- **Transições desabilitadas**: CSS transitions removidas para cores
+- **JavaScript puro**: Interpolação HSL com easing ease-in-out
+- **Variáveis CSS**: `--mdc-theme-*` para cores principais
+- **Classes condicionais**: `.theme-light`, `.theme-dark`
 
-### Gerenciamento de Estado
+### Stores Pattern
 
-- **Svelte Stores** para estado global
-- **Derived stores** para estados computados
-- **API baseada em classes** para stores complexas
+- **Classes base**: Stores como classes para APIs complexas
+- **Estados derivados**: Computed values com `derived()`
+- **Subscription**: Método `subscribe()` para compatibilidade Svelte
+- **Lifecycle**: Cleanup automático em componentes
+
+### Performance
+
+- **Logger integrado**: Medição automática de transições e animações
+- **Thresholds**: 300ms transições, 500ms animações
+- **Cache**: Scripts Python, elementos DOM, configurações
+- **Lazy loading**: Pyodide carregado sob demanda
 
 ## Scripts Python Educacionais
 
@@ -136,6 +147,29 @@ def operacoes_matematicas(a, b):
     """Realiza operações matemáticas básicas"""
     # Demonstração de estruturas de dados...
 ```
+
+## Recursos do Sistema
+
+### 1. Ionicons Integration
+
+- **1338 ícones SVG** disponíveis em `/static/assets/ionicons/`
+- **Helper TypeScript** em `src/lib/utils/ionicons.ts`
+- **Categorias**: Navegação, UI, Comunicação, Sistema, etc.
+- **Uso**: Importação direta ou via helper utilitário
+
+### 2. Sistema de Logs Avançado
+
+- **Categorização**: theme, animation, component, store, transition
+- **Português BR**: Mensagens humanizadas com emojis
+- **Performance**: Medição automática com thresholds configuráveis
+- **Desenvolvimento**: Auto-desabilitado em produção
+
+### 3. Transições Personalizadas
+
+- **CSS desabilitado**: Transições de cores controladas por JavaScript
+- **Interpolação HSL**: Suavização de cores entre temas
+- **60fps**: Animações fluidas com requestAnimationFrame
+- **Easing**: ease-in-out customizado para transições orgânicas
 
 ## Diretrizes para Contribuições
 
@@ -171,6 +205,13 @@ def operacoes_matematicas(a, b):
 - **Comentários** em português para contexto educacional
 - **Nomes descritivos** de variáveis e funções
 
+### 6. Sistema de Temas
+
+- **Nunca use CSS transitions** para cores de tema
+- **JavaScript puro** para animações de cor
+- **Logger integrado** para debugging de transições
+- **Classes `.theme-*-transition`** apenas para elementos não-tema
+
 ## Comandos Úteis
 
 ```bash
@@ -196,9 +237,39 @@ Este projeto visa ensinar estruturas de dados e algoritmos de forma interativa, 
 
 ## Estado Atual
 
-- ✅ Base SvelteKit funcional
-- ✅ Integração Pyodide completa
-- ✅ Sistema de temas Material Design
-- ✅ Internacionalização configurada
+- ✅ Base SvelteKit 5 funcional com Svelte 5 (runes)
+- ✅ Integração Pyodide completa com API simplificada
+- ✅ Sistema de temas Material Design 3 com transições JavaScript
+- ✅ Internacionalização Paraglide JS (pt-br/en)
+- ✅ Animações de nuvens implementadas (17 assets, movimento orgânico)
+- ✅ Logger de desenvolvimento humanizado
+- ✅ Sistema de transições JavaScript puro (300ms, 60fps)
+- ✅ Ionicons 7.1.0 integrado (1338+ SVGs)
+- ✅ Deploy automático GitHub Pages
 - 🚧 Jogo narrativo em desenvolvimento
 - 🚧 Conteúdo educacional em expansão
+
+## Comandos Úteis
+
+```bash
+# Desenvolvimento
+bun run dev
+
+# Build
+bun run build
+
+# Linting
+bun run lint
+
+# Formatação
+bun run format
+
+# Temas Material Design
+bun run prepare-themes
+```
+
+## Deploy
+
+- **Automático**: Push na `main` → GitHub Pages
+- **Manual**: `bun run build` → `/build`
+- **URL**: https://araujosemacento.github.io/ED-Acima_das_Nuvens/

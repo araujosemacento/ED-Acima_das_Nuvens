@@ -1,22 +1,38 @@
-# 🎨 Sistema de Cores Eficiente - ED | Acima das Nuvens
+# 🎨 Sistema de Temas
 
-## Visão Geral
+Sistema de cores integrado com Material Design 3 e paleta customizada.
 
-O sistema de cores foi completamente refatorado para integrar diretamente com a paleta definida em `_palette.scss`, eliminando duplicação e melhorando a manutenção.
+## 🔧 Uso
 
-## 🔧 Funções Principais
-
-### 1. `theme-color($color-name, $theme: 'light')`
-
-Acessa diretamente as cores da paleta SCSS.
+### SCSS
 
 ```scss
 .component {
-	background-color: theme-color('primary');
-	color: theme-color('text', 'dark');
-	border: 1px solid theme-color('primary-200');
+  background-color: theme-color('primary');
+  color: theme-color('text', 'dark');
+  border: 1px solid theme-color('primary-200');
 }
 ```
+
+### CSS Variables
+
+```css
+.element {
+  background-color: var(--mdc-theme-primary);
+  color: var(--ed-text-100);
+}
+```
+
+## 📁 Estrutura
+
+- `_palette.scss` - Paleta de cores base
+- `_smui-theme.scss` - Configuração SMUI
+- `dark/` - Variações tema escuro
+
+## ⚡ Transições
+
+Cores de tema usam **JavaScript puro** para transições suaves (300ms, 60fps).
+CSS transitions são **desabilitadas** para evitar conflitos.
 
 ### 2. `theme-var($color-name, $prefix: 'theme')`
 

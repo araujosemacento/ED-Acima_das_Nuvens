@@ -1,23 +1,27 @@
-# Ionicons 7.1.0 - Arquivos Baixados
+# Ionicons 7.1.0
 
-## Informações
+**1338+ ícones SVG** para o projeto ED | Acima das Nuvens.
+
+## 📊 Informações
+
 - **Versão**: 7.1.0
-- **Data do download**: 2025-07-24T03:24:26.966Z
-- **Total de arquivos**: 1349
-- **Arquivos baixados com sucesso**: 1349
-- **URL base**: https://unpkg.com/ionicons@7.1.0/dist/ionicons
+- **Total**: 1349 arquivos
+- **JavaScript**: 11 arquivos
+- **SVGs**: 1338 ícones
 
-## Estrutura de arquivos
+## 🎯 Uso
 
-### Arquivos JavaScript (11)
-- index.esm.js
-- ionicons.esm.js
-- ionicons.js
-- p-1c0b2c47.entry.js
-- p-2b141077.system.entry.js
-- p-40ae2aa7.js
-- p-60d56620.system.js
-- p-cff0a9de.system.js
+```javascript
+// Helper utilitário
+import { getIonicon } from '$lib/utils/ionicons.ts';
+
+// Importação direta
+import homeIcon from '/assets/ionicons/home.svg';
+```
+
+## 📁 Categorias
+
+Navegação, UI, Comunicação, Sistema, Pessoas, Negócios, Dispositivos, e mais.
 - p-d15ec307.js
 - p-ea7bbed1.system.js
 - p-eb3ff5ea.system.js
