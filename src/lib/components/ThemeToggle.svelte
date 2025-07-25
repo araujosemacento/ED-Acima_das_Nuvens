@@ -7,6 +7,7 @@
 	import { Anchor } from '@smui/menu-surface';
 	import List, { Item, Graphic, Text } from '@smui/list';
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 
 	// Estados reativos usando Svelte 5 runes
 	let menu = $state();
@@ -22,12 +23,12 @@
 	const getThemeIcon = (theme) => {
 		switch (theme) {
 			case THEME_TYPES.LIGHT:
-				return '/assets/ionicons/svg/sunny.svg';
+				return `${base}/assets/ionicons/svg/sunny.svg`;
 			case THEME_TYPES.DARK:
-				return '/assets/ionicons/svg/moon.svg';
+				return `${base}/assets/ionicons/svg/moon.svg`;
 			case THEME_TYPES.SYSTEM:
 			default:
-				return '/assets/ionicons/svg/desktop.svg';
+				return `${base}/assets/ionicons/svg/desktop.svg`;
 		}
 	};
 
@@ -35,11 +36,11 @@
 	const getMenuItemIcon = (theme) => {
 		switch (theme) {
 			case THEME_TYPES.LIGHT:
-				return '/assets/ionicons/svg/sunny.svg';
+				return `${base}/assets/ionicons/svg/sunny.svg`;
 			case THEME_TYPES.DARK:
-				return '/assets/ionicons/svg/moon.svg';
+				return `${base}/assets/ionicons/svg/moon.svg`;
 			case THEME_TYPES.SYSTEM:
-				return '/assets/ionicons/svg/desktop.svg';
+				return `${base}/assets/ionicons/svg/desktop.svg`;
 		}
 	};
 

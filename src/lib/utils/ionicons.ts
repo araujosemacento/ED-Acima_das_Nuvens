@@ -3,15 +3,17 @@
  * Gerado automaticamente em 2025-07-24T03:24:26.966Z
  */
 
+import { base } from '$app/paths';
+
 /**
  * Caminho base para os ícones SVG
  */
-export const IONICONS_SVG_PATH = '%sveltekit.assets%/assets/ionicons/svg';
+export const IONICONS_SVG_PATH = `${base}/assets/ionicons/svg`;
 
 /**
  * Caminho base para os arquivos JS do Ionicons
  */
-export const IONICONS_JS_PATH = '%sveltekit.assets%/assets/ionicons';
+export const IONICONS_JS_PATH = `${base}/assets/ionicons`;
 
 /**
  * Lista de todos os arquivos JavaScript disponíveis
@@ -48,9 +50,9 @@ export type IconVariant = (typeof ICON_VARIANTS)[number];
  *
  * @example
  * ```typescript
- * const iconPath = getIconPath('home', 'outline'); // '/assets/ionicons/svg/home-outline.svg'
- * const iconPath = getIconPath('add', 'sharp'); // '/assets/ionicons/svg/add-sharp.svg'
- * const iconPath = getIconPath('heart'); // '/assets/ionicons/svg/heart.svg' (filled é o padrão)
+ * const iconPath = getIconPath('home', 'outline'); // '${base}/assets/ionicons/svg/home-outline.svg'
+ * const iconPath = getIconPath('add', 'sharp'); // '${base}/assets/ionicons/svg/add-sharp.svg'
+ * const iconPath = getIconPath('heart'); // '${base}/assets/ionicons/svg/heart.svg' (filled é o padrão)
  * ```
  */
 export function getIconPath(name: string, variant: IconVariant = 'filled'): string {

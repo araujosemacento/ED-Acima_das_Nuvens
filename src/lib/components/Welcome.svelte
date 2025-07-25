@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { logger } from '$lib/stores/logger.js';
 	import { cloudAnimationsStore, registerCloudElement } from '$lib/stores/cloudAnimations.js';
+	import { base } from '$app/paths';
 
 	// Estado para controlar se as animações estão ativas
 	let cloudman = true;
@@ -75,7 +76,7 @@
 		{#each cloudAssets as assetNum (assetNum)}
 			{#if showImages}
 				<img
-					src="/assets/nuvens/{currentTheme}/SVG/nuvem{assetNum}.svg"
+					src="{base}/assets/nuvens/{currentTheme}/SVG/nuvem{assetNum}.svg"
 					alt=""
 					class="cloud-asset"
 					data-cloud-id={assetNum}

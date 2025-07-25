@@ -178,6 +178,6 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-**Status do Projeto**: ✅ Produção  
-**Última Atualização**: Janeiro 2025  
+**Status do Projeto**: ✅ Produção
+**Última Atualização**: Janeiro 2025
 Desenvolvido com ❤️ para educação
