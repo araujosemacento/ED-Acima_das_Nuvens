@@ -20,6 +20,11 @@ class DevLogger {
 			animation: 500
 		};
 
+		// Sistema de throttling para reduzir spam de logs
+		this.throttleDelay = 10000; // 10 segundos entre mensagens similares
+		this.lastLogTimes = new Map(); // Mapeia chaves de log para timestamps
+		this.pendingLogs = new Map(); // Logs agendados para execução
+
 		// Configurar modo verbose via localStorage ou query param
 		this.initVerboseMode();
 	}
@@ -72,6 +77,114 @@ class DevLogger {
 	}
 
 	/**
+	 * Cria uma chave única para throttling baseada no tipo e conteúdo do log
+	 */
+	createLogKey(method, action) {
+		// Para logs de animação, agrupar por tipo de ação
+		if (method === 'animation') {
+			return `animation-${action}`;
+		}
+
+		// Para logs de tema, agrupar por ação principal
+		if (method === 'theme') {
+			return `theme-${action}`;
+		}
+
+		// Para outros métodos, usar método + ação
+		return `${method}-${action}`;
+	}
+
+	/**
+	 * Verifica se um log deve ser throttled (limitado)
+	 */
+	shouldThrottleLog(key) {
+		const now = Date.now();
+		const lastTime = this.lastLogTimes.get(key);
+
+		if (!lastTime) {
+			// Primeiro log desta chave, permite
+			return false;
+		}
+
+		// Verifica se ainda está dentro do período de throttle
+		return (now - lastTime) < this.throttleDelay;
+	}
+
+	/**
+	 * Registra o timestamp de um log executado
+	 */
+	markLogExecuted(key) {
+		this.lastLogTimes.set(key, Date.now());
+	}
+
+	/**
+	 * Agenda um log para execução após o período de throttle
+	 */
+	scheduleDelayedLog(key, logFunction) {
+		// Cancela log agendado anterior se existir
+		const existing = this.pendingLogs.get(key);
+		if (existing) {
+			clearTimeout(existing.timeoutId);
+		}
+
+		// Calcula quando pode executar o próximo log
+		const lastTime = this.lastLogTimes.get(key) || 0;
+		const nextTime = lastTime + this.throttleDelay;
+		const delay = Math.max(0, nextTime - Date.now());
+
+		// Agenda execução
+		const timeoutId = setTimeout(() => {
+			logFunction();
+			this.markLogExecuted(key);
+			this.pendingLogs.delete(key);
+		}, delay);
+
+		this.pendingLogs.set(key, { timeoutId, scheduledFor: nextTime });
+	}
+
+	/**
+	 * Wrapper para throttled logging
+	 */
+	throttledLog(method, action, logFunction) {
+		if (!this.isDev) return;
+
+		const key = this.createLogKey(method, action);
+
+		if (!this.shouldThrottleLog(key)) {
+			// Pode executar imediatamente
+			logFunction();
+			this.markLogExecuted(key);
+		} else {
+			// Agenda para execução futura
+			this.scheduleDelayedLog(key, logFunction);
+		}
+	}
+
+	/**
+	 * Configura o delay de throttling (em ms)
+	 */
+	setThrottleDelay(delayMs) {
+		if (!this.isDev) return;
+
+		this.throttleDelay = delayMs;
+		this.info(`Delay de throttling configurado para ${delayMs}ms (${(delayMs / 1000).toFixed(1)}s) 🕐`);
+	}
+
+	/**
+	 * Limpa todos os logs agendados
+	 */
+	clearPendingLogs() {
+		if (!this.isDev) return;
+
+		this.pendingLogs.forEach(({ timeoutId }) => {
+			clearTimeout(timeoutId);
+		});
+
+		this.pendingLogs.clear();
+		this.info('Logs pendentes limpos 🧹');
+	}
+
+	/**
 	 * Log genérico com timestamp humanizado (simplificado)
 	 */
 	log(message, ...args) {
@@ -110,7 +223,7 @@ class DevLogger {
 	}
 
 	/**
-	 * Log específico para tema com mensagens humanizadas
+	 * Log específico para tema com mensagens humanizadas (com throttling)
 	 */
 	theme(action, data) {
 		if (!this.isDev) return;
@@ -131,31 +244,62 @@ class DevLogger {
 
 		const message = actionMessages[action] || `🎨 TEMA: ${action}`;
 
-		if (this.verboseMode) {
-			// Modo verbose: logs detalhados com grupos
-			console.group(`${this.prefix} ${message}`);
-			console.log(
-				'🕒 Horário:',
-				new Date().toLocaleTimeString('pt-BR', {
-					hour: '2-digit',
-					minute: '2-digit',
-					second: '2-digit',
-					fractionalSecondDigits: 3
-				})
-			);
+		// Ações que devem sempre aparecer (importantes para usuário)
+		const alwaysShowActions = [
+			'SET_THEME_CALLED',
+			'AUTO_INIT_COMPLETE',
+			'THEME_APPLIED'
+		];
 
-			if (data) {
-				this.formatDataOutput(data);
-			}
-			console.groupEnd();
-		} else {
-			// Modo padrão: log simples
-			if (data && Object.keys(data).length > 0) {
-				const summary = this.getDataSummary(data);
-				console.log(`${this.prefix} ${message}${summary ? ` - ${summary}` : ''}`);
+		// Ações que podem ser throttled (frequentes/automáticas)
+		const throttledActions = [
+			'DETECT_SYSTEM',
+			'AUTO_RESTORE_USER_PREFERENCE',
+			'APPLY_THEME',
+			'AUTO_APPLY_THEME',
+			'SYSTEM_THEME_AUTO_CHANGED',
+			'TRANSITION_START',
+			'TRANSITION_END'
+		];
+
+		const executeLog = () => {
+			if (this.verboseMode) {
+				// Modo verbose: logs detalhados com grupos
+				console.group(`${this.prefix} ${message}`);
+				console.log(
+					'🕒 Horário:',
+					new Date().toLocaleTimeString('pt-BR', {
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit',
+						fractionalSecondDigits: 3
+					})
+				);
+
+				if (data) {
+					this.formatDataOutput(data);
+				}
+				console.groupEnd();
 			} else {
-				console.log(`${this.prefix} ${message}`);
+				// Modo padrão: log simples
+				if (data && Object.keys(data).length > 0) {
+					const summary = this.getDataSummary(data);
+					console.log(`${this.prefix} ${message}${summary ? ` - ${summary}` : ''}`);
+				} else {
+					console.log(`${this.prefix} ${message}`);
+				}
 			}
+		};
+
+		if (alwaysShowActions.includes(action)) {
+			// Executar imediatamente
+			executeLog();
+		} else if (throttledActions.includes(action)) {
+			// Usar throttling
+			this.throttledLog('theme', action, executeLog);
+		} else {
+			// Ações desconhecidas: usar throttling por segurança
+			this.throttledLog('theme', action, executeLog);
 		}
 	}
 
@@ -631,6 +775,8 @@ class DevLogger {
 		console.log('• logger.setVerbose(true) - Ativar modo verbose');
 		console.log('• logger.setVerbose(false) - Ativar modo padrão');
 		console.log('• logger.isVerbose() - Verificar modo atual');
+		console.log('• logger.setThrottleDelay(ms) - Configurar delay entre logs');
+		console.log('• logger.clearPendingLogs() - Limpar logs agendados');
 		console.log('• ?verbose=true na URL - Ativar verbose temporariamente');
 		console.groupEnd();
 
@@ -650,6 +796,8 @@ class DevLogger {
 		console.log('✅ Modo verbose para análise técnica');
 		console.log('✅ Alertas automáticos para performance');
 		console.log('✅ Persistência de preferências');
+		console.log('✅ Sistema de throttling (10s entre logs similares)');
+		console.log('✅ Logs importantes sempre visíveis');
 		console.groupEnd();
 
 		console.groupEnd();

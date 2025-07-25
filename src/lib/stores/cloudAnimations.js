@@ -164,19 +164,23 @@ class CloudAnimationsStore {
 
 			// Calcula nova posição
 			const movement = Math.random() * this.config.movementRadius;
+			// Movimento em unidades viewport (vw/vh) - mais consistente
+			const movementVw = (movement / window.innerWidth) * 100;
+			const movementVh = (movement / window.innerHeight) * 100;
+
 			const newPos = {
 				x: Math.max(
 					this.config.boundaryMargin,
 					Math.min(
 						100 - this.config.boundaryMargin,
-						currentPos.x + ((direction.x * movement) / window.innerWidth) * 100
+						currentPos.x + (direction.x * movementVw)
 					)
 				),
 				y: Math.max(
 					this.config.boundaryMargin,
 					Math.min(
 						100 - this.config.boundaryMargin,
-						currentPos.y + ((direction.y * movement) / window.innerHeight) * 100
+						currentPos.y + (direction.y * movementVh)
 					)
 				)
 			};
@@ -215,20 +219,57 @@ class CloudAnimationsStore {
 			'Asset ID': assetId,
 			'Elemento válido': !!element,
 			'Tag do elemento': element?.tagName,
-			'Classes do elemento': element?.className
+			'Classes do elemento': element?.className,
+			'Dimensões atuais': {
+				width: element?.offsetWidth,
+				height: element?.offsetHeight
+			}
 		});
+
+		// Verifica se elemento está realmente pronto
+		if (!element || element.offsetHeight === 0) {
+			logger.animation('STORE_CREATE_ANIMATION_SKIP', {
+				'Asset ID': assetId,
+				'Motivo': 'Elemento não pronto ou altura zero',
+				'Offset Height': element?.offsetHeight
+			});
+			return null;
+		}
+
+		// Cancela animação existente
+		if (this.animations.has(assetId)) {
+			const { animation } = this.animations.get(assetId);
+			try {
+				animation.cancel();
+				logger.animation('STORE_CREATE_ANIMATION_CLEANUP', {
+					'Asset ID': assetId,
+					'Animação anterior cancelada': true
+				});
+			} catch (error) {
+				logger.animation('STORE_CREATE_ANIMATION_CLEANUP_ERROR', {
+					'Asset ID': assetId,
+					'Erro ao cancelar': error.message
+				});
+			}
+		}
 
 		const startPos = this.generateInitialPosition();
 		const keyframes = this.generateMovementSequence(startPos);
 
-		// Define posição inicial
-		element.style.left = `${startPos.x}vw`;
-		element.style.top = `${startPos.y}vh`;
+		// Define posição inicial com transform (consistente com animação)
+		// Remove propriedades CSS conflitantes e usa apenas transform
+		element.style.position = 'absolute'; // Mudança para absolute para evitar conflitos
+		element.style.left = '';  // Remove left/top para evitar conflito com transform
+		element.style.top = '';
+		element.style.transform = `translate(${startPos.x}vw, ${startPos.y}vh)`;
+		element.style.zIndex = '1'; // Garante que as nuvens fiquem atrás do conteúdo
 
 		logger.animation('STORE_INITIAL_POSITION_SET', {
 			'Asset ID': assetId,
-			'Posição aplicada': `left: ${startPos.x}vw, top: ${startPos.y}vh`,
-			'Style aplicado': !!element.style.left
+			'Posição aplicada': `transform: translate(${startPos.x}vw, ${startPos.y}vh)`,
+			'Style aplicado': !!element.style.transform,
+			'Position': element.style.position,
+			'Z-index': element.style.zIndex
 		});
 
 		// Duração aleatória
@@ -261,7 +302,8 @@ class CloudAnimationsStore {
 				'Asset ID': assetId,
 				'Animação criada': !!animation,
 				'Estado da animação': animation.playState,
-				'Ready state': animation.ready !== undefined ? 'Suportado' : 'Não suportado'
+				'Ready state': animation.ready !== undefined ? 'Suportado' : 'Não suportado',
+				'Current time': animation.currentTime
 			});
 
 			this.animations.set(assetId, {
@@ -278,7 +320,8 @@ class CloudAnimationsStore {
 					logger.animation('STORE_ANIMATION_READY', {
 						'Asset ID': assetId,
 						Estado: animation.playState,
-						'Tempo atual': animation.currentTime
+						'Tempo atual': animation.currentTime,
+						'Timeline time': animation.timeline?.currentTime
 					});
 				})
 				.catch((error) => {
@@ -308,7 +351,7 @@ class CloudAnimationsStore {
 	initializeAllAnimations() {
 		logger.animation('STORE_INIT_START', {
 			Elementos: this.elements.size,
-			Animações: this.animations.size
+			'Animações existentes': this.animations.size
 		});
 
 		if (this.elements.size === 0) {
@@ -318,16 +361,37 @@ class CloudAnimationsStore {
 			return;
 		}
 
+		// Cancela todas as animações existentes primeiro
+		this.cancelAllAnimations();
+
 		let animationsCreated = 0;
 		let animationsFailed = 0;
+		let elementsSkipped = 0;
 
 		this.elements.forEach((element, assetId) => {
+			// Verifica novamente se o elemento está visível
+			const isVisible = element.offsetParent !== null && element.offsetHeight > 0;
+			const isInDOM = document.contains(element);
+
 			logger.animation('STORE_INIT_ELEMENT', {
 				'Asset ID': assetId,
 				'Elemento existe': !!element,
-				'No DOM': document.contains(element),
-				Visível: element.offsetParent !== null
+				'No DOM': isInDOM,
+				'Visível': isVisible,
+				'Offset Height': element.offsetHeight,
+				'Offset Width': element.offsetWidth,
+				'Display': window.getComputedStyle(element).display
 			});
+
+			if (!isVisible || !isInDOM || element.offsetHeight === 0) {
+				elementsSkipped++;
+				logger.animation('STORE_INIT_SKIP_ELEMENT', {
+					'Asset ID': assetId,
+					'Motivo': !isInDOM ? 'Não no DOM' : !isVisible ? 'Não visível' : 'Altura zero',
+					'Tentará novamente': true
+				});
+				return;
+			}
 
 			try {
 				const animation = this.createChoppyAnimation(element, assetId);
@@ -335,30 +399,47 @@ class CloudAnimationsStore {
 					animationsCreated++;
 					logger.animation('STORE_INIT_SUCCESS', {
 						ID: assetId,
-						Estado: animation.playState
+						Estado: animation.playState,
+						'Tempo atual': animation.currentTime
 					});
 				} else {
 					animationsFailed++;
 					logger.animation('STORE_INIT_FAILED', {
 						ID: assetId,
-						Erro: 'Animação null'
+						Erro: 'createChoppyAnimation retornou null'
 					});
 				}
 			} catch (error) {
 				animationsFailed++;
 				logger.animation('STORE_INIT_ERROR', {
 					ID: assetId,
-					Erro: error.message
+					Erro: error.message,
+					Stack: error.stack
 				});
 			}
 		});
 
 		logger.animation('STORE_INIT_COMPLETE', {
-			Total: this.elements.size,
-			Criadas: animationsCreated,
-			Falhas: animationsFailed,
-			Taxa: `${((animationsCreated / this.elements.size) * 100).toFixed(0)}%`
+			'Total elementos': this.elements.size,
+			'Animações criadas': animationsCreated,
+			'Falhas': animationsFailed,
+			'Elementos ignorados': elementsSkipped,
+			'Taxa de sucesso': `${((animationsCreated / Math.max(this.elements.size - elementsSkipped, 1)) * 100).toFixed(0)}%`
 		});
+
+		// Se há elementos ignorados, tenta novamente após um delay
+		if (elementsSkipped > 0) {
+			logger.animation('STORE_INIT_RETRY_SCHEDULED', {
+				'Elementos para retry': elementsSkipped,
+				'Delay': '200ms'
+			});
+
+			setTimeout(() => {
+				if (this.isActive) {
+					this.initializeAllAnimations();
+				}
+			}, 200);
+		}
 
 		this.updateStore();
 	}
@@ -487,18 +568,53 @@ class CloudAnimationsStore {
 			Parent: element?.parentElement?.tagName
 		});
 
-		// Aguarda um tick para garantir que o elemento está renderizado
+		// Cancela animação existente se houver
+		if (this.animations.has(assetId)) {
+			const { animation } = this.animations.get(assetId);
+			animation.cancel();
+			this.animations.delete(assetId);
+			logger.animation('STORE_REGISTER_CLEANUP_OLD', {
+				'Asset ID': assetId,
+				'Animação anterior cancelada': true
+			});
+		}
+
+		// Aguarda múltiplos ticks para garantir renderização completa
 		await tick();
+		await new Promise(resolve => setTimeout(resolve, 50)); // Pequeno delay extra
+
+		// Verifica se o elemento está realmente visível
+		const isVisible = element.offsetParent !== null && element.offsetHeight > 0;
+		const isInDOM = document.contains(element);
 
 		logger.animation('STORE_REGISTER_AFTER_TICK', {
 			'Asset ID': assetId,
-			'No DOM': document.contains(element),
-			Visível: element.offsetParent !== null,
+			'No DOM': isInDOM,
+			'Visível': isVisible,
+			'Offset Parent': !!element.offsetParent,
 			Dimensões: {
 				width: element.offsetWidth,
-				height: element.offsetHeight
-			}
+				height: element.offsetHeight,
+				clientWidth: element.clientWidth,
+				clientHeight: element.clientHeight
+			},
+			'Computed Style': window.getComputedStyle(element).display !== 'none'
 		});
+
+		// Só registra se o elemento estiver realmente visível
+		if (!isVisible || !isInDOM) {
+			logger.animation('STORE_REGISTER_SKIP_INVISIBLE', {
+				'Asset ID': assetId,
+				'Motivo': !isInDOM ? 'Não está no DOM' : 'Não está visível',
+				'Aguardando próxima tentativa': true
+			});
+
+			// Tenta novamente após um delay maior
+			setTimeout(() => {
+				this.registerElement(element, assetId);
+			}, 100);
+			return;
+		}
 
 		this.elements.set(assetId, element);
 		this.updateStore();
@@ -509,41 +625,12 @@ class CloudAnimationsStore {
 			'IDs atuais': Array.from(this.elements.keys())
 		});
 
-		// Se as animações estiverem ativas, inicia animação imediatamente
-		if (this.isActive) {
-			logger.animation('STORE_REGISTER_IMMEDIATE_ANIMATION', {
-				'Asset ID': assetId,
-				'Store ativa': true,
-				'Iniciando animação': true
-			});
-
-			try {
-				const animation = this.createChoppyAnimation(element, assetId);
-				if (animation) {
-					logger.animation('STORE_REGISTER_ANIMATION_SUCCESS', {
-						'Asset ID': assetId,
-						Estado: animation.playState
-					});
-				} else {
-					logger.animation('STORE_REGISTER_ANIMATION_FAILED', {
-						'Asset ID': assetId,
-						Erro: 'createChoppyAnimation retornou null'
-					});
-				}
-			} catch (error) {
-				logger.animation('STORE_REGISTER_ANIMATION_ERROR', {
-					'Asset ID': assetId,
-					Erro: error.message,
-					Stack: error.stack
-				});
-			}
-		} else {
-			logger.animation('STORE_REGISTER_INACTIVE', {
-				'Asset ID': assetId,
-				'Store ativa': false,
-				'Animação adiada': true
-			});
-		}
+		// NÃO inicia animação aqui - será iniciada apenas via initializeAllAnimations
+		logger.animation('STORE_REGISTER_DEFERRED', {
+			'Asset ID': assetId,
+			'Animação será iniciada por': 'initializeAllAnimations()',
+			'Store ativa': this.isActive
+		});
 	}
 
 	/**

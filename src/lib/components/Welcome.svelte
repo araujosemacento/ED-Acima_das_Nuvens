@@ -9,6 +9,8 @@
 
 	// Estado para controlar se as animações estão ativas
 	let cloudman = true;
+	let imagesLoaded = $state(0);
+	let totalImages = 17;
 
 	// Array com todos os assets de nuvens (1-17)
 	const cloudAssets = Array.from({ length: 17 }, (_, i) => i + 1);
@@ -16,6 +18,31 @@
 	// Fix para hydration_attribute_changed: controlar renderização das imagens
 	let showImages = $state(false);
 	let currentTheme = $state('light'); // Tema padrão para SSR
+
+	// Função para lidar com carregamento de imagens
+	function handleImageLoad() {
+		imagesLoaded++;
+		logger.animation('IMAGE_LOADED', {
+			'Imagens carregadas': imagesLoaded,
+			'Total': totalImages,
+			'Progresso': `${((imagesLoaded / totalImages) * 100).toFixed(0)}%`
+		});
+
+		// Quando todas as imagens carregarem, inicia as animações
+		if (imagesLoaded === totalImages) {
+			logger.animation('ALL_IMAGES_LOADED', {
+				'Todas carregadas': true,
+				'Iniciando animações': cloudman
+			});
+
+			if (cloudman) {
+				// Pequeno delay para garantir que o DOM esteja atualizado
+				setTimeout(() => {
+					cloudAnimationsStore.initializeAllAnimations();
+				}, 100);
+			}
+		}
+	}
 
 	// Aguardar hidratação no cliente antes de mostrar as imagens com tema correto
 	if (typeof window !== 'undefined') {
@@ -46,14 +73,8 @@
 			'Tema atual': currentTheme
 		});
 
-		// Pequeno delay para garantir que elementos estejam renderizados
-		setTimeout(() => {
-			logger.animation('MOUNT_INIT_CALL', {
-				Ação: 'Inicializando animações das nuvens'
-			});
-
-			cloudAnimationsStore.initializeAllAnimations();
-		}, 100);
+		// Não inicia animações aqui - espera todas as imagens carregarem
+		// As animações serão iniciadas via handleImageLoad quando todas estiverem prontas
 
 		// Cleanup ao desmontar
 		return () => {
@@ -81,6 +102,15 @@
 					class="cloud-asset"
 					data-cloud-id={assetNum}
 					use:registerCloudElement={assetNum}
+					onload={handleImageLoad}
+					onerror={(e) => {
+						logger.animation('IMAGE_ERROR', {
+							'Asset': assetNum,
+							'Erro': e.detail || 'Falha ao carregar imagem'
+						});
+						// Conta como carregada mesmo com erro para não travar
+						handleImageLoad();
+					}}
 				/>
 			{/if}
 		{/each}
@@ -150,7 +180,8 @@
 		opacity: 0.7;
 		pointer-events: none;
 		width: clamp(60px, 8vw, 120px);
-		height: auto;
+		height: clamp(40px, 6vw, 90px); /* Altura fixa para evitar altura 0 */
+		object-fit: contain; /* Mantém proporção da imagem */
 		/* Removida animação CSS - agora controlada por JavaScript */
 		will-change: transform;
 		transform-origin: center;
@@ -190,6 +221,7 @@
 
 		.cloud-asset {
 			width: clamp(40px, 10vw, 80px);
+			height: clamp(30px, 8vw, 60px); /* Altura proporcional para mobile */
 		}
 
 		.text-outlined {

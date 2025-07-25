@@ -1,0 +1,407 @@
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:list';
+@use 'sass:color';
+@use '../theme/palette' as palette;
+
+// ===========================================
+// CLOUD MOTION SYSTEM - SCSS AVANÇADO
+// Sistema de animações para nuvens com Svelte Motion
+// ===========================================
+
+// Configurações base do sistema
+$cloud-config: (
+	// Tamanhos responsivos
+	sizes: (
+			mobile: (
+				width: clamp(40px, 10vw, 80px),
+				height: clamp(30px, 8vw, 60px)
+			),
+			tablet: (
+				width: clamp(50px, 9vw, 100px),
+				height: clamp(35px, 7vw, 70px)
+			),
+			desktop: (
+				width: clamp(60px, 8vw, 120px),
+				height: clamp(40px, 6vw, 90px)
+			)
+		),
+
+	// Estilos de animação
+	animation-styles: (
+			gentle: (
+				opacity: 0.6,
+				filter: blur(0.5px),
+				transition-timing: ease-in-out
+			),
+			dynamic: (
+				opacity: 0.8,
+				filter: blur(0px),
+				transition-timing: cubic-bezier(0.4, 0, 0.2, 1)
+			),
+			elastic: (
+				opacity: 0.7,
+				filter: blur(1px),
+				transition-timing: cubic-bezier(0.68, -0.55, 0.265, 1.55)
+			)
+		),
+
+	// Z-index layers
+	z-layers: (
+			background-far: -2,
+			background-near: -1,
+			content: 0,
+			overlay: 1
+		),
+
+	// Breakpoints
+	breakpoints: (
+			mobile: 576px,
+			tablet: 768px,
+			desktop: 1200px
+		)
+);
+
+// ===========================================
+// FUNÇÕES SCSS AVANÇADAS
+// ===========================================
+
+/**
+ * Função para acessar configurações de nuvens
+ */
+@function cloud-config($key-path...) {
+	$result: $cloud-config;
+	@each $key in $key-path {
+		@if map.has-key($result, $key) {
+			$result: map.get($result, $key);
+		} @else {
+			@warn "Key '#{$key}' not found in cloud config path: #{$key-path}";
+			@return null;
+		}
+	}
+	@return $result;
+}
+
+/**
+ * Função para calcular opacidade baseada no tema
+ */
+@function cloud-opacity($base-opacity, $theme: 'light') {
+	$theme-map: if(
+		$theme == 'dark',
+		map.get(palette.$themes, 'dark'),
+		map.get(palette.$themes, 'light')
+	);
+	$background: map.get($theme-map, 'background-500');
+
+	// Ajusta opacidade baseado na luminosidade do background
+	$lightness: color.lightness($background);
+	$multiplier: if($lightness > 50%, 1.2, 0.8); // Mais opaco em temas claros
+
+	@return math.clamp(0.1, $base-opacity * $multiplier, 0.9);
+}
+
+/**
+ * Função para gerar posições de nuvens distribuídas
+ */
+@function distribute-clouds($count, $margin: 10%) {
+	$positions: ();
+	$margin-decimal: math.div(math.percentage($margin), 100%);
+	$available-space: 100% - (2 * $margin-decimal);
+
+	@for $i from 1 through $count {
+		$x: $margin-decimal +
+			math.div($available-space, $count) *
+			($i - 1) +
+			math.random() *
+			math.div($available-space, $count);
+		$y: $margin-decimal + math.random() * $available-space;
+
+		$positions: list.append(
+			$positions,
+			(
+				x: $x,
+				y: $y
+			)
+		);
+	}
+
+	@return $positions;
+}
+
+/**
+ * Função para criar filtros baseados no tema
+ */
+@function cloud-theme-filter($theme: 'light', $style: 'gentle') {
+	$base-filter: map.get(cloud-config('animation-styles', $style), 'filter');
+
+	@if $theme == 'dark' {
+		// Em tema escuro, adiciona um slight glow
+		@return #{$base-filter} drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+	} @else {
+		// Em tema claro, adiciona sombra sutil
+		@return #{$base-filter} drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+	}
+}
+
+// ===========================================
+// MIXINS SCSS AVANÇADOS
+// ===========================================
+
+/**
+ * Mixin responsivo para nuvens
+ */
+@mixin cloud-responsive-size($size-key: 'desktop') {
+	$size-map: cloud-config('sizes', $size-key);
+
+	@if $size-map {
+		width: map.get($size-map, 'width');
+		height: map.get($size-map, 'height');
+	}
+}
+
+/**
+ * Mixin para breakpoints responsivos
+ */
+@mixin respond-to($breakpoint) {
+	$bp-value: cloud-config('breakpoints', $breakpoint);
+
+	@if $breakpoint == 'mobile' {
+		@media (max-width: #{$bp-value}) {
+			@content;
+		}
+	} @else if $breakpoint == 'tablet' {
+		@media (min-width: #{$bp-value}) and (max-width: #{cloud-config('breakpoints', 'desktop')}) {
+			@content;
+		}
+	} @else if $breakpoint == 'desktop' {
+		@media (min-width: #{$bp-value}) {
+			@content;
+		}
+	}
+}
+
+/**
+ * Mixin para estilos de animação de nuvem
+ */
+@mixin cloud-animation-style($style: 'gentle', $theme: 'light') {
+	$style-config: cloud-config('animation-styles', $style);
+
+	@if $style-config {
+		$base-opacity: map.get($style-config, 'opacity');
+		$timing: map.get($style-config, 'transition-timing');
+
+		opacity: cloud-opacity($base-opacity, $theme);
+		filter: cloud-theme-filter($theme, $style);
+		transition-timing-function: $timing;
+	}
+}
+
+/**
+ * Mixin para container de nuvens
+ */
+@mixin cloud-container() {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: hidden;
+	z-index: cloud-config('z-layers', 'background-near');
+}
+
+/**
+ * Mixin para nuvem individual
+ */
+@mixin cloud-element($style: 'gentle') {
+	position: absolute;
+	pointer-events: none;
+	object-fit: contain;
+	transform-origin: center center;
+	will-change: transform, opacity;
+
+	// Aplica tamanhos responsivos
+	@include cloud-responsive-size('desktop');
+
+	@include respond-to('tablet') {
+		@include cloud-responsive-size('tablet');
+	}
+
+	@include respond-to('mobile') {
+		@include cloud-responsive-size('mobile');
+	}
+
+	// Fallback para temas (será sobrescrito por CSS variables)
+	@include cloud-animation-style($style, 'light');
+}
+
+/**
+ * Mixin para transições temáticas suaves
+ */
+@mixin cloud-theme-transition() {
+	transition:
+		opacity 300ms ease-in-out,
+		filter 300ms ease-in-out;
+}
+
+/**
+ * Mixin para performance otimizada
+ */
+@mixin cloud-performance() {
+	backface-visibility: hidden;
+	perspective: 1000px;
+	transform-style: preserve-3d;
+
+	// GPU acceleration hints
+	transform: translateZ(0);
+	will-change: transform;
+}
+
+/**
+ * Mixin para debug mode (development)
+ */
+@mixin cloud-debug($show-bounds: true, $show-id: false) {
+	@if $show-bounds {
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			border: 1px dashed rgba(255, 0, 0, 0.5);
+			pointer-events: none;
+		}
+	}
+
+	@if $show-id {
+		&::after {
+			content: attr(data-cloud-id);
+			position: absolute;
+			top: 0;
+			left: 0;
+			background: rgba(0, 0, 0, 0.7);
+			color: white;
+			font-size: 10px;
+			padding: 2px 4px;
+			border-radius: 2px;
+			pointer-events: none;
+		}
+	}
+}
+
+// ===========================================
+// CLASSES BASE PARA NUVENS
+// ===========================================
+
+// Container principal das nuvens
+.clouds-background {
+	@include cloud-container();
+}
+
+// Classe base para nuvens
+.cloud-element {
+	@include cloud-element();
+	@include cloud-theme-transition();
+	@include cloud-performance();
+
+	// Estados do motion store
+	&[data-motion-state='paused'] {
+		animation-play-state: paused;
+	}
+
+	&[data-motion-state='active'] {
+		animation-play-state: running;
+	}
+}
+
+// Variações por estilo de animação
+.cloud-element {
+	&--gentle {
+		@include cloud-animation-style('gentle');
+	}
+
+	&--dynamic {
+		@include cloud-animation-style('dynamic');
+	}
+
+	&--elastic {
+		@include cloud-animation-style('elastic');
+	}
+}
+
+// Estados temáticos
+.theme-light {
+	.cloud-element {
+		&--gentle {
+			@include cloud-animation-style('gentle', 'light');
+		}
+		&--dynamic {
+			@include cloud-animation-style('dynamic', 'light');
+		}
+		&--elastic {
+			@include cloud-animation-style('elastic', 'light');
+		}
+	}
+}
+
+.theme-dark {
+	.cloud-element {
+		&--gentle {
+			@include cloud-animation-style('gentle', 'dark');
+		}
+		&--dynamic {
+			@include cloud-animation-style('dynamic', 'dark');
+		}
+		&--elastic {
+			@include cloud-animation-style('elastic', 'dark');
+		}
+	}
+}
+
+// Debug mode (apenas em desenvolvimento)
+.cloud-debug {
+	.cloud-element {
+		@include cloud-debug(true, true);
+	}
+}
+
+// ===========================================
+// UTILITÁRIOS RESPONSIVOS
+// ===========================================
+
+// Classes utilitárias para z-index
+@each $layer, $z-value in cloud-config('z-layers') {
+	.cloud-layer-#{$layer} {
+		z-index: $z-value;
+	}
+}
+
+// Classes para distribuição automática (até 20 nuvens)
+@for $i from 1 through 20 {
+	.cloud-auto-distribute-#{$i} {
+		$positions: distribute-clouds($i);
+
+		@for $j from 1 through $i {
+			&:nth-child(#{$j}) {
+				$pos: list.nth($positions, $j);
+				left: map.get($pos, 'x');
+				top: map.get($pos, 'y');
+			}
+		}
+	}
+}
+
+// ===========================================
+// PERFORMANCE & ACCESSIBILITY
+// ===========================================
+
+// Redução de movimento para usuários que preferirem
+@media (prefers-reduced-motion: reduce) {
+	.cloud-element {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		opacity: 0.3;
+		transform: none !important;
+	}
+}

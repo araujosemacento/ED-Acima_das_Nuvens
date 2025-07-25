@@ -173,6 +173,13 @@ def operacoes_matematicas(a, b):
 
 ## Diretrizes para Contribuições
 
+### 0. Processo de Mudanças
+
+- **NUNCA aplique alterações** sem confirmação explícita do usuário
+- **Apresente propostas** detalhadas antes da implementação
+- **Aguarde aprovação** para qualquer modificação de código
+- **Explique impactos** e benefícios das mudanças sugeridas
+
 ### 1. Componentes Svelte
 
 - Use **Svelte 5 runes** (`$state`, `$derived`, `$effect`)

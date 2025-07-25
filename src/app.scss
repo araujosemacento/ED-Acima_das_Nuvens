@@ -3,6 +3,7 @@
 @use 'sass:string';
 
 @use './theme/palette' as palette;
+@use './lib/styles/cloudMotion' as cloudMotion; // Novo sistema de animações
 
 @font-face {
 	font-family: 'Noto Sans Display';
