@@ -47,6 +47,7 @@
 		"@smui/menu": "^8.0.1",
 		"@smui/menu-surface": "^8.0.1",
 		"smui-theme": "^8.0.0-beta.3",
-		"svelte-material-ui": "^8.0.0-beta.3"
+		"svelte-material-ui": "^8.0.0-beta.3",
+		"svelte-moveable": "^0.45.0"
 	}
 }

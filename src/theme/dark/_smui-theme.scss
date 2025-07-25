@@ -1,30 +1,123 @@
 @use 'sass:color';
 @use 'sass:map';
 
-@use '@material/theme/color-palette';
 @use '../palette' as palette;
 
 // Extrair cores da paleta personalizada
-$light-theme: map.get(palette.$themes, 'light');
 $dark-theme: map.get(palette.$themes, 'dark');
 
-// Svelte Colors integrados com a paleta personalizada (Dark Theme)
+// Configurar Material Design com variáveis básicas (Dark Theme)
+$error-color: hsl(5, 100%, 75%);
+
 @use '@material/theme/index' as theme with (
+	$background: map.get($dark-theme, 'background'),
 	$primary: map.get($dark-theme, 'primary'),
 	$secondary: map.get($dark-theme, 'secondary'),
 	$surface: map.get($dark-theme, 'surface'),
-	$background: map.get($dark-theme, 'background'),
-	$error: #ffb4ab
+	$error: $error-color
 );
+
+// Definir variáveis CSS customizadas para suas cores extras (Dark Theme)
+:root {
+	// Cores do seu sistema de paleta
+	--ed-text: #{map.get($dark-theme, 'text')};
+	--ed-background: #{map.get($dark-theme, 'background')};
+	--ed-primary: #{map.get($dark-theme, 'primary')};
+	--ed-secondary: #{map.get($dark-theme, 'secondary')};
+	--ed-accent: #{map.get($dark-theme, 'accent')};
+	--ed-surface: #{map.get($dark-theme, 'surface')};
+	--ed-error: #{$error-color};
+
+	// Cor complementar automática (accent no dark, secondary no light)
+	--ed-complementary: #{map.get($dark-theme, 'accent')};
+
+	// Paleta completa de shades para texto
+	--ed-text-50: #{map.get($dark-theme, 'text-50')};
+	--ed-text-100: #{map.get($dark-theme, 'text-100')};
+	--ed-text-200: #{map.get($dark-theme, 'text-200')};
+	--ed-text-300: #{map.get($dark-theme, 'text-300')};
+	--ed-text-400: #{map.get($dark-theme, 'text-400')};
+	--ed-text-500: #{map.get($dark-theme, 'text-500')};
+	--ed-text-600: #{map.get($dark-theme, 'text-600')};
+	--ed-text-700: #{map.get($dark-theme, 'text-700')};
+	--ed-text-800: #{map.get($dark-theme, 'text-800')};
+	--ed-text-900: #{map.get($dark-theme, 'text-900')};
+	--ed-text-950: #{map.get($dark-theme, 'text-950')};
+
+	// Paleta completa de shades para primary
+	--ed-primary-50: #{map.get($dark-theme, 'primary-50')};
+	--ed-primary-100: #{map.get($dark-theme, 'primary-100')};
+	--ed-primary-200: #{map.get($dark-theme, 'primary-200')};
+	--ed-primary-300: #{map.get($dark-theme, 'primary-300')};
+	--ed-primary-400: #{map.get($dark-theme, 'primary-400')};
+	--ed-primary-500: #{map.get($dark-theme, 'primary-500')};
+	--ed-primary-600: #{map.get($dark-theme, 'primary-600')};
+	--ed-primary-700: #{map.get($dark-theme, 'primary-700')};
+	--ed-primary-800: #{map.get($dark-theme, 'primary-800')};
+	--ed-primary-900: #{map.get($dark-theme, 'primary-900')};
+	--ed-primary-950: #{map.get($dark-theme, 'primary-950')};
+
+	// Paleta completa de shades para secondary
+	--ed-secondary-50: #{map.get($dark-theme, 'secondary-50')};
+	--ed-secondary-100: #{map.get($dark-theme, 'secondary-100')};
+	--ed-secondary-200: #{map.get($dark-theme, 'secondary-200')};
+	--ed-secondary-300: #{map.get($dark-theme, 'secondary-300')};
+	--ed-secondary-400: #{map.get($dark-theme, 'secondary-400')};
+	--ed-secondary-500: #{map.get($dark-theme, 'secondary-500')};
+	--ed-secondary-600: #{map.get($dark-theme, 'secondary-600')};
+	--ed-secondary-700: #{map.get($dark-theme, 'secondary-700')};
+	--ed-secondary-800: #{map.get($dark-theme, 'secondary-800')};
+	--ed-secondary-900: #{map.get($dark-theme, 'secondary-900')};
+	--ed-secondary-950: #{map.get($dark-theme, 'secondary-950')};
+
+	// Paleta completa de shades para accent
+	--ed-accent-50: #{map.get($dark-theme, 'accent-50')};
+	--ed-accent-100: #{map.get($dark-theme, 'accent-100')};
+	--ed-accent-200: #{map.get($dark-theme, 'accent-200')};
+	--ed-accent-300: #{map.get($dark-theme, 'accent-300')};
+	--ed-accent-400: #{map.get($dark-theme, 'accent-400')};
+	--ed-accent-500: #{map.get($dark-theme, 'accent-500')};
+	--ed-accent-600: #{map.get($dark-theme, 'accent-600')};
+	--ed-accent-700: #{map.get($dark-theme, 'accent-700')};
+	--ed-accent-800: #{map.get($dark-theme, 'accent-800')};
+	--ed-accent-900: #{map.get($dark-theme, 'accent-900')};
+	--ed-accent-950: #{map.get($dark-theme, 'accent-950')};
+
+	// Paleta completa de shades para surface
+	--ed-surface-50: #{map.get($dark-theme, 'surface-50')};
+	--ed-surface-100: #{map.get($dark-theme, 'surface-100')};
+	--ed-surface-200: #{map.get($dark-theme, 'surface-200')};
+	--ed-surface-300: #{map.get($dark-theme, 'surface-300')};
+	--ed-surface-400: #{map.get($dark-theme, 'surface-400')};
+	--ed-surface-500: #{map.get($dark-theme, 'surface-500')};
+	--ed-surface-600: #{map.get($dark-theme, 'surface-600')};
+	--ed-surface-700: #{map.get($dark-theme, 'surface-700')};
+	--ed-surface-800: #{map.get($dark-theme, 'surface-800')};
+	--ed-surface-900: #{map.get($dark-theme, 'surface-900')};
+	--ed-surface-950: #{map.get($dark-theme, 'surface-950')};
+
+	// Paleta completa de shades para background
+	--ed-background-50: #{map.get($dark-theme, 'background-50')};
+	--ed-background-100: #{map.get($dark-theme, 'background-100')};
+	--ed-background-200: #{map.get($dark-theme, 'background-200')};
+	--ed-background-300: #{map.get($dark-theme, 'background-300')};
+	--ed-background-400: #{map.get($dark-theme, 'background-400')};
+	--ed-background-500: #{map.get($dark-theme, 'background-500')};
+	--ed-background-600: #{map.get($dark-theme, 'background-600')};
+	--ed-background-700: #{map.get($dark-theme, 'background-700')};
+	--ed-background-800: #{map.get($dark-theme, 'background-800')};
+	--ed-background-900: #{map.get($dark-theme, 'background-900')};
+	--ed-background-950: #{map.get($dark-theme, 'background-950')};
+}
 
 html,
 body {
-	background-color: theme.$background;
+	background-color: theme.$surface;
 	color: theme.$on-surface;
 }
 
 a {
-	color: map.get($dark-theme, 'accent');
+	color: var(--ed-accent);
 }
 a:visited {
 	color: color.scale(map.get($dark-theme, 'accent'), $lightness: -35%);
