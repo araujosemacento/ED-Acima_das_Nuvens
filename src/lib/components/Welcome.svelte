@@ -3,8 +3,8 @@
 	import Button from '@smui/button';
 	import { themeStore } from '$lib/stores/theme.js';
 	import { onMount } from 'svelte';
-	import { logger } from '$lib/stores/logger.js';
-	import { cloudAnimationsStore, registerCloudElement } from '$lib/stores/cloudAnimations.js';
+
+	import { cloudMotionStore, registerCloudMotion } from '$lib/stores/cloudMotion.js';
 	import { base } from '$app/paths';
 
 	// Estado para controlar se as animações estão ativas
@@ -22,24 +22,14 @@
 	// Função para lidar com carregamento de imagens
 	function handleImageLoad() {
 		imagesLoaded++;
-		logger.animation('IMAGE_LOADED', {
-			'Imagens carregadas': imagesLoaded,
-			'Total': totalImages,
-			'Progresso': `${((imagesLoaded / totalImages) * 100).toFixed(0)}%`
-		});
 
 		// Quando todas as imagens carregarem, inicia as animações
 		if (imagesLoaded === totalImages) {
-			logger.animation('ALL_IMAGES_LOADED', {
-				'Todas carregadas': true,
-				'Iniciando animações': cloudman
-			});
-
 			if (cloudman) {
 				// Pequeno delay para garantir que o DOM esteja atualizado
 				setTimeout(() => {
-					cloudAnimationsStore.initializeAllAnimations();
-				}, 100);
+					cloudMotionStore.initializeAllAnimations();
+				}, 150);
 			}
 		}
 	}
@@ -61,32 +51,17 @@
 
 	// Reativo: sincroniza cloudman com a store
 	$effect(() => {
-		cloudAnimationsStore.setActive(cloudman);
+		cloudMotionStore.setActive(cloudman);
 	});
 
 	// Lifecycle
 	onMount(() => {
-		logger.animation('COMPONENT_MOUNT', {
-			Componente: 'Welcome',
-			'Animações ativas': cloudman,
-			'Imagens carregadas': showImages,
-			'Tema atual': currentTheme
-		});
-
 		// Não inicia animações aqui - espera todas as imagens carregarem
 		// As animações serão iniciadas via handleImageLoad quando todas estiverem prontas
 
 		// Cleanup ao desmontar
 		return () => {
-			logger.animation('COMPONENT_UNMOUNT', {
-				Componente: 'Welcome'
-			});
-
-			cloudAnimationsStore.cleanup();
-
-			logger.animation('COMPONENT_UNMOUNT_COMPLETE', {
-				Status: 'Limpeza concluída'
-			});
+			cloudMotionStore.cleanup();
 		};
 	});
 </script>
@@ -99,16 +74,15 @@
 				<img
 					src="{base}/assets/nuvens/{currentTheme}/SVG/nuvem{assetNum}.svg"
 					alt=""
-					class="cloud-asset"
+					class="cloud-element cloud-element--gentle"
 					data-cloud-id={assetNum}
-					use:registerCloudElement={assetNum}
+					use:registerCloudMotion={{ cloudId: assetNum, style: 'gentle' }}
 					onload={handleImageLoad}
 					onerror={(e) => {
-						logger.animation('IMAGE_ERROR', {
-							'Asset': assetNum,
-							'Erro': e.detail || 'Falha ao carregar imagem'
-						});
 						// Conta como carregada mesmo com erro para não travar
+						console.error(`Erro ao carregar imagem nuvem${assetNum}.svg:`, e);
+						imagesLoaded++;
+						// Inicia animações se todas as imagens já foram "carregadas"
 						handleImageLoad();
 					}}
 				/>
@@ -133,6 +107,7 @@
 </section>
 
 <style lang="scss">
+	@use '../styles/cloudMotion' as cloud;
 	#welcome {
 		display: flex;
 		flex-direction: column;
@@ -166,30 +141,12 @@
 	}
 
 	.clouds-background {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-		z-index: 1;
-	}
-
-	.cloud-asset {
-		position: fixed;
-		opacity: 0.7;
-		pointer-events: none;
-		width: clamp(60px, 8vw, 120px);
-		height: clamp(40px, 6vw, 90px); /* Altura fixa para evitar altura 0 */
-		object-fit: contain; /* Mantém proporção da imagem */
-		/* Removida animação CSS - agora controlada por JavaScript */
-		will-change: transform;
-		transform-origin: center;
+		@include cloud.cloud-container();
 	}
 
 	.welcome-content {
 		position: relative;
-		z-index: 2;
+		z-index: cloud.cloud-config('z-layers', 'content');
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -214,20 +171,16 @@
 			0 20px 0 var(--theme-background);
 	}
 
-	@media (max-width: 576px) {
+	/* Responsividade usando mixins SCSS */
+	@include cloud.respond-to('mobile') {
 		#welcome {
 			max-width: 80%;
-		}
-
-		.cloud-asset {
-			width: clamp(40px, 10vw, 80px);
-			height: clamp(30px, 8vw, 60px); /* Altura proporcional para mobile */
 		}
 
 		.text-outlined {
 			-webkit-text-stroke: 10px var(--theme-background);
 
-			// Ajustar text-shadow para mobile
+			/* Ajustar text-shadow para mobile */
 			text-shadow:
 				-10px -10px 0 var(--theme-background),
 				10px -10px 0 var(--theme-background),
