@@ -21,7 +21,7 @@
 - **Frontend:** SvelteKit 5 + Svelte 5 (runes)
 - **UI:** Svelte Material UI (SMUI) v8.0.0-beta.3
 - **Python:** Pyodide (execução no browser)
-- **Styling:** SCSS + CSS Custom Properties
+- **Styling:** SCSS + CSS Custom Properties (prioridade em/rem)
 - **I18n:** Paraglide JS (pt-br/en)
 - **Ícones:** Ionicons 7.1.0 (1338+ SVGs)
 - **Build:** Vite 7.0.6
@@ -63,10 +63,11 @@ bun run format
 
 ### Animações de Nuvens
 
-- **17 assets SVG** com movimento orgânico
-- **8 direções + parada** em padrão "choppy"
-- **Responsivo** com diferentes tamanhos
-- **Web Animations API** para performance nativa
+- **17 assets SVG** com movimento orgânico via Svelte Motion
+- **3 estilos configuráveis**: gentle, dynamic, elastic
+- **Responsivo** com tamanhos adaptativos por breakpoint
+- **Transições suaves** com tweened/spring
+- **SCSS avançado** com mixins para diferentes dispositivos
 
 ### Python Interativo
 
@@ -103,16 +104,15 @@ Scripts Python em `/static/scripts/`:
 src/
 ├── lib/
 │   ├── components/          # Componentes Svelte
-│   │   ├── Welcome.svelte   # Tela principal (hydration fix)
-│   │   ├── ThemeToggle.svelte # Alternador de temas
-│   │   ├── PyodideInteractive.svelte # Interface Python
-│   │   ├── Counter.svelte   # Contador animado
-│   │   └── ColorExamples.svelte # Demonstração de cores
+│   │   ├── ThemeToggle.svelte # FAB circular para alternador de temas
+│   │   └── Welcome.svelte   # Tela principal com animações de nuvens
 │   ├── stores/             # Gerenciamento de estado
-│   │   ├── theme.js        # Sistema de temas
-│   │   ├── cloudAnimations.js # Animações de nuvens
+│   │   ├── theme.js        # Sistema de temas avançado
+│   │   ├── cloudMotion.js  # Animações de nuvens (Svelte Motion)
 │   │   ├── pyodide.js      # Integração Python
 │   │   └── logger.js       # Logger de desenvolvimento
+│   ├── styles/             # Estilos SCSS avançados
+│   │   └── cloudMotion.scss # Mixins responsivos para nuvens
 │   └── utils/              # Utilitários
 │       └── ionicons.ts     # Helper para ícones
 ├── routes/                 # Rotas SvelteKit
@@ -120,7 +120,7 @@ src/
 
 static/
 ├── assets/
-│   ├── nuvens/            # Assets de nuvens (light/dark)
+│   ├── nuvens/            # 17 assets SVG de nuvens (light/dark)
 │   └── ionicons/          # 1338+ ícones SVG
 ├── scripts/               # Scripts Python educacionais
 └── fonts/                 # Fontes Noto customizadas
@@ -128,12 +128,12 @@ static/
 
 ## � Características Técnicas
 
-### Svelte 5 (Runes)
+### Design Responsivo Prioritário
 
-- **Estados reativos** com `$state()` e `$derived()`
-- **Efeitos** com `$effect()`
-- **Props** com `$props()`
-- **Performance otimizada** com hydration fixes
+- **Unidades em/rem**: Sistema baseado em unidades escaláveis
+- **Breakpoints consistentes**: 48rem mobile, 64rem tablet, 80rem desktop
+- **Material Design 3**: FAB circular para ThemeToggle com elevações animadas
+- **SCSS avançado**: Mixins responsivos para diferentes dispositivos
 
 ### Sistema de Performance
 
@@ -161,14 +161,14 @@ let showImages = $state(false);
 let currentTheme = $state('light');
 
 if (typeof window !== 'undefined') {
-	$effect(() => {
-		if (!showImages) {
-			currentTheme = $themeStore;
-			showImages = true;
-		} else {
-			currentTheme = $themeStore;
-		}
-	});
+    $effect(() => {
+        if (!showImages) {
+            currentTheme = $themeStore;
+            showImages = true;
+        } else {
+            currentTheme = $themeStore;
+        }
+    });
 }
 ```
 
@@ -179,5 +179,5 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 ---
 
 **Status do Projeto**: ✅ Produção
-**Última Atualização**: Janeiro 2025
+**Última Atualização**: Julho 2025
 Desenvolvido com ❤️ para educação

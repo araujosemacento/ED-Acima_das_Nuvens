@@ -1,6 +1,6 @@
 <script>
 	import { m } from '$lib/paraglide/messages.js';
-	import Button from '@smui/button';
+	import Button, { Label } from '@smui/button';
 	import { themeStore } from '$lib/stores/theme.js';
 	import { onMount } from 'svelte';
 
@@ -59,9 +59,19 @@
 		// Não inicia animações aqui - espera todas as imagens carregarem
 		// As animações serão iniciadas via handleImageLoad quando todas estiverem prontas
 
+		// Listener para mudanças de tema dinâmicas
+		const handleThemeChange = () => {
+			// Força atualização do tema atual para garantir rehidratação
+			currentTheme = $themeStore;
+		};
+
+		// Escuta evento customizado de mudança de tema
+		window.addEventListener('theme-changed', handleThemeChange);
+
 		// Cleanup ao desmontar
 		return () => {
 			cloudMotionStore.cleanup();
+			window.removeEventListener('theme-changed', handleThemeChange);
 		};
 	});
 </script>
@@ -98,10 +108,10 @@
 			<p class="theme-text-transition text-outlined">{m.initial_disclaimer_paragraph2()}</p>
 		</div>
 		<Button
-			style="background-color: var(--ed-complementary); color: var(--ed-text-100); font-weight: 600;"
-			class="theme-interactive-transition"
+			variant="unelevated"
+			class="theme-interactive-transition game-start-button"
 		>
-			{m.start_game()}
+			<Label>{m.start_game()}</Label>
 		</Button>
 	</div>
 </section>
@@ -169,6 +179,9 @@
 			20px 0 0 var(--theme-background),
 			0 -20px 0 var(--theme-background),
 			0 20px 0 var(--theme-background);
+
+		// Melhor contraste baseado no tema
+		color: var(--mdc-theme-text-primary-on-background);
 	}
 
 	/* Responsividade usando mixins SCSS */
@@ -191,5 +204,31 @@
 				0 -10px 0 var(--theme-background),
 				0 10px 0 var(--theme-background);
 		}
+	}
+
+	/* Estilo para o botão de início de jogo com integração adequada ao tema */
+	:global(.game-start-button) {
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+		border-radius: 2rem !important;
+		padding: 1rem 2rem !important;
+		min-width: 12rem !important;
+		height: 3rem !important;
+		font-weight: 600 !important;
+		font-size: 1rem !important;
+		letter-spacing: 0.5px !important;
+	}
+
+	:global(.game-start-button:hover) {
+		transform: translateY(-2px) !important;
+	}
+
+	:global(.game-start-button:active) {
+		transform: translateY(0) !important;
+	}
+
+	/* Customização do Label do Button */
+	:global(.game-start-button .mdc-button__label) {
+		font-weight: 600 !important;
+		letter-spacing: 0.5px !important;
 	}
 </style>

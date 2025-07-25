@@ -4,6 +4,9 @@
 
 @use './theme/palette' as palette;
 @use './lib/styles/cloudMotion' as cloudMotion; // Novo sistema de animações
+@use '@material/typography' as mdctypography;
+
+/* Carregamento das fontes */ // Mixins para componentes SMUI
 
 @font-face {
 	font-family: 'Noto Sans Display';
@@ -151,25 +154,26 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	--theme-surface-900: #{theme-color('surface-900')};
 	--theme-surface-950: #{theme-color('surface-950')};
 
-	/* Compatibilidade com Material Design */
-	--mdc-theme-primary: #{theme-color('primary')};
-	--mdc-theme-secondary: #{theme-color('secondary')};
-	--mdc-theme-background: #{theme-color('background')};
-	--mdc-theme-surface: #{theme-color('surface')};
-	--mdc-theme-error: hsl(5, 50%, 50%);
-	--mdc-theme-on-primary: #{theme-color('background')};
-	--mdc-theme-on-secondary: #{theme-color('background')};
-	--mdc-theme-on-surface: #{theme-color('text')};
-	--mdc-theme-on-error: #{theme-color('background')};
-	--mdc-theme-text-primary-on-background: #{theme-color('text')};
-	--mdc-theme-text-secondary-on-background: #{theme-color('text-700')};
-	--mdc-theme-text-hint-on-background: #{theme-color('text-500')};
-	--mdc-theme-text-disabled-on-background: #{theme-color('text-400')};
-	--mdc-theme-text-icon-on-background: #{theme-color('text-600')};
+	/* Compatibilidade com Material Design - valores padrão para tema escuro */
+	--mdc-theme-primary: #{theme-color('primary', 'dark')};
+	--mdc-theme-secondary: #{theme-color('secondary', 'dark')};
+	--mdc-theme-background: #{theme-color('background', 'dark')};
+	--mdc-theme-surface: #{theme-color('surface', 'dark')};
+	--mdc-theme-error: hsl(5, 100%, 70%);
+	--mdc-theme-on-primary: #{theme-color('text', 'dark')};
+	--mdc-theme-on-secondary: #{theme-color('text', 'dark')};
+	--mdc-theme-on-surface: #{theme-color('text', 'dark')};
+	--mdc-theme-on-error: #{theme-color('background', 'dark')};
+	--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);
+	--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.6);
+	--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38);
+	--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38);
+	--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38);
 
 	font-family: var(--font-body);
 	background-color: var(--mdc-theme-background) !important;
 	color: var(--mdc-theme-text-primary-on-background) !important;
+	color-scheme: dark; /* Padrão escuro */
 }
 
 body {
@@ -387,7 +391,7 @@ h2 {
 	--theme-surface-900: #{theme-color('surface-900', 'light')};
 	--theme-surface-950: #{theme-color('surface-950', 'light')};
 
-	/* Compatibilidade com Material Design - redefinindo para tema claro */
+	/* Compatibilidade com Material Design - redefinindo para tema claro com melhor contraste */
 	--mdc-theme-primary: #{theme-color('primary', 'light')} !important;
 	--mdc-theme-secondary: #{theme-color('secondary', 'light')} !important;
 	--mdc-theme-background: #{theme-color('background', 'light')} !important;
@@ -397,21 +401,47 @@ h2 {
 	--mdc-theme-on-secondary: #{theme-color('background', 'light')} !important;
 	--mdc-theme-on-surface: #{theme-color('text', 'light')} !important;
 	--mdc-theme-on-error: #{theme-color('background', 'light')} !important;
-	--mdc-theme-text-primary-on-background: #{theme-color('text', 'light')} !important;
-	--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'light')} !important;
-	--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'light')} !important;
-	--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'light')} !important;
-	--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'light')} !important;
+
+	/* Cores de texto com alto contraste para tema claro baseadas nas diretrizes Material Design */
+	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87) !important;
+	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.6) !important;
+	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38) !important;
+	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38) !important;
+	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38) !important;
 
 	--theme-current: light;
+
+	/* Estilos SMUI para tema claro usando CSS variables */
+	.mdc-button,
+	.mdc-button--unelevated {
+		--mdc-theme-primary: var(--theme-primary);
+		--mdc-protected-button-container-color: var(--theme-primary);
+		--mdc-protected-button-label-text-color: var(--theme-background);
+		--mdc-text-button-label-text-color: var(--theme-primary);
+	}
+
+	.mdc-list,
+	.mdc-list-item {
+		--mdc-list-list-item-label-text-color: var(--theme-text);
+		--mdc-list-list-item-supporting-text-color: var(--theme-text-700);
+		--mdc-list-list-item-container-color: var(--theme-surface);
+		--mdc-list-list-item-hover-state-layer-color: var(--theme-primary-100);
+		--mdc-list-list-item-focus-state-layer-color: var(--theme-primary-200);
+	}
+
+	.mdc-menu,
+	.mdc-menu-surface {
+		--mdc-menu-container-color: var(--theme-surface);
+		--mdc-menu-container-elevation: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
 }
 
 /* Tema escuro - redefine todas as variáveis usando a paleta dark */
 :global(.theme-dark) {
 	color-scheme: dark;
 
-	/* Text colors */
-	--theme-text: #{theme-color('text-950', 'dark')};
+	/* Text colors - corrigido para melhor contraste */
+	--theme-text: #{theme-color('text', 'dark')};
 	--theme-text-50: #{theme-color('text-50', 'dark')};
 	--theme-text-100: #{theme-color('text-100', 'dark')};
 	--theme-text-200: #{theme-color('text-200', 'dark')};
@@ -425,7 +455,7 @@ h2 {
 	--theme-text-950: #{theme-color('text-950', 'dark')};
 
 	/* Background colors */
-	--theme-background: #{theme-color('background-50', 'dark')};
+	--theme-background: #{theme-color('background', 'dark')};
 	--theme-background-50: #{theme-color('background-50', 'dark')};
 	--theme-background-100: #{theme-color('background-100', 'dark')};
 	--theme-background-200: #{theme-color('background-200', 'dark')};
@@ -466,23 +496,49 @@ h2 {
 	--theme-surface-900: #{theme-color('surface-900', 'dark')};
 	--theme-surface-950: #{theme-color('surface-950', 'dark')};
 
-	/* Compatibilidade com Material Design - redefinindo para tema escuro */
+	/* Compatibilidade com Material Design - redefinindo para tema escuro com melhor contraste */
 	--mdc-theme-primary: #{theme-color('primary', 'dark')} !important;
 	--mdc-theme-secondary: #{theme-color('secondary', 'dark')} !important;
 	--mdc-theme-background: #{theme-color('background', 'dark')} !important;
 	--mdc-theme-surface: #{theme-color('surface', 'dark')} !important;
-	--mdc-theme-error: hsl(5, 100%, 50%);
-	--mdc-theme-on-primary: #{theme-color('background', 'dark')} !important;
-	--mdc-theme-on-secondary: #{theme-color('background', 'dark')} !important;
+	--mdc-theme-error: hsl(5, 100%, 70%);
+	--mdc-theme-on-primary: #{theme-color('text', 'dark')} !important;
+	--mdc-theme-on-secondary: #{theme-color('text', 'dark')} !important;
 	--mdc-theme-on-surface: #{theme-color('text', 'dark')} !important;
 	--mdc-theme-on-error: #{theme-color('background', 'dark')} !important;
-	--mdc-theme-text-primary-on-background: #{theme-color('text', 'dark')} !important;
-	--mdc-theme-text-secondary-on-background: #{theme-color('text-700', 'dark')} !important;
-	--mdc-theme-text-hint-on-background: #{theme-color('text-500', 'dark')} !important;
-	--mdc-theme-text-disabled-on-background: #{theme-color('text-400', 'dark')} !important;
-	--mdc-theme-text-icon-on-background: #{theme-color('text-600', 'dark')} !important;
+
+	/* Cores de texto com alto contraste para tema escuro baseadas nas diretrizes Material Design */
+	--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87) !important;
+	--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.6) !important;
+	--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38) !important;
+	--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38) !important;
+	--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38) !important;
 
 	--theme-current: dark;
+
+	/* Estilos SMUI para tema escuro usando CSS variables */
+	.mdc-button,
+	.mdc-button--unelevated {
+		--mdc-theme-primary: var(--theme-primary);
+		--mdc-protected-button-container-color: var(--theme-primary);
+		--mdc-protected-button-label-text-color: var(--theme-background);
+		--mdc-text-button-label-text-color: var(--theme-primary);
+	}
+
+	.mdc-list,
+	.mdc-list-item {
+		--mdc-list-list-item-label-text-color: var(--theme-text);
+		--mdc-list-list-item-supporting-text-color: var(--theme-text-700);
+		--mdc-list-list-item-container-color: var(--theme-surface);
+		--mdc-list-list-item-hover-state-layer-color: var(--theme-primary-100);
+		--mdc-list-list-item-focus-state-layer-color: var(--theme-primary-200);
+	}
+
+	.mdc-menu,
+	.mdc-menu-surface {
+		--mdc-menu-container-color: var(--theme-surface);
+		--mdc-menu-container-elevation: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
 }
 
 /* Theme Toggle Styles */
@@ -500,12 +556,12 @@ h2 {
 
 /* Sistema de temas dinâmico - controlado totalmente via JavaScript */
 :root {
-	/* Cores padrão do tema - inicialmente light */
+	/* Cores padrão do tema - inicialmente dark */
 	--theme-background: var(--mdc-theme-background);
 	--theme-surface: var(--mdc-theme-surface);
 	--theme-text: var(--mdc-theme-text-primary-on-background);
-	--theme-outline: rgba(0, 0, 0, 0.12);
-	--theme-current: light;
+	--theme-outline: rgba(255, 255, 255, 0.12);
+	--theme-current: dark;
 }
 
 /* Temas específicos - aplicados via JavaScript dinamicamente */
