@@ -1,6 +1,4 @@
 <script>
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import { m } from '$lib/paraglide/messages.js';
 	import Welcome from '$lib/components/Welcome.svelte';
 </script>
 

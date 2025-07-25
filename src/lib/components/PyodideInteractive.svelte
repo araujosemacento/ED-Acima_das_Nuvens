@@ -80,7 +80,11 @@
 			/>
 		</div>
 
-		<button onclick={executePython} disabled={isExecuting} class="execute-btn theme-interactive-transition">
+		<button
+			onclick={executePython}
+			disabled={isExecuting}
+			class="execute-btn theme-interactive-transition"
+		>
 			{isExecuting ? '⏳ Executando...' : '▶️ Executar'}
 		</button>
 
@@ -94,10 +98,16 @@
 		<div class="examples theme-surface-transition">
 			<h4 class="theme-text-transition">💡 Exemplos para testar:</h4>
 			<div class="example-buttons">
-				<button onclick={() => (pythonCode = 'import math; math.sqrt(64)')} class="example-btn theme-interactive-transition">
+				<button
+					onclick={() => (pythonCode = 'import math; math.sqrt(64)')}
+					class="example-btn theme-interactive-transition"
+				>
 					🔢 Matemática
 				</button>
-				<button onclick={() => (pythonCode = 'list(range(1, 11))')} class="example-btn theme-interactive-transition">
+				<button
+					onclick={() => (pythonCode = 'list(range(1, 11))')}
+					class="example-btn theme-interactive-transition"
+				>
 					📋 Lista
 				</button>
 				<button

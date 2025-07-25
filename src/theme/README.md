@@ -8,9 +8,9 @@ Sistema de cores integrado com Material Design 3 e paleta customizada.
 
 ```scss
 .component {
-  background-color: theme-color('primary');
-  color: theme-color('text', 'dark');
-  border: 1px solid theme-color('primary-200');
+	background-color: theme-color('primary');
+	color: theme-color('text', 'dark');
+	border: 1px solid theme-color('primary-200');
 }
 ```
 
@@ -18,8 +18,8 @@ Sistema de cores integrado com Material Design 3 e paleta customizada.
 
 ```css
 .element {
-  background-color: var(--mdc-theme-primary);
-  color: var(--ed-text-100);
+	background-color: var(--mdc-theme-primary);
+	color: var(--ed-text-100);
 }
 ```
 

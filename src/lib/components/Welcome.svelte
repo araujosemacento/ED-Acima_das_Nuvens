@@ -12,35 +12,58 @@
 	// Array com todos os assets de nuvens (1-17)
 	const cloudAssets = Array.from({ length: 17 }, (_, i) => i + 1);
 
+	// Fix para hydration_attribute_changed: controlar renderização das imagens
+	let showImages = $state(false);
+	let currentTheme = $state('light'); // Tema padrão para SSR
+
+	// Aguardar hidratação no cliente antes de mostrar as imagens com tema correto
+	if (typeof window !== 'undefined') {
+		$effect(() => {
+			if (!showImages) {
+				// Primeiro, definir o tema correto
+				currentTheme = $themeStore;
+				// Depois, mostrar as imagens
+				showImages = true;
+			} else {
+				// Atualizar tema quando mudar
+				currentTheme = $themeStore;
+			}
+		});
+	}
+
 	// Reativo: sincroniza cloudman com a store
-	$: cloudAnimationsStore.setActive(cloudman);
+	$effect(() => {
+		cloudAnimationsStore.setActive(cloudman);
+	});
 
 	// Lifecycle
 	onMount(() => {
 		logger.animation('COMPONENT_MOUNT', {
-			'Componente': 'Welcome',
-			'Animações ativas': cloudman
+			Componente: 'Welcome',
+			'Animações ativas': cloudman,
+			'Imagens carregadas': showImages,
+			'Tema atual': currentTheme
 		});
 
 		// Pequeno delay para garantir que elementos estejam renderizados
 		setTimeout(() => {
 			logger.animation('MOUNT_INIT_CALL', {
-				'Ação': 'Inicializando animações das nuvens'
+				Ação: 'Inicializando animações das nuvens'
 			});
-			
+
 			cloudAnimationsStore.initializeAllAnimations();
 		}, 100);
-		
+
 		// Cleanup ao desmontar
 		return () => {
 			logger.animation('COMPONENT_UNMOUNT', {
-				'Componente': 'Welcome'
+				Componente: 'Welcome'
 			});
 
 			cloudAnimationsStore.cleanup();
-			
+
 			logger.animation('COMPONENT_UNMOUNT_COMPLETE', {
-				'Status': 'Limpeza concluída'
+				Status: 'Limpeza concluída'
 			});
 		};
 	});
@@ -49,21 +72,26 @@
 <section id="welcome" class="theme-background theme-text-transition">
 	<!-- Background de nuvens -->
 	<div class="clouds-background">
-		{#each cloudAssets as assetNum}
-			<img 
-				src="/assets/nuvens/{$themeStore}/SVG/nuvem{assetNum}.svg"
-				alt=""
-				class="cloud-asset"
-				data-cloud-id={assetNum}
-				use:registerCloudElement={assetNum}
-			/>
+		{#each cloudAssets as assetNum (assetNum)}
+			{#if showImages}
+				<img
+					src="/assets/nuvens/{currentTheme}/SVG/nuvem{assetNum}.svg"
+					alt=""
+					class="cloud-asset"
+					data-cloud-id={assetNum}
+					use:registerCloudElement={assetNum}
+				/>
+			{/if}
 		{/each}
 	</div>
 
 	<!-- Conteúdo principal -->
 	<div class="welcome-content">
-		<h1 class="theme-text-transition text-outlined">{`${m.welcome()}!`}</h1>
-		<p class="theme-text-transition text-outlined">{@html m.initial_disclaimer()}</p>
+		<h1 class="theme-text-transition text-outlined">{m.welcome()}!</h1>
+		<div class="disclaimer-text">
+			<p class="theme-text-transition text-outlined">{m.initial_disclaimer_paragraph1()}</p>
+			<p class="theme-text-transition text-outlined">{m.initial_disclaimer_paragraph2()}</p>
+		</div>
 		<Button
 			style="background-color: var(--ed-complementary); color: var(--ed-text-100); font-weight: 600;"
 			class="theme-interactive-transition"
@@ -88,11 +116,21 @@
 		color: var(--theme-text);
 		overflow: hidden;
 		line-height: 175%;
-		
+
 		p {
 			text-align: justify;
 			text-align-last: center;
 			text-justify: inter-word;
+		}
+	}
+
+	.disclaimer-text {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		p {
+			margin: 0;
 		}
 	}
 
@@ -131,9 +169,9 @@
 		-webkit-text-stroke: 20px var(--theme-background);
 		paint-order: stroke fill;
 		font-weight: 600;
-		
+
 		// Fallback para browsers que não suportam text-stroke
-		text-shadow: 
+		text-shadow:
 			-20px -20px 0 var(--theme-background),
 			20px -20px 0 var(--theme-background),
 			-20px 20px 0 var(--theme-background),
@@ -155,9 +193,9 @@
 
 		.text-outlined {
 			-webkit-text-stroke: 10px var(--theme-background);
-			
+
 			// Ajustar text-shadow para mobile
-			text-shadow: 
+			text-shadow:
 				-10px -10px 0 var(--theme-background),
 				10px -10px 0 var(--theme-background),
 				-10px 10px 0 var(--theme-background),

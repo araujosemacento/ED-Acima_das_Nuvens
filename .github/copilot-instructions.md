@@ -242,12 +242,42 @@ Este projeto visa ensinar estruturas de dados e algoritmos de forma interativa, 
 - ✅ Sistema de temas Material Design 3 com transições JavaScript
 - ✅ Internacionalização Paraglide JS (pt-br/en)
 - ✅ Animações de nuvens implementadas (17 assets, movimento orgânico)
-- ✅ Logger de desenvolvimento humanizado
+- ✅ Logger de desenvolvimento humanizado com modo verbose
 - ✅ Sistema de transições JavaScript puro (300ms, 60fps)
 - ✅ Ionicons 7.1.0 integrado (1338+ SVGs)
 - ✅ Deploy automático GitHub Pages
+- ✅ **Fix para hydration_attribute_changed warning** implementado
+- ✅ Script de limpeza de cache (`bun run clean`)
+- ✅ Linting e formatação automatizados
 - 🚧 Jogo narrativo em desenvolvimento
 - 🚧 Conteúdo educacional em expansão
+
+## Correções Implementadas
+
+### Hydration Warning Fix
+
+**Problema**: Aviso `hydration_attribute_changed` no componente `Welcome.svelte` devido à mudança do `src` das imagens entre servidor e cliente.
+
+**Solução**: Implementação de controle de renderização para evitar conflitos de hidratação:
+
+```javascript
+// Fix implementado em Welcome.svelte
+let showImages = $state(false);
+let currentTheme = $state('light'); // Tema padrão para SSR
+
+if (typeof window !== 'undefined') {
+	$effect(() => {
+		if (!showImages) {
+			currentTheme = $themeStore;
+			showImages = true;
+		} else {
+			currentTheme = $themeStore;
+		}
+	});
+}
+```
+
+**Resultado**: Eliminação completa do warning de hidratação, mantendo funcionalidade de temas.
 
 ## Comandos Úteis
 
@@ -258,6 +288,9 @@ bun run dev
 # Build
 bun run build
 
+# Limpeza (cache, build, temporários)
+bun run clean
+
 # Linting
 bun run lint
 
@@ -266,6 +299,9 @@ bun run format
 
 # Temas Material Design
 bun run prepare-themes
+
+# Verificação de acessibilidade
+bun run accessibility-check
 ```
 
 ## Deploy

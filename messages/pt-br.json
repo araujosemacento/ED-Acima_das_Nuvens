@@ -7,5 +7,7 @@
 	"theme_light": "Claro",
 	"theme_dark": "Escuro",
 	"theme_system": "Sistema",
-	"theme_toggle": "Alternar tema"
+	"theme_toggle": "Alternar tema",
+	"initial_disclaimer_paragraph1": "O jogo a seguir é uma aventura estilo RPG baseada em texto e inspirada na estética de terminais de comando, onde você toma o controle das ações de um dentre cinco personagens distintos, cada um com suas diferentes formas de vivenciar a narrativa. Suas decisões determinam o desenrolar da narrativa em questão, então pense bem e tente se agarrar aos detalhes.",
+	"initial_disclaimer_paragraph2": "Gostaria de continuar?"
 }

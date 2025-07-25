@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { themeStore, THEME_TYPES } from '$lib/stores/theme.js';
 	import { logger } from '$lib/stores/logger.js';
-	import Button, { Label } from '@smui/button';
+	import Button from '@smui/button';
 	import Menu from '@smui/menu';
 	import { Anchor } from '@smui/menu-surface';
 	import List, { Item, Graphic, Text } from '@smui/list';
@@ -12,7 +12,7 @@
 	let menu = $state();
 	let anchor = $state();
 	let anchorClasses = $state({});
-	
+
 	// Stores reativos da nova API
 	let currentTheme = $state(THEME_TYPES.SYSTEM);
 	let userTheme = $state(THEME_TYPES.SYSTEM);
@@ -47,29 +47,29 @@
 	const getDisplayIcon = () => {
 		// Para debug: mostra valores atuais
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON_DEBUG', {
-			'Interagiu': hasUserInteraction,
-			'Escolha': userTheme,
-			'Atual': currentTheme
+			Interagiu: hasUserInteraction,
+			Escolha: userTheme,
+			Atual: currentTheme
 		});
 
 		// Se o usuário escolheu explicitamente light ou dark, mostra o ícone da escolha
 		if (hasUserInteraction && (userTheme === THEME_TYPES.LIGHT || userTheme === THEME_TYPES.DARK)) {
 			const icon = getThemeIcon(userTheme);
 			logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-				'Tipo': 'Escolha do usuário',
-				'Tema': userTheme,
-				'Ícone': icon
+				Tipo: 'Escolha do usuário',
+				Tema: userTheme,
+				Ícone: icon
 			});
 			return icon;
 		}
-		
+
 		// Em qualquer outro caso (system ou sem interação), mostra o ícone do tema efetivo
 		// currentTheme sempre será 'light' ou 'dark', nunca 'system'
 		const icon = getThemeIcon(currentTheme);
 		logger.component('ThemeToggle', 'GET_DISPLAY_ICON', {
-			'Tipo': 'Tema efetivo',
-			'Tema': currentTheme,
-			'Ícone': icon
+			Tipo: 'Tema efetivo',
+			Tema: currentTheme,
+			Ícone: icon
 		});
 		return icon;
 	};
@@ -77,30 +77,30 @@
 	// Subscreve aos stores do tema usando a nova API
 	$effect(() => {
 		// Store principal para o tema atual efetivo (light/dark, nunca 'system')
-		const unsubscribeMain = themeStore.subscribe(theme => {
+		const unsubscribeMain = themeStore.subscribe((theme) => {
 			logger.component('ThemeToggle', 'MAIN_THEME_UPDATE', {
-				'De': currentTheme,
-				'Para': theme
+				De: currentTheme,
+				Para: theme
 			});
 			currentTheme = theme;
 		});
-		
+
 		// Store para a escolha do usuário (pode ser 'system', 'light', 'dark')
-		const unsubscribeUser = themeStore.userTheme.subscribe(theme => {
+		const unsubscribeUser = themeStore.userTheme.subscribe((theme) => {
 			logger.component('ThemeToggle', 'USER_THEME_UPDATE', {
-				'Escolha': theme
+				Escolha: theme
 			});
 			userTheme = theme;
 		});
-		
+
 		// Store para saber se o usuário já interagiu
-		const unsubscribeInteraction = themeStore.hasUserInteraction.subscribe(interacted => {
+		const unsubscribeInteraction = themeStore.hasUserInteraction.subscribe((interacted) => {
 			logger.component('ThemeToggle', 'INTERACTION_UPDATE', {
-				'Interagiu': interacted
+				Interagiu: interacted
 			});
 			hasUserInteraction = interacted;
 		});
-		
+
 		return () => {
 			logger.component('ThemeToggle', 'UNSUBSCRIBE_ALL');
 			unsubscribeMain();
@@ -112,20 +112,20 @@
 	// Função para selecionar um tema
 	const selectTheme = (theme) => {
 		logger.component('ThemeToggle', 'SELECT_THEME', {
-			'Tema': theme
+			Tema: theme
 		});
-		
+
 		themeStore.setTheme(theme);
-		
+
 		logger.component('ThemeToggle', 'THEME_SET_CALLED', {
-			'Definido': theme
+			Definido: theme
 		});
 	};
 
 	// A inicialização do tema agora é automática no store
 	onMount(() => {
 		logger.component('ThemeToggle', 'MOUNT');
-		});
+	});
 </script>
 
 <div class="theme-toggle-container">
@@ -142,7 +142,7 @@
 				if (anchorClasses[className]) {
 					delete anchorClasses[className];
 				}
-			},
+			}
 		}}
 		bind:this={anchor}
 	>
@@ -155,8 +155,8 @@
 			aria-label={m.theme_toggle()}
 			onclick={() => menu.setOpen(true)}
 		>
-			<img 
-				src={getDisplayIcon()} 
+			<img
+				src={getDisplayIcon()}
 				alt={m.theme_toggle()}
 				class="theme-icon theme-transition-medium"
 			/>
@@ -177,38 +177,38 @@
 					onSMUIAction={() => selectTheme(THEME_TYPES.LIGHT)}
 				>
 					<Graphic>
-						<img 
-							src={getMenuItemIcon(THEME_TYPES.LIGHT)} 
+						<img
+							src={getMenuItemIcon(THEME_TYPES.LIGHT)}
 							alt={m.theme_light()}
 							class="theme-menu-icon theme-transition-medium"
 						/>
 					</Graphic>
 					<Text class="theme-text-transition">{m.theme_light()}</Text>
 				</Item>
-				
+
 				<Item
 					class="theme-menu-item theme-interactive-transition"
 					selected={userTheme === THEME_TYPES.DARK}
 					onSMUIAction={() => selectTheme(THEME_TYPES.DARK)}
 				>
 					<Graphic>
-						<img 
-							src={getMenuItemIcon(THEME_TYPES.DARK)} 
+						<img
+							src={getMenuItemIcon(THEME_TYPES.DARK)}
 							alt={m.theme_dark()}
 							class="theme-menu-icon theme-transition-medium"
 						/>
 					</Graphic>
 					<Text class="theme-text-transition">{m.theme_dark()}</Text>
 				</Item>
-				
+
 				<Item
 					class="theme-menu-item theme-interactive-transition"
 					selected={userTheme === THEME_TYPES.SYSTEM}
 					onSMUIAction={() => selectTheme(THEME_TYPES.SYSTEM)}
 				>
 					<Graphic>
-						<img 
-							src={getMenuItemIcon(THEME_TYPES.SYSTEM)} 
+						<img
+							src={getMenuItemIcon(THEME_TYPES.SYSTEM)}
 							alt={m.theme_system()}
 							class="theme-menu-icon theme-transition-medium"
 						/>
@@ -223,8 +223,8 @@
 <style lang="scss">
 	.theme-toggle-container {
 		position: fixed;
-        top: 2rem;
-        right: 2rem;
+		top: 2rem;
+		right: 2rem;
 	}
 
 	:global(.theme-toggle-button) {
@@ -238,7 +238,7 @@
 		justify-content: center !important;
 		overflow: hidden !important; /* Clipa o ripple effect */
 		position: relative !important;
-		
+
 		/* Garante que todos os elementos internos respeitem o border-radius */
 		:global(.mdc-button__ripple),
 		:global(.mdc-ripple-surface),
@@ -246,7 +246,7 @@
 			border-radius: 50% !important;
 			overflow: hidden !important;
 		}
-		
+
 		&:hover {
 			transform: scale(1.05);
 			transition: all 0.2s ease-in-out;
@@ -275,15 +275,24 @@
 		/* Remover transições locais para usar as globais */
 
 		&:hover {
-			background-color: var(--mdc-theme-primary-variant, rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.08)) !important;
+			background-color: var(
+				--mdc-theme-primary-variant,
+				rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.08)
+			) !important;
 		}
 
 		&:focus {
-			background-color: var(--mdc-theme-primary-variant, rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.12)) !important;
+			background-color: var(
+				--mdc-theme-primary-variant,
+				rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.12)
+			) !important;
 		}
 
 		&.mdc-list-item--selected {
-			background-color: var(--mdc-theme-primary-variant, rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.16)) !important;
+			background-color: var(
+				--mdc-theme-primary-variant,
+				rgba(var(--mdc-theme-primary-rgb, 98, 0, 238), 0.16)
+			) !important;
 			color: var(--mdc-theme-primary) !important;
 		}
 	}
@@ -292,12 +301,17 @@
 	:global(.theme-dark) {
 		:global(.theme-menu-item) {
 			color: var(--mdc-theme-on-surface) !important;
-			
+
 			&.mdc-list-item--selected {
-				background-color: rgba(164, 61, 150, 0.25) !important; /* Verde mais escuro para melhor contraste */
+				background-color: rgba(
+					164,
+					61,
+					150,
+					0.25
+				) !important; /* Verde mais escuro para melhor contraste */
 				color: hsl(162, 100%, 90%) !important; /* Texto claro */
 			}
-			
+
 			&:hover {
 				background-color: rgba(164, 61, 150, 0.1) !important;
 				color: hsl(162, 100%, 90%) !important;
@@ -308,12 +322,17 @@
 	:global(.theme-light) {
 		:global(.theme-menu-item) {
 			color: var(--mdc-theme-on-surface) !important;
-			
+
 			&.mdc-list-item--selected {
-				background-color: rgba(164, 61, 150, 0.15) !important; /* Verde mais escuro para melhor contraste */
+				background-color: rgba(
+					164,
+					61,
+					150,
+					0.15
+				) !important; /* Verde mais escuro para melhor contraste */
 				color: hsl(162, 100%, 10%) !important; /* Texto escuro */
 			}
-			
+
 			&:hover {
 				background-color: rgba(164, 61, 150, 0.08) !important;
 				color: hsl(162, 100%, 10%) !important;
@@ -373,7 +392,7 @@
 		:global(.theme-menu-item) {
 			transition: none !important;
 		}
-		
+
 		:global(.theme-toggle-button):hover {
 			transform: none !important;
 		}

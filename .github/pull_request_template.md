@@ -36,6 +36,7 @@
 ## � Notas
 
 <!-- Informações adicionais para review -->
+
 - [ ] ♿ Acessibilidade
 - [ ] 🎯 Temas Material Design
 - [ ] 🔄 GitHub Actions/CI

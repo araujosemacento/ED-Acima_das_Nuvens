@@ -23,5 +23,14 @@ export default [
 	{
 		files: ['**/*.svelte', '**/*.svelte.js'],
 		languageOptions: { parserOptions: { svelteConfig } }
+	},
+	{
+		ignores: [
+			'build/',
+			'.svelte-kit/',
+			'dist/',
+			'static/assets/ionicons/**',
+			'build/assets/ionicons/**'
+		]
 	}
 ];
