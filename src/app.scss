@@ -6,7 +6,6 @@
 @use 'sass:map';
 
 @use './theme/palette' as palette;
-@use './lib/styles/cloudMotion' as cloudMotion;
 @use '@material/typography' as mdctypography;
 
 // ========================================
@@ -70,9 +69,12 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	--theme-surface: #{theme-color('surface', 'dark')};
 
 	// Sombras temáticas
-	--theme-shadow-light: rgba(0, 0, 0, 0.1);
+	--theme-shadow-light: rgba(0, 0, 0, 0.12);
 	--theme-shadow-medium: rgba(0, 0, 0, 0.14);
 	--theme-shadow-dark: rgba(0, 0, 0, 0.2);
+
+	// Filtros de ícones (controlado dinamicamente por theme.js)
+	--icon-filter: invert(1); // Padrão tema escuro
 
 	// Compatibilidade Material Design (tema escuro)
 	--mdc-theme-primary: #{theme-color('primary', 'dark')};
@@ -211,6 +213,9 @@ h2 {
 	--theme-accent: #{theme-color('accent', 'light')};
 	--theme-surface: #{theme-color('surface', 'light')};
 
+	/* Filtros de ícones para tema claro */
+	--icon-filter: none;
+
 	/* Compatibilidade Material Design */
 	--mdc-theme-primary: #{theme-color('primary', 'light')};
 	--mdc-theme-secondary: #{theme-color('secondary', 'light')};
@@ -238,6 +243,9 @@ h2 {
 	--theme-secondary: #{theme-color('secondary', 'dark')};
 	--theme-accent: #{theme-color('accent', 'dark')};
 	--theme-surface: #{theme-color('surface', 'dark')};
+
+	/* Filtros de ícones para tema escuro */
+	--icon-filter: invert(1);
 
 	/* Compatibilidade Material Design */
 	--mdc-theme-primary: #{theme-color('primary', 'dark')};

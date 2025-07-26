@@ -71,7 +71,7 @@ $effect(() => console.log(count));
 ### Eventos Svelte 5
 
 - **Declarações obsoletas**: `on:click`, `on:SMUI:action`
-- **Usar**: `onclick`, `onSMUIaction`
+- **Usar**: `onclick`, `onSMUIAction`
 - **Padrão**: Event handlers como propriedades diretas
 
 ### Sistema de Temas

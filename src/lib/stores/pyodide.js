@@ -1,318 +1,348 @@
-import { writable, derived } from 'svelte/store';
+// Store do Pyodide - Versão dinâmica e responsiva baseada nas melhores práticas do Svelte
+import { writable, derived, readonly, get } from 'svelte/store';
 
 /**
- * Store robusta e simplificada para gerenciar o Pyodide
- * API inspirada em classe/objeto para uso plug-and-play
+ * Store robusta e dinâmica para gerenciar o Pyodide
+ * API funcional inspirada nas melhores práticas do Svelte stores
  */
+
+// Configurações otimizadas
+const PYODIDE_CONFIG = Object.freeze({
+	CDN_BASE: 'https://araujosemacento.github.io/pyodide-files-serve/files/',
+	MODULE_URL: 'https://araujosemacento.github.io/pyodide-files-serve/files/pyodide.mjs',
+	EXECUTION_TIMEOUT: 30000,
+	CACHE_TTL: 5 * 60 * 1000, // 5 minutos
+	RETRY_ATTEMPTS: 3
+});
+
+// Estados possíveis do Pyodide
+const PYODIDE_STATES = Object.freeze({
+	IDLE: 'idle',
+	LOADING: 'loading',
+	READY: 'ready',
+	ERROR: 'error',
+	EXECUTING: 'executing'
+});
+
+// Sistema de cache reativo para scripts
+const createScriptCache = () => {
+	const cache = new Map();
+	const cacheTimestamps = new Map();
+
+	return {
+		get: (key) => {
+			const timestamp = cacheTimestamps.get(key);
+			if (timestamp && Date.now() - timestamp > PYODIDE_CONFIG.CACHE_TTL) {
+				cache.delete(key);
+				cacheTimestamps.delete(key);
+				return null;
+			}
+			return cache.get(key);
+		},
+		set: (key, value) => {
+			cache.set(key, value);
+			cacheTimestamps.set(key, Date.now());
+		},
+		clear: () => {
+			cache.clear();
+			cacheTimestamps.clear();
+		},
+		size: () => cache.size
+	};
+};
+
 function createPyodideStore() {
-	// Estado base interno
-	const baseStore = writable({
+	// Estado base usando estrutura mais granular
+	const baseState = writable({
 		instance: null,
-		ready: false,
-		loading: false,
+		state: PYODIDE_STATES.IDLE,
 		error: null,
+		loadedPackages: new Set(),
 		loadedScripts: new Set(),
-		lastExecution: null
+		executionHistory: [],
+		lastExecution: null,
+		stats: {
+			totalExecutions: 0,
+			successfulExecutions: 0,
+			averageExecutionTime: 0
+		}
 	});
 
-	// Estados derivados já prontos para uso
-	const derived_isReady = derived(baseStore, ($store) => $store.ready);
-	const derived_isLoading = derived(baseStore, ($store) => $store.loading);
-	const derived_hasError = derived(baseStore, ($store) => !!$store.error);
-	const derived_statusMessage = derived(baseStore, ($store) => {
-		if ($store.error) return `❌ Erro: ${$store.error}`;
-		if ($store.loading) return '⏳ Carregando Pyodide...';
-		if ($store.ready) return '✅ Pyodide carregado com sucesso!';
-		return '🔄 Inicializando...';
+	// Cache reativo para scripts
+	const scriptCache = createScriptCache();
+
+	// Stores derivados granulares para diferentes aspectos
+	const isReady = derived(baseState, ($state) => $state.state === PYODIDE_STATES.READY);
+	const isLoading = derived(baseState, ($state) => $state.state === PYODIDE_STATES.LOADING);
+	const hasError = derived(baseState, ($state) => $state.state === PYODIDE_STATES.ERROR);
+	const isExecuting = derived(baseState, ($state) => $state.state === PYODIDE_STATES.EXECUTING);
+
+	const statusMessage = derived(baseState, ($state) => {
+		switch ($state.state) {
+			case PYODIDE_STATES.IDLE:
+				return 'Inicializando...';
+			case PYODIDE_STATES.LOADING:
+				return 'Carregando Pyodide...';
+			case PYODIDE_STATES.READY:
+				return 'Pyodide pronto!';
+			case PYODIDE_STATES.EXECUTING:
+				return 'Executando código Python...';
+			case PYODIDE_STATES.ERROR:
+				return 'Erro: ' + $state.error;
+			default:
+				return 'Estado desconhecido';
+		}
 	});
 
-	// Cache para scripts carregados
-	const scriptCache = new Map();
+	const executionStats = derived(baseState, ($state) => $state.stats);
 
-	const api = {
-		// Subscrição ao estado base
-		subscribe: baseStore.subscribe,
-
-		// Estados derivados prontos para uso
-		isReady: derived_isReady,
-		isLoading: derived_isLoading,
-		hasError: derived_hasError,
-		statusMessage: derived_statusMessage,
-
-		/**
-		 * Carrega o Pyodide de forma assíncrona
-		 * Retorna Promise que resolve quando estiver pronto
-		 * @returns {Promise<boolean>} true se carregou com sucesso
-		 */
-		async load() {
-			// Só executa no cliente
-			if (typeof window === 'undefined') return false;
-
-			return new Promise((resolve) => {
-				// Evita carregar múltiplas vezes
-				let currentState;
-				const unsubscribe = baseStore.subscribe((state) => (currentState = state));
-				unsubscribe();
-
-				if (currentState.loading || currentState.ready) {
-					if (currentState.ready) resolve(true);
-					else {
-						// Espera terminar de carregar
-						const waitUnsubscribe = baseStore.subscribe((state) => {
-							if (state.ready) {
-								waitUnsubscribe();
-								resolve(true);
-							} else if (state.error) {
-								waitUnsubscribe();
-								resolve(false);
-							}
-						});
-					}
-					return;
-				}
-
-				baseStore.update((state) => ({ ...state, loading: true, error: null }));
-
-				(async () => {
-					try {
-						console.log('🚀 Iniciando carregamento do Pyodide...');
-
-						// Importa o módulo ES do Pyodide
-						const { loadPyodide: loadPyodideModule } = await import(
-							'https://araujosemacento.github.io/pyodide-files-serve/files/pyodide.mjs'
-						);
-
-						// Carrega a instância do Pyodide
-						const pyodide = await loadPyodideModule({
-							indexURL: 'https://araujosemacento.github.io/pyodide-files-serve/files/'
-						});
-
-						console.log('✅ Pyodide carregado com sucesso!');
-
-						baseStore.set({
-							instance: pyodide,
-							ready: true,
-							loading: false,
-							error: null,
-							loadedScripts: new Set(),
-							lastExecution: null
-						});
-
-						resolve(true);
-					} catch (error) {
-						console.error('❌ Erro ao carregar Pyodide:', error);
-
-						baseStore.set({
-							instance: null,
-							ready: false,
-							loading: false,
-							error: error.message,
-							loadedScripts: new Set(),
-							lastExecution: null
-						});
-
-						resolve(false);
-					}
-				})();
-			});
-		},
-
-		/**
-		 * Executa código Python de forma síncrona (aguarda se necessário)
-		 * @param {string} code - Código Python para executar
-		 * @returns {Promise<any>} Resultado da execução
-		 */
-		async run(code) {
-			// Garante que está carregado
-			const isLoaded = await this.load();
-			if (!isLoaded) {
-				throw new Error('Falha ao carregar Pyodide');
-			}
-
-			let currentState;
-			const unsubscribe = baseStore.subscribe((state) => (currentState = state));
-			unsubscribe();
-
-			try {
-				const rawResult = await currentState.instance.runPythonAsync(code);
-
-				// Converte resultado Python para JavaScript de forma segura
-				let result;
+	// Sistema otimizado de execução com retry e timeout
+	const createExecutionSystem = () => {
+		const executeWithRetry = async (fn, attempts = PYODIDE_CONFIG.RETRY_ATTEMPTS) => {
+			for (let i = 0; i < attempts; i++) {
 				try {
-					// Tenta converter objeto Python para JavaScript
-					if (rawResult && typeof rawResult.toJs === 'function') {
-						result = rawResult.toJs();
-					} else {
-						result = rawResult;
-					}
-				} catch {
-					// Se falhar, usa string representation
-					result = String(rawResult);
+					return await Promise.race([
+						fn(),
+						new Promise((_, reject) =>
+							setTimeout(
+								() => reject(new Error('Timeout de execução')),
+								PYODIDE_CONFIG.EXECUTION_TIMEOUT
+							)
+						)
+					]);
+				} catch (error) {
+					if (i === attempts - 1) throw error;
+					await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1))); // Backoff
 				}
-
-				baseStore.update((state) => ({
-					...state,
-					lastExecution: { code, result, timestamp: new Date() }
-				}));
-
-				console.log(`🐍 Python executou: ${code} = ${result}`);
-				return result;
-			} catch (error) {
-				console.error('❌ Erro ao executar Python:', error);
-
-				baseStore.update((state) => ({
-					...state,
-					lastExecution: { code, error: error.message, timestamp: new Date() }
-				}));
-
-				throw error;
 			}
-		},
+		};
 
-		/**
-		 * Carrega e executa um script Python de arquivo
-		 * @param {string} scriptPath - Caminho relativo ao script (ex: 'scripts/exemplo.py')
-		 * @returns {Promise<any>} Resultado da execução
-		 */
-		async runScript(scriptPath) {
-			try {
-				// Verifica cache primeiro
-				if (scriptCache.has(scriptPath)) {
-					console.log(`📁 Script encontrado no cache: ${scriptPath}`);
-					return await this.run(scriptCache.get(scriptPath));
+		const updateStats = (startTime, success = true) => {
+			baseState.update((state) => {
+				const executionTime = Date.now() - startTime;
+				const newStats = {
+					totalExecutions: state.stats.totalExecutions + 1,
+					successfulExecutions: state.stats.successfulExecutions + (success ? 1 : 0),
+					averageExecutionTime:
+						(state.stats.averageExecutionTime * state.stats.totalExecutions + executionTime) /
+						(state.stats.totalExecutions + 1)
+				};
+				return { ...state, stats: newStats };
+			});
+		};
+
+		return { executeWithRetry, updateStats };
+	};
+
+	const executionSystem = createExecutionSystem();
+
+	// Sistema de carregamento otimizado
+	const loadPyodide = async () => {
+		const currentState = get(baseState);
+		if (currentState.instance) return currentState.instance;
+		if (currentState.state === PYODIDE_STATES.LOADING) {
+			// Espera terminar o carregamento atual
+			return new Promise((resolve, reject) => {
+				const unsubscribe = baseState.subscribe((state) => {
+					if (state.state === PYODIDE_STATES.READY) {
+						unsubscribe();
+						resolve(state.instance);
+					} else if (state.state === PYODIDE_STATES.ERROR) {
+						unsubscribe();
+						reject(new Error(state.error));
+					}
+				});
+			});
+		}
+
+		baseState.update((state) => ({ ...state, state: PYODIDE_STATES.LOADING, error: null }));
+
+		try {
+			const { loadPyodide: loadPyodideModule } = await import(PYODIDE_CONFIG.MODULE_URL);
+			const instance = await loadPyodideModule({
+				indexURL: PYODIDE_CONFIG.CDN_BASE,
+				fullStdLib: false
+			});
+
+			baseState.update((state) => ({
+				...state,
+				instance,
+				state: PYODIDE_STATES.READY,
+				error: null
+			}));
+
+			return instance;
+		} catch (error) {
+			baseState.update((state) => ({
+				...state,
+				instance: null,
+				state: PYODIDE_STATES.ERROR,
+				error: error.message
+			}));
+			throw error;
+		}
+	};
+
+	return {
+		// Store principal - apenas leitura
+		subscribe: readonly(baseState).subscribe,
+
+		// Stores derivados granulares
+		isReady: readonly(isReady),
+		isLoading: readonly(isLoading),
+		hasError: readonly(hasError),
+		isExecuting: readonly(isExecuting),
+		statusMessage: readonly(statusMessage),
+		executionStats: readonly(executionStats),
+
+		// API funcional otimizada
+		actions: {
+			async load() {
+				try {
+					await loadPyodide();
+					return true;
+				} catch {
+					return false;
+				}
+			},
+
+			async run(code) {
+				const startTime = Date.now();
+
+				try {
+					const instance = await loadPyodide();
+
+					baseState.update((state) => ({ ...state, state: PYODIDE_STATES.EXECUTING }));
+
+					const result = await executionSystem.executeWithRetry(async () => {
+						const rawResult = await instance.runPythonAsync(code);
+						return rawResult?.toJs?.() ?? rawResult;
+					});
+
+					const execution = {
+						code,
+						result,
+						timestamp: new Date(),
+						duration: Date.now() - startTime
+					};
+
+					baseState.update((state) => ({
+						...state,
+						state: PYODIDE_STATES.READY,
+						lastExecution: execution,
+						executionHistory: [...state.executionHistory.slice(-9), execution] // Mantém últimas 10
+					}));
+
+					executionSystem.updateStats(startTime, true);
+					return result;
+				} catch (error) {
+					const execution = {
+						code,
+						error: error.message,
+						timestamp: new Date(),
+						duration: Date.now() - startTime
+					};
+
+					baseState.update((state) => ({
+						...state,
+						state: PYODIDE_STATES.READY,
+						lastExecution: execution,
+						executionHistory: [...state.executionHistory.slice(-9), execution]
+					}));
+
+					executionSystem.updateStats(startTime, false);
+					throw error;
+				}
+			},
+
+			async runScript(scriptPath) {
+				const cached = scriptCache.get(scriptPath);
+				if (cached) {
+					return this.run(cached);
 				}
 
-				console.log(`📁 Carregando script: ${scriptPath}`);
-
-				// Carrega o arquivo Python (agora em /static)
-				const response = await fetch(`/${scriptPath}`);
+				const response = await fetch('/' + scriptPath);
 				if (!response.ok) {
-					throw new Error(`Falha ao carregar script: ${scriptPath} (${response.status})`);
+					throw new Error('Falha ao carregar script: ' + scriptPath);
 				}
 
-				const pythonCode = await response.text();
+				const code = await response.text();
+				scriptCache.set(scriptPath, code);
 
-				// Armazena no cache
-				scriptCache.set(scriptPath, pythonCode);
-
-				// Marca como carregado
-				baseStore.update((state) => ({
+				baseState.update((state) => ({
 					...state,
 					loadedScripts: new Set([...state.loadedScripts, scriptPath])
 				}));
 
-				console.log(`✅ Script carregado: ${scriptPath}`);
+				return this.run(code);
+			},
 
-				// Executa o script
-				return await this.run(pythonCode);
-			} catch (error) {
-				console.error(`❌ Erro ao executar script ${scriptPath}:`, error);
-				throw error;
+			async install(packages) {
+				const packageList = Array.isArray(packages) ? packages : [packages];
+				const instance = await loadPyodide();
+
+				await instance.loadPackage(packageList);
+
+				baseState.update((state) => ({
+					...state,
+					loadedPackages: new Set([...state.loadedPackages, ...packageList])
+				}));
+			},
+
+			async runWithOutput(code) {
+				const captureCode = [
+					'import sys',
+					'from io import StringIO',
+					'old_stdout = sys.stdout',
+					'sys.stdout = mystdout = StringIO()',
+					'',
+					'try:',
+					...code.split('\n').map((line) => '    ' + line),
+					'except Exception as e:',
+					'    print(f"Erro: {e}")',
+					'',
+					'sys.stdout = old_stdout',
+					'captured_output = mystdout.getvalue()'
+				].join('\n');
+
+				await this.run(captureCode);
+				const output = await this.run('captured_output');
+
+				try {
+					const result = await this.run(code);
+					return { result, output };
+				} catch {
+					return { result: null, output };
+				}
+			},
+
+			reset() {
+				scriptCache.clear();
+				baseState.set({
+					instance: null,
+					state: PYODIDE_STATES.IDLE,
+					error: null,
+					loadedPackages: new Set(),
+					loadedScripts: new Set(),
+					executionHistory: [],
+					lastExecution: null,
+					stats: {
+						totalExecutions: 0,
+						successfulExecutions: 0,
+						averageExecutionTime: 0
+					}
+				});
 			}
 		},
 
-		/**
-		 * Instala pacotes Python de forma simplificada
-		 * @param {string|string[]} packages - Pacote(s) para instalar
-		 * @returns {Promise<void>}
-		 */
-		async install(packages) {
-			const packageList = Array.isArray(packages) ? packages : [packages];
-
-			// Garante que está carregado
-			const isLoaded = await this.load();
-			if (!isLoaded) {
-				throw new Error('Falha ao carregar Pyodide');
-			}
-
-			let currentState;
-			const unsubscribe = baseStore.subscribe((state) => (currentState = state));
-			unsubscribe();
-
-			try {
-				await currentState.instance.loadPackage(packageList);
-				console.log(`📦 Pacotes instalados: ${packageList.join(', ')}`);
-			} catch (error) {
-				console.error('❌ Erro ao instalar pacotes:', error);
-				throw error;
-			}
-		},
-
-		/**
-		 * Executa código Python e retorna resultado + captura print()
-		 * @param {string} code - Código Python para executar
-		 * @returns {Promise<{result: any, output: string}>}
-		 */
-		async runWithOutput(code) {
-			const captureCode = `
-import sys
-from io import StringIO
-
-# Captura output
-old_stdout = sys.stdout
-sys.stdout = mystdout = StringIO()
-
-try:
-	${code
-		.split('\n')
-		.map((line) => `    ${line}`)
-		.join('\n')}
-except Exception as e:
-	print(f"Erro: {e}")
-
-# Restaura stdout
-sys.stdout = old_stdout
-captured_output = mystdout.getvalue()
-`;
-
-			await this.run(captureCode);
-			const output = await this.run('captured_output');
-			const result = await this.run(`
-try:
-	result = ${code}
-	result
-except:
-	None
-`);
-
-			return { result, output };
-		},
-
-		/**
-		 * Reseta completamente o estado
-		 */
-		reset() {
-			scriptCache.clear();
-			baseStore.set({
-				instance: null,
-				ready: false,
-				loading: false,
-				error: null,
-				loadedScripts: new Set(),
-				lastExecution: null
-			});
-			console.log('🔄 Pyodide resetado');
-		},
-
-		/**
-		 * Obtém informações do estado atual
-		 * @returns {object} Estado atual
-		 */
-		getState() {
-			let currentState;
-			const unsubscribe = baseStore.subscribe((state) => (currentState = state));
-			unsubscribe();
-			return {
-				ready: currentState.ready,
-				loading: currentState.loading,
-				error: currentState.error,
-				loadedScripts: Array.from(currentState.loadedScripts),
-				lastExecution: currentState.lastExecution
-			};
+		// Utilities funcionais
+		utils: {
+			getState: () => get(baseState),
+			getCacheStats: () => ({ size: scriptCache.size() }),
+			getExecutionHistory: () => get(baseState).executionHistory,
+			clearHistory: () => baseState.update((state) => ({ ...state, executionHistory: [] }))
 		}
 	};
-
-	return api;
 }
 
 export const pyodideStore = createPyodideStore();
