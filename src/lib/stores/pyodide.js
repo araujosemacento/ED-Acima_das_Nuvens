@@ -158,7 +158,7 @@ function createPyodideStore() {
 		baseState.update((state) => ({ ...state, state: PYODIDE_STATES.LOADING, error: null }));
 
 		try {
-			const { loadPyodide: loadPyodideModule } = await import(PYODIDE_CONFIG.MODULE_URL);
+			const { loadPyodide: loadPyodideModule } = await import(/* @vite-ignore */ PYODIDE_CONFIG.MODULE_URL);
 			const instance = await loadPyodideModule({
 				indexURL: PYODIDE_CONFIG.CDN_BASE,
 				fullStdLib: false

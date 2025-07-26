@@ -37,22 +37,22 @@
 				let glimmerColors;
 				if (isDarkTheme) {
 					glimmerColors = {
-						center: isMobile ? 'rgba(255, 223, 186, 0.06)' : 'rgba(255, 223, 186, 0.08)',
-						mid: isMobile ? 'rgba(255, 223, 186, 0.03)' : 'rgba(255, 223, 186, 0.04)',
-						outer: isMobile ? 'transparent' : 'rgba(255, 223, 186, 0.02)'
+						center: isMobile ? 'rgba(255, 223, 186, 0.08)' : 'rgba(255, 223, 186, 0.1)',
+						mid: isMobile ? 'rgba(255, 223, 186, 0.04)' : 'rgba(255, 223, 186, 0.05)',
+						outer: isMobile ? 'transparent' : 'rgba(255, 223, 186, 0.025)'
 					};
 				} else if (isLightTheme) {
 					glimmerColors = {
-						center: isMobile ? 'rgba(100, 149, 237, 0.04)' : 'rgba(100, 149, 237, 0.06)',
-						mid: isMobile ? 'rgba(100, 149, 237, 0.02)' : 'rgba(100, 149, 237, 0.03)',
-						outer: isMobile ? 'transparent' : 'rgba(100, 149, 237, 0.01)'
+						center: isMobile ? 'rgba(100, 149, 237, 0.1)' : 'rgba(100, 149, 237, 0.12)',
+						mid: isMobile ? 'rgba(100, 149, 237, 0.05)' : 'rgba(100, 149, 237, 0.06)',
+						outer: isMobile ? 'transparent' : 'rgba(100, 149, 237, 0.03)'
 					};
 				} else {
 					// Tema padrão/sistema
 					glimmerColors = {
-						center: isMobile ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.06)',
-						mid: isMobile ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.03)',
-						outer: isMobile ? 'transparent' : 'rgba(255, 255, 255, 0.01)'
+						center: isMobile ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.1)',
+						mid: isMobile ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+						outer: isMobile ? 'transparent' : 'rgba(255, 255, 255, 0.025)'
 					};
 				}
 				
@@ -101,27 +101,27 @@
 					const maxDistance = isMobile ? 200 : 300;
 					const proximity = Math.max(0, 1 - distance / maxDistance);
 					
-					// Detectar tema para cores accent adequadas
+					// Detectar tema para cores adequadas
 					const isDarkTheme = document.documentElement.classList.contains('theme-dark');
 					const isLightTheme = document.documentElement.classList.contains('theme-light');
 					
-					let accentColor;
+					let themeColor;
 					if (isDarkTheme) {
-						// Dark theme: accent-400 com intensidade aumentada para maior visibilidade
-						accentColor = `hsla(273, 65%, 45%, ${proximity * 1.0})`;
+						// Dark theme: secondary-400 com intensidade aumentada para maior visibilidade
+						themeColor = `hsla(290, 40%, 43%, ${proximity * 1.0})`;
 					} else if (isLightTheme) {
 						// Light theme: accent-600 com intensidade aumentada para maior visibilidade
-						accentColor = `hsla(273, 70%, 35%, ${proximity * 0.9})`;
+						themeColor = `hsla(273, 70%, 35%, ${proximity * 0.9})`;
 					} else {
 						// System theme: fallback com intensidade aumentada
-						accentColor = `rgba(255, 255, 255, ${proximity * 0.8})`;
+						themeColor = `rgba(255, 255, 255, ${proximity * 0.8})`;
 					}
 					
-					// Animar com transform (performance) + cores accent
+					// Animar com transform (performance) + cores temáticas
 					buttonBlob.animate([
 						{
 							transform: `translate(${relativeX}px, ${relativeY}px)`,
-							background: accentColor,
+							background: themeColor,
 							opacity: proximity > 0.05 ? 1 : 0 // Limiar reduzido para maior sensibilidade
 						}
 					], {
@@ -134,14 +134,25 @@
 					const angleDeg = calculateGradientAngle(centerX, centerY);
 					
 					// Atualizar borda do container baseado na proximidade (intensidade aumentada)
-					const borderIntensity = proximity * 0.77; // Intensidade aumentada
+					const borderIntensity = proximity; // Intensidade aumentada
+					
+					// Definir cores do gradiente baseadas no tema
+					let gradientColors;
+					if (isDarkTheme) {
+						// Dark theme: usar cores secondary com variações apropriadas
+						gradientColors = `${themeColor}, 
+							hsla(290, 40%, 53%, ${borderIntensity * 0.99}),
+							hsla(290, 40%, 53%, ${borderIntensity * 0.44})`;
+					} else {
+						// Light theme: usar cores accent (mantendo comportamento original)
+						gradientColors = `${themeColor}, 
+							hsla(273, 65%, 55%, ${borderIntensity * 0.66}),
+							hsla(273, 65%, 55%, ${borderIntensity * 0.33})`;
+					}
+					
 					container.animate([
 						{
-							background: `linear-gradient(${angleDeg}deg, 
-								${accentColor}, 
-								hsla(273, 65%, 55%, ${borderIntensity * 0.66}),
-								hsla(273, 65%, 55%, ${borderIntensity * 0.33})
-							)`
+							background: `linear-gradient(${angleDeg}deg, ${gradientColors})`
 						}
 					], {
 						duration: 150,
@@ -163,21 +174,21 @@
 				let glimmerColors;
 				if (isDarkTheme) {
 					glimmerColors = {
-						center: isMobile ? 'rgba(255, 223, 186, 0.06)' : 'rgba(255, 223, 186, 0.08)',
-						mid: isMobile ? 'rgba(255, 223, 186, 0.03)' : 'rgba(255, 223, 186, 0.04)',
-						outer: isMobile ? 'transparent' : 'rgba(255, 223, 186, 0.02)'
+						center: isMobile ? 'rgba(255, 223, 186, 0.08)' : 'rgba(255, 223, 186, 0.1)',
+						mid: isMobile ? 'rgba(255, 223, 186, 0.04)' : 'rgba(255, 223, 186, 0.05)',
+						outer: isMobile ? 'transparent' : 'rgba(255, 223, 186, 0.025)'
 					};
 				} else if (isLightTheme) {
 					glimmerColors = {
-						center: isMobile ? 'rgba(100, 149, 237, 0.04)' : 'rgba(100, 149, 237, 0.06)',
-						mid: isMobile ? 'rgba(100, 149, 237, 0.02)' : 'rgba(100, 149, 237, 0.03)',
-						outer: isMobile ? 'transparent' : 'rgba(100, 149, 237, 0.01)'
+						center: isMobile ? 'rgba(100, 149, 237, 0.08)' : 'rgba(100, 149, 237, 0.1)',
+						mid: isMobile ? 'rgba(100, 149, 237, 0.04)' : 'rgba(100, 149, 237, 0.05)',
+						outer: isMobile ? 'transparent' : 'rgba(100, 149, 237, 0.025)'
 					};
 				} else {
 					glimmerColors = {
-						center: isMobile ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.06)',
-						mid: isMobile ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.03)',
-						outer: isMobile ? 'transparent' : 'rgba(255, 255, 255, 0.01)'
+						center: isMobile ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.1)',
+						mid: isMobile ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+						outer: isMobile ? 'transparent' : 'rgba(255, 255, 255, 0.025)'
 					};
 				}
 				
