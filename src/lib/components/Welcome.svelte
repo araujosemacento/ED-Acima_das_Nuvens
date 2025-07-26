@@ -2,11 +2,209 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import Button, { Label } from '@smui/button';
 	import { onMount } from 'svelte';
+	import { logger } from '$lib/stores/logger.js';
 
 	let mouseGlimmer = $state({ x: 50, y: 50 });
 	let mousePosition = $state({ x: 0, y: 0 }); // Posição absoluta do mouse para cálculos vetoriais
 	let welcomeSection;
 	let glimmerElement;
+
+	// === SISTEMA DE NUVENS ===
+	let cloudAssets = $state([]);
+	let cloudControllers = $state(new Map());
+	let cloudAnimationIntervals = $state(new Map());
+
+	// Configurações do sistema de nuvens
+	const CLOUD_CONFIG = {
+		stepDistance: 0.25, // rem - distância de cada passo (corrigido: 0.25rem ao invés de 0.025rem)
+		maxDistance: 5, // rem - raio máximo da origem
+		moveInterval: 1000, // ms - intervalo base entre movimentos (~1s para estética retrô)
+		intervalVariation: 250, // ms - variação para dessincronização (±250ms)
+		opacity: 0.8, // 80% de opacidade
+		totalClouds: 17, // Renderizar todas as 17 nuvens
+		// Sistema de logging híbrido
+		logging: {
+			performanceThrottle: 5000, // ms - throttle para logs de performance crítica
+			maxLocalLogs: 50, // máximo de logs locais em memória
+			useStructuredLogs: true // usar logger store para logs estruturados
+		}
+	};
+
+	// 8 direções possíveis (estilo retrô)
+	const DIRECTIONS = {
+		UP: { x: 0, y: -1, name: 'UP' },
+		DOWN: { x: 0, y: 1, name: 'DOWN' },
+		LEFT: { x: -1, y: 0, name: 'LEFT' },
+		RIGHT: { x: 1, y: 0, name: 'RIGHT' },
+		UP_LEFT: { x: -1, y: -1, name: 'UP_LEFT' },
+		UP_RIGHT: { x: 1, y: -1, name: 'UP_RIGHT' },
+		DOWN_LEFT: { x: -1, y: 1, name: 'DOWN_LEFT' },
+		DOWN_RIGHT: { x: 1, y: 1, name: 'DOWN_RIGHT' }
+	};
+
+	// === SISTEMA DE LOGGING HÍBRIDO ===
+	// Combina logger store (estruturado) + sistema local (performance crítica)
+	let localPerformanceLogs = $state([]);
+	let lastPerformanceLogTime = 0;
+
+	// Logger híbrido com diferenciação inteligente
+	const cloudLogger = {
+		// Logs estruturados via logger store (para interface/desenvolvimento)
+		structured: {
+			init: (data) => logger.actions.component('CloudSystem', 'inicialização', data),
+			animation: (action, data) => logger.actions.animation(`cloud-${action}`, data),
+			error: (message, data) => logger.actions.error(`CloudSystem: ${message}`, data),
+			debug: (action, data) => logger.actions.debug(`CloudSystem: ${action}`, data)
+		},
+		
+		// Logs de performance crítica (local, com throttling otimizado)
+		performance: (message, data = {}) => {
+			const now = Date.now();
+			if (now - lastPerformanceLogTime > CLOUD_CONFIG.logging.performanceThrottle) {
+				// Log local para controle de memória
+				const logEntry = {
+					timestamp: now,
+					message,
+					data: { ...data },
+					memoryUsage: performance.memory ? 
+						`${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1)}MB` : 'N/A'
+				};
+				
+				localPerformanceLogs.push(logEntry);
+				
+				// Limitar logs locais para controle de memória
+				if (localPerformanceLogs.length > CLOUD_CONFIG.logging.maxLocalLogs) {
+					localPerformanceLogs.shift();
+				}
+				
+				// Console log direto para desenvolvimento
+				console.log(`🌤️ [CloudPerf] ${message}`, logEntry);
+				lastPerformanceLogTime = now;
+			}
+		},
+		
+		// Logs críticos (sempre logados, sem throttle)
+		critical: (message, data = {}) => {
+			logger.actions.error(`[CRÍTICO] CloudSystem: ${message}`, data);
+			console.error(`🚨 [CloudSystem] ${message}`, data);
+		},
+		
+		// Utilitários de memória
+		getMemoryStats: () => ({
+			localLogs: localPerformanceLogs.length,
+			maxLocalLogs: CLOUD_CONFIG.logging.maxLocalLogs,
+			lastPerformanceLog: lastPerformanceLogTime,
+			memoryUsage: performance.memory ? 
+				`${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1)}MB` : 'N/A'
+		}),
+		
+		clearLocalLogs: () => {
+			localPerformanceLogs = [];
+			lastPerformanceLogTime = 0;
+		}
+	};
+
+	// Controller de movimento para cada nuvem
+	class CloudMovementController {
+		constructor(initialPosition, cloudId) {
+			this.cloudId = cloudId;
+			this.originalPosition = { ...initialPosition }; // em rem
+			this.currentPosition = { ...initialPosition };
+			this.movementHistory = []; // Últimas 2 direções
+			this.maxDistance = CLOUD_CONFIG.maxDistance; // rem
+			this.stepDistance = CLOUD_CONFIG.stepDistance; // rem
+			this.moveCount = 0;
+		}
+
+		calculateDistanceFromOrigin() {
+			const deltaX = this.currentPosition.x - this.originalPosition.x;
+			const deltaY = this.currentPosition.y - this.originalPosition.y;
+			return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		}
+
+		getOppositeDirection(directionName) {
+			const opposites = {
+				'UP': DIRECTIONS.DOWN,
+				'DOWN': DIRECTIONS.UP,
+				'LEFT': DIRECTIONS.RIGHT,
+				'RIGHT': DIRECTIONS.LEFT,
+				'UP_LEFT': DIRECTIONS.DOWN_RIGHT,
+				'UP_RIGHT': DIRECTIONS.DOWN_LEFT,
+				'DOWN_LEFT': DIRECTIONS.UP_RIGHT,
+				'DOWN_RIGHT': DIRECTIONS.UP_LEFT
+			};
+			return opposites[directionName] || this.getRandomDirection();
+		}
+
+		getDirectionTowardsOrigin() {
+			const deltaX = this.originalPosition.x - this.currentPosition.x;
+			const deltaY = this.originalPosition.y - this.currentPosition.y;
+			
+			// Determinar direção geral para casa
+			let direction;
+			if (Math.abs(deltaX) > Math.abs(deltaY)) {
+				// Movimento horizontal prioritário
+				direction = deltaX > 0 ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
+			} else {
+				// Movimento vertical prioritário
+				direction = deltaY > 0 ? DIRECTIONS.DOWN : DIRECTIONS.UP;
+			}
+			
+			return direction;
+		}
+
+		getRandomDirection() {
+			const directionKeys = Object.keys(DIRECTIONS);
+			const randomKey = directionKeys[Math.floor(Math.random() * directionKeys.length)];
+			return DIRECTIONS[randomKey];
+		}
+
+		getNextDirection() {
+			this.moveCount++;
+			
+			// 1. Se moveu 2x consecutivas na mesma direção → forçar oposta
+			if (this.movementHistory.length >= 2) {
+				const lastTwo = this.movementHistory.slice(-2);
+				if (lastTwo[0] === lastTwo[1]) {
+					const oppositeDir = this.getOppositeDirection(lastTwo[1]);
+					cloudLogger.structured.debug('direção-forçada', {
+						cloudId: this.cloudId,
+						from: lastTwo[1],
+						to: oppositeDir.name,
+						history: this.movementHistory,
+						position: this.currentPosition
+					});
+					return oppositeDir;
+				}
+			}
+
+			// 2. Se muito longe da origem → direcionar para casa
+			const distanceFromOrigin = this.calculateDistanceFromOrigin();
+			if (distanceFromOrigin > this.maxDistance) {
+				const homeDir = this.getDirectionTowardsOrigin();
+				cloudLogger.structured.animation('retorno-origem', {
+					cloudId: this.cloudId,
+					distance: distanceFromOrigin.toFixed(2),
+					direction: homeDir.name,
+					currentPos: this.currentPosition,
+					originalPos: this.originalPosition
+				});
+				return homeDir;
+			}
+
+			// 3. Caso contrário → direção aleatória
+			const randomDir = this.getRandomDirection();
+			if (this.moveCount % 10 === 0) { // Log estruturado a cada 10 movimentos
+				cloudLogger.structured.animation('movimento-aleatório', {
+					cloudId: this.cloudId,
+					direction: randomDir.name,
+					moveCount: this.moveCount,
+					distance: distanceFromOrigin.toFixed(2)
+				});
+			}
+			return randomDir;
+		}
+	}
 
 	// Função derivada para cálculos vetoriais eficientes (Svelte 5 runes)
 	const calculateGradientAngle = $derived((centerX, centerY) => {
@@ -16,7 +214,161 @@
 		return (angleRad * 180 / Math.PI + 360) % 360; // Normalizar para 0-360°
 	});
 
+	// === FUNÇÕES DO SISTEMA DE NUVENS ===
+	function generateRandomPosition() {
+		// Gerar posição aleatória dentro do viewport em rem
+		// Margem de segurança para evitar cortes
+		const safeMargin = 2; // rem
+		const viewportWidth = window.innerWidth / 16; // converter px para rem (assumindo 16px = 1rem)
+		const viewportHeight = window.innerHeight / 16;
+		
+		const position = {
+			x: Math.random() * (viewportWidth - safeMargin * 2) + safeMargin,
+			y: Math.random() * (viewportHeight - safeMargin * 2) + safeMargin
+		};
+		
+		cloudLogger.structured.debug('posição-gerada', {
+			x: position.x.toFixed(2),
+			y: position.y.toFixed(2),
+			viewport: { width: viewportWidth.toFixed(2), height: viewportHeight.toFixed(2) }
+		});
+		
+		return position;
+	}
+
+	function initializeCloudAssets() {
+		const isDarkTheme = document.documentElement.classList.contains('theme-dark');
+		const isMobile = window.innerWidth <= 768;
+		
+		cloudLogger.structured.init({
+			theme: isDarkTheme ? 'dark' : 'light',
+			isMobile,
+			totalClouds: CLOUD_CONFIG.totalClouds,
+			stepDistance: CLOUD_CONFIG.stepDistance,
+			maxDistance: CLOUD_CONFIG.maxDistance
+		});
+		
+		// TODO: Futuro workflow - implementar subconjuntos de nuvens
+		// TODO: Futuro workflow - alguns assets terão posição inicial fixa
+		// TODO: Futuro workflow - redução de nuvens no mobile para performance
+		
+		const themeFolder = isDarkTheme ? 'dark' : 'light';
+		const clouds = [];
+		
+		for (let i = 1; i <= CLOUD_CONFIG.totalClouds; i++) {
+			const initialPosition = generateRandomPosition();
+			const cloud = {
+				id: `cloud-${i}`,
+				src: `/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
+				position: initialPosition, // em rem
+				element: null
+			};
+			
+			clouds.push(cloud);
+			
+			// Criar controller de movimento para cada nuvem
+			cloudControllers.set(cloud.id, new CloudMovementController(initialPosition, cloud.id));
+		}
+		
+		cloudAssets = clouds;
+		cloudLogger.structured.init({
+			message: 'assets-inicializados',
+			count: clouds.length,
+			theme: themeFolder
+		});
+	}
+
+	function startCloudAnimations() {
+		cloudLogger.structured.animation('início-animações', {
+			baseInterval: CLOUD_CONFIG.moveInterval,
+			intervalVariation: CLOUD_CONFIG.intervalVariation,
+			totalClouds: cloudAssets.length
+		});
+		
+		cloudAssets.forEach((cloud, index) => {
+			// Intervalo dessincronizado para cada nuvem (±250ms variação)
+			const baseInterval = CLOUD_CONFIG.moveInterval;
+			const randomOffset = (Math.random() * 2 - 1) * CLOUD_CONFIG.intervalVariation; // ±250ms
+			const interval = baseInterval + randomOffset;
+			
+			cloudLogger.structured.debug('intervalo-configurado', {
+				cloudId: cloud.id,
+				interval: interval.toFixed(0),
+				offset: `${randomOffset > 0 ? '+' : ''}${randomOffset.toFixed(0)}ms`
+			});
+			
+			// Delay inicial escalonado para evitar sincronização acidental
+			const initialDelay = index * 100; // 100ms entre cada nuvem
+			
+			setTimeout(() => {
+				const animationInterval = setInterval(() => {
+					moveCloud(cloud.id);
+				}, interval);
+				
+				cloudAnimationIntervals.set(cloud.id, animationInterval);
+			}, initialDelay);
+		});
+	}
+
+	function moveCloud(cloudId) {
+		const controller = cloudControllers.get(cloudId);
+		const cloudIndex = cloudAssets.findIndex(c => c.id === cloudId);
+		
+		if (!controller || cloudIndex === -1) {
+			cloudLogger.critical('controller-ou-cloud-não-encontrado', { cloudId });
+			return;
+		}
+		
+		const direction = controller.getNextDirection();
+		const newPosition = {
+			x: controller.currentPosition.x + (direction.x * controller.stepDistance),
+			y: controller.currentPosition.y + (direction.y * controller.stepDistance)
+		};
+		
+		// Atualizar posição do controller
+		controller.currentPosition = newPosition;
+		controller.movementHistory.push(direction.name);
+		
+		// Manter apenas últimas 2 direções para análise
+		if (controller.movementHistory.length > 2) {
+			controller.movementHistory.shift();
+		}
+		
+		// Atualizar posição visual da nuvem usando state reativo
+		cloudAssets[cloudIndex].position = { ...newPosition };
+		
+		// Log de performance com sistema híbrido (a cada 20 movimentos)
+		if (controller.moveCount % 20 === 0) {
+			cloudLogger.performance('check-performance', {
+				activeIntervals: cloudAnimationIntervals.size,
+				cloudId: controller.cloudId,
+				moveCount: controller.moveCount,
+				memoryStats: cloudLogger.getMemoryStats()
+			});
+		}
+	}
+
 	onMount(() => {
+		// === INICIALIZAÇÃO DO SISTEMA DE NUVENS ===
+		cloudLogger.structured.init({
+			message: 'montando-componente',
+			timestamp: Date.now()
+		});
+		
+		try {
+			initializeCloudAssets();
+			startCloudAnimations();
+			cloudLogger.structured.init({
+				message: 'sistema-inicializado-com-sucesso',
+				activeAssets: cloudAssets.length,
+				activeControllers: cloudControllers.size
+			});
+		} catch (error) {
+			cloudLogger.critical('erro-inicialização', { 
+				error: error.message, 
+				stack: error.stack 
+			});
+		}
 		const handleMouseMove = (event) => {
 			// Atualizar posição global do mouse (rune para reatividade)
 			mousePosition = { x: event.clientX, y: event.clientY };
@@ -253,6 +605,33 @@
 		document.addEventListener('mouseleave', handleMouseLeave);
 
 		return () => {
+			// === CLEANUP DO SISTEMA DE NUVENS ===
+			cloudLogger.structured.debug('iniciando-cleanup', {
+				activeIntervals: cloudAnimationIntervals.size,
+				activeControllers: cloudControllers.size,
+				memoryStats: cloudLogger.getMemoryStats()
+			});
+			
+			// Limpar todos os intervalos de animação
+			cloudAnimationIntervals.forEach((interval, cloudId) => {
+				clearInterval(interval);
+				cloudLogger.structured.debug('intervalo-limpo', { cloudId });
+			});
+			cloudAnimationIntervals.clear();
+			
+			// Limpar controladores
+			cloudControllers.clear();
+			cloudAssets = [];
+			
+			// Limpar logs locais para liberar memória
+			cloudLogger.clearLocalLogs();
+			
+			cloudLogger.structured.init({
+				message: 'cleanup-concluído',
+				finalMemoryStats: cloudLogger.getMemoryStats()
+			});
+			
+			// Cleanup existente dos event listeners
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseleave', handleMouseLeave);
 		};
@@ -260,6 +639,20 @@
 </script>
 
 <section id="welcome" class="theme-background theme-text-transition" bind:this={welcomeSection}>
+	<!-- NOVA: Camada de nuvens (z-index: -10) -->
+	<!-- TODO: Futuro workflow - esta área será expandida para outros componentes -->
+	<div class="cloud-layer">
+		{#each cloudAssets as cloud (cloud.id)}
+			<img 
+				src={cloud.src} 
+				alt="Nuvem decorativa"
+				class="cloud-asset"
+				style="transform: translate({cloud.position.x}rem, {cloud.position.y}rem);"
+				bind:this={cloud.element}
+			/>
+		{/each}
+	</div>
+	
 	<!-- Glimmer radial que segue o mouse -->
 	<div 
 		class="mouse-glimmer"
@@ -318,7 +711,7 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		z-index: 2; /* Acima do pseudo-elemento do outline (z-index: -1), mas abaixo do conteúdo (z-index: 10) */
+		z-index: -2; /* Acima do pseudo-elemento do outline (z-index: -1), mas abaixo do conteúdo (z-index: 10) */
 		pointer-events: none;
 		/* Removemos a transition CSS - será controlada via Web Animation API */
 		
@@ -329,6 +722,42 @@
 			rgba(255, 255, 255, 0.01) 70%,
 			transparent 100%
 		);
+	}
+
+	/* NOVA: Camada de nuvens */
+	/* TODO: Futuro workflow - esta área será expandida para outros componentes */
+	.cloud-layer {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -10; /* Abaixo do outline dos textos (z-index: -1) */
+		pointer-events: none;
+		overflow: hidden; /* Confinar nuvens ao viewport inicial */
+	}
+
+	.cloud-asset {
+		position: absolute;
+		opacity: 0.8; /* 80% conforme especificado */
+		pointer-events: none;
+		
+		/* TODO: Futuro workflow - implementar tamanhos proporcionais diferentes */
+		width: auto;
+		height: auto;
+		max-width: 8rem; /* Tamanho duplicado: 4rem → 8rem */
+		max-height: 8rem;
+		
+		/* Movimento step-based sem interpolação (estética pixelada/retrô) */
+		transition: none; /* Remover suavização para movimento discreto */
+		
+		/* Sem rotação conforme especificado */
+		transform-origin: center;
+		
+		/* Evitar blur/antialiasing para manter estética pixelada */
+		image-rendering: pixelated;
+		image-rendering: -moz-crisp-edges;
+		image-rendering: crisp-edges;
 	}
 
 	.disclaimer-text {
@@ -416,6 +845,12 @@
 	@media (max-width: 48rem) {
 		#welcome {
 			max-width: 80%;
+		}
+
+		/* TODO: Futuro workflow - reduzir quantidade de nuvens para performance */
+		.cloud-asset {
+			max-width: 6rem; /* Tamanho mobile duplicado: 3rem → 6rem */
+			max-height: 6rem;
 		}
 
 		.text-outlined {
@@ -525,4 +960,28 @@
 		font-weight: 600 !important;
 		letter-spacing: 0.5px !important;
 	}
+
+	/*
+	 * === DOCUMENTAÇÃO DE FUTUROS WORKFLOWS ===
+	 * 
+	 * 1. SUBCONJUNTOS DE NUVENS:
+	 *    - Grupo A: Posição inicial fixa (não pode ser ocultado)
+	 *    - Grupo B: Posição aleatória (pode ser ocultado no mobile)
+	 *    - Grupo C: Nuvens temáticas/especiais
+	 * 
+	 * 2. REDIMENSIONAMENTO PROPORCIONAL:
+	 *    - Pequenas (2-3rem), Médias (4-5rem), Grandes (6-7rem)
+	 *    - Distribuição baseada em peso visual
+	 * 
+	 * 3. OTIMIZAÇÃO MOBILE:
+	 *    - Reduzir quantidade de nuvens ativas
+	 *    - Priorizar Grupo A (posição fixa)
+	 *    - Intervalos de movimento mais longos
+	 * 
+	 * 4. EXPANSÃO DE ÁREA DE MOVIMENTO:
+	 *    - Permitir movimento além do viewport
+	 *    - Integração com outros componentes
+	 *    - Sistema de "entrada/saída" de nuvens
+	 *    - Área de movimento expandida para acomodar novos componentes
+	 */
 </style>
