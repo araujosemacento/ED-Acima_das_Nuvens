@@ -4,12 +4,14 @@ import { dev } from '$app/environment';
 
 /**
  * Logger reativo e dinâmico para desenvolvimento
- * Sistema de logs em tempo real com filtragem e histórico
+ * Sistema de logs em tempo real com filtragem, histórico e throttling inteligente
  */
 
 // Configurações do logger
 const LOGGER_CONFIG = Object.freeze({
 	MAX_LOGS: 100,
+	THROTTLE_WINDOW: 1000, // ms - janela para detectar logs repetitivos
+	MAX_SIMILAR_LOGS: 3, // máximo de logs similares na janela
 	CATEGORIES: {
 		THEME: 'theme',
 		ANIMATION: 'animation',
@@ -36,7 +38,9 @@ const createLogEntry = (category, action, data = {}, level = LOGGER_CONFIG.LEVEL
 	action,
 	data,
 	level,
-	formatted: formatLogMessage(category, action, data)
+	formatted: formatLogMessage(category, action, data),
+	// Chave para detectar logs similares (usado no throttling)
+	similarityKey: `${category}:${action}:${JSON.stringify(Object.keys(data).sort())}`
 });
 
 const formatLogMessage = (category, action, data) => {
@@ -52,10 +56,67 @@ const formatLogMessage = (category, action, data) => {
 	};
 
 	const icon = icons[category] || '📝';
-	const summary = Object.values(data)
-		.filter((v) => v)
-		.join(' → ');
-	return `${icon} [${category.toUpperCase()}] ${action}${summary ? ` - ${summary}` : ''}`;
+
+	// Formatação inteligente dos dados
+	const dataEntries = Object.entries(data).filter(([, value]) => value !== undefined && value !== null);
+	const summary = dataEntries.length > 0
+		? dataEntries.map(([key, value]) => {
+			// Trunca strings muito longas para melhor legibilidade
+			const displayValue = typeof value === 'string' && value.length > 50
+				? `${value.substring(0, 47)}...`
+				: value;
+			return `${key}: ${displayValue}`;
+		}).join(', ')
+		: '';
+
+	return `${icon} [${category.toUpperCase()}] ${action}${summary ? ` | ${summary}` : ''}`;
+};
+
+// Sistema de throttling inteligente
+const createThrottleSystem = () => {
+	const recentLogs = new Map(); // similarityKey -> [timestamps]
+
+	const shouldThrottle = (logEntry) => {
+		const now = logEntry.timestamp;
+		const key = logEntry.similarityKey;
+
+		// Limpa entradas antigas
+		if (recentLogs.has(key)) {
+			const timestamps = recentLogs.get(key).filter(
+				ts => now - ts < LOGGER_CONFIG.THROTTLE_WINDOW
+			);
+			recentLogs.set(key, timestamps);
+		}
+
+		// Verifica se deve throttle
+		const currentCount = recentLogs.get(key)?.length || 0;
+		if (currentCount >= LOGGER_CONFIG.MAX_SIMILAR_LOGS) {
+			return true;
+		}
+
+		// Adiciona timestamp atual
+		const timestamps = recentLogs.get(key) || [];
+		timestamps.push(now);
+		recentLogs.set(key, timestamps);
+
+		return false;
+	};
+
+	const getThrottleStats = () => {
+		const stats = new Map();
+		for (const [key, timestamps] of recentLogs.entries()) {
+			if (timestamps.length >= LOGGER_CONFIG.MAX_SIMILAR_LOGS) {
+				stats.set(key, {
+					count: timestamps.length,
+					firstOccurrence: new Date(Math.min(...timestamps)).toLocaleTimeString(),
+					lastOccurrence: new Date(Math.max(...timestamps)).toLocaleTimeString()
+				});
+			}
+		}
+		return stats;
+	};
+
+	return { shouldThrottle, getThrottleStats };
 };
 
 function createLoggerStore() {
@@ -63,6 +124,7 @@ function createLoggerStore() {
 	const baseState = writable({
 		logs: [],
 		isEnabled: dev,
+		throttledCount: 0, // Contador de logs throttled
 		filters: {
 			categories: new Set(Object.values(LOGGER_CONFIG.CATEGORIES)),
 			minLevel: LOGGER_CONFIG.LEVELS.DEBUG,
@@ -74,6 +136,9 @@ function createLoggerStore() {
 			logsByLevel: new Map()
 		}
 	});
+
+	// Sistema de throttling
+	const throttleSystem = createThrottleSystem();
 
 	// Stores derivados granulares
 	const isEnabled = derived(baseState, ($state) => $state.isEnabled);
@@ -124,6 +189,24 @@ function createLoggerStore() {
 		if (!get(isEnabled)) return;
 
 		const logEntry = createLogEntry(category, action, data, level);
+
+		// Verifica throttling
+		if (throttleSystem.shouldThrottle(logEntry)) {
+			baseState.update((state) => {
+				const newThrottledCount = state.throttledCount + 1;
+
+				// Log throttling apenas no console, não adiciona ao store para evitar spam
+				if (dev && newThrottledCount % 10 === 1) { // Log a cada 10 throttles
+					console.warn(`🚀 [ED] ⚠️ Throttling ativo: ${newThrottledCount} logs similares suprimidos`);
+				}
+
+				return {
+					...state,
+					throttledCount: newThrottledCount
+				};
+			});
+			return;
+		}
 
 		baseState.update((state) => {
 			const newLogs = [...state.logs, logEntry].slice(-LOGGER_CONFIG.MAX_LOGS);
@@ -259,6 +342,23 @@ function createLoggerStore() {
 			export: () => {
 				const logs = get(filteredLogs);
 				return JSON.stringify(logs, null, 2);
+			},
+
+			// Estatísticas de throttling
+			getThrottleStats: () => ({
+				throttledCount: get(baseState).throttledCount,
+				activeThrottles: throttleSystem.getThrottleStats(),
+				throttleConfig: {
+					window: LOGGER_CONFIG.THROTTLE_WINDOW,
+					maxSimilar: LOGGER_CONFIG.MAX_SIMILAR_LOGS
+				}
+			}),
+
+			resetThrottleStats: () => {
+				baseState.update((state) => ({
+					...state,
+					throttledCount: 0
+				}));
 			}
 		},
 

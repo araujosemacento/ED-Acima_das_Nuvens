@@ -7,9 +7,10 @@
 	// ✅ Elimina redundâncias de filtros CSS
 	// ✅ Performance melhorada com subscriptions otimizadas
 	// ✅ Alinhado com paleta de cores acessível
+	// ✅ Instrumentado com logger para debugging
 
 	import { m } from '$lib/paraglide/messages.js';
-	import { themeStore, THEME_TYPES } from '$lib/stores/theme.js';
+	import { themeStore, THEME_TYPES, logger } from '$lib/stores/index.js';
 	import IconButton from '@smui/icon-button';
 	import Menu from '@smui/menu';
 	import List, { Item, Graphic, Text } from '@smui/list';
@@ -23,18 +24,34 @@
 
 	// Subscriptions otimizadas usando $effect
 	$effect(() => {
+		logger.actions.component('ThemeToggle', 'Inicializado', {
+			hasMenu: !!menu,
+			hasAnchor: !!anchor
+		});
+
 		// Subscription para tema atual
 		const unsubscribeMain = themeStore.subscribe((theme) => {
+			logger.actions.component('ThemeToggle', 'Tema atual mudou', {
+				from: currentTheme,
+				to: theme
+			});
 			currentTheme = theme;
 		});
 
 		// Subscription para tema do usuário
 		const unsubscribeUser = themeStore.userTheme.subscribe((theme) => {
+			logger.actions.component('ThemeToggle', 'Tema do usuário mudou', {
+				from: userTheme,
+				to: theme
+			});
 			userTheme = theme;
 		});
 
 		// Cleanup automático
 		return () => {
+			logger.actions.component('ThemeToggle', 'Cleanup executado', {
+				reason: 'componente desmontado'
+			});
 			unsubscribeMain();
 			unsubscribeUser();
 		};
@@ -52,8 +69,38 @@
 
 	// Alterna o tema de forma otimizada
 	const handleThemeChange = (newTheme) => {
-		themeStore.setTheme(newTheme);
+		logger.actions.component('ThemeToggle', 'Clique do usuário', {
+			selectedTheme: newTheme,
+			currentTheme,
+			userTheme,
+			menuOpen: menu?.isOpen?.() || false
+		});
+
+		const success = themeStore.actions.setTheme(newTheme);
+		
+		if (success) {
+			logger.actions.component('ThemeToggle', 'Tema alterado com sucesso', {
+				newTheme,
+				menuClosing: true
+			});
+		} else {
+			logger.actions.error('Falha ao alterar tema no ThemeToggle', {
+				attemptedTheme: newTheme,
+				reason: 'setTheme retornou false'
+			});
+		}
+		
 		menu.setOpen(false);
+	};
+
+	// Handler para abertura do menu
+	const handleMenuOpen = () => {
+		logger.actions.component('ThemeToggle', 'Menu aberto', {
+			currentTheme,
+			userTheme,
+			availableThemes: themes.length
+		});
+		menu.setOpen(true);
 	};
 
 	// Lista de temas disponíveis
@@ -68,7 +115,7 @@
 
 <div class="theme-toggle" bind:this={anchor}>
 	<IconButton
-		onclick={() => menu.setOpen(true)}
+		onclick={handleMenuOpen}
 		class="theme-fab themed-icon-button"
 		title={m.theme_toggle_tooltip()}
 		aria-label={m.theme_toggle_alt()}

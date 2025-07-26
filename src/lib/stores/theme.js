@@ -1,6 +1,7 @@
 // Store do tema - Versão dinâmica e responsiva baseada nas melhores práticas do Svelte
 import { writable, derived, readable, readonly, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { logger } from './logger.js';
 
 // Tipos de tema disponíveis - Enum imutável
 export const THEME_TYPES = Object.freeze({
@@ -89,7 +90,15 @@ const createRehydrationSystem = () => {
 
 	return {
 		forceElementsRehydration: () => {
-			if (!browser) return;
+			if (!browser) {
+				logger.actions.theme('Reidratação ignorada', {
+					reason: 'não está no browser'
+				});
+				return;
+			}
+
+			const startTime = performance.now();
+			let elementsProcessed = 0;
 
 			scheduleRehydration(() => {
 				// Força repaint dos elementos críticos de forma mais eficiente
@@ -101,7 +110,18 @@ const createRehydrationSystem = () => {
 						element.style.transform = 'translateZ(0)'; // Força layer de hardware
 						void element.offsetHeight; // Força reflow
 						element.style.transform = originalTransform;
+						elementsProcessed++;
 					});
+				});
+
+				const endTime = performance.now();
+				const duration = Math.round(endTime - startTime);
+
+				logger.actions.theme('Reidratação concluída', {
+					elementsProcessed,
+					selectorsUsed: THEME_CONFIG.CRITICAL_SELECTORS.length,
+					duration: `${duration}ms`,
+					performance: duration < 5 ? 'excelente' : duration < 16 ? 'boa' : 'lenta'
 				});
 
 				// Dispara evento customizado otimizado
@@ -109,7 +129,9 @@ const createRehydrationSystem = () => {
 					new CustomEvent('theme-changed', {
 						detail: {
 							timestamp: Date.now(),
-							performance: performance.now()
+							performance: performance.now(),
+							elementsProcessed,
+							duration
 						}
 					})
 				);
@@ -121,14 +143,31 @@ const createRehydrationSystem = () => {
 // Cria sistema de detecção do tema do sistema usando readable com StartStopNotifier
 const createSystemThemeDetector = () => {
 	return readable(THEME_TYPES.DARK, (set) => {
-		if (!browser) return;
+		if (!browser) {
+			logger.actions.theme('Detector de tema do sistema desabilitado', {
+				reason: 'não está no browser'
+			});
+			return;
+		}
 
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+		logger.actions.theme('Detector de tema do sistema inicializado', {
+			initialPreference: mediaQuery.matches ? 'dark' : 'light',
+			mediaQuerySupported: true
+		});
 
 		// Função de atualização otimizada
 		const updateTheme = (event) => {
 			const newTheme =
 				(event?.matches ?? mediaQuery.matches) ? THEME_TYPES.DARK : THEME_TYPES.LIGHT;
+
+			logger.actions.theme('Tema do sistema detectado', {
+				theme: newTheme,
+				triggeredBy: event ? 'mudança de preferência' : 'inicialização',
+				matches: event?.matches ?? mediaQuery.matches
+			});
+
 			set(newTheme);
 		};
 
@@ -140,6 +179,9 @@ const createSystemThemeDetector = () => {
 
 		// Cleanup function (StartStopNotifier)
 		return () => {
+			logger.actions.theme('Detector de tema do sistema desconectado', {
+				reason: 'cleanup do store'
+			});
 			mediaQuery.removeEventListener('change', updateTheme);
 		};
 	});
@@ -148,27 +190,67 @@ const createSystemThemeDetector = () => {
 // Sistema de persistência reativo para localStorage
 const createThemePersistence = () => {
 	const loadSavedTheme = () => {
-		if (!browser) return THEME_TYPES.SYSTEM;
+		if (!browser) {
+			logger.actions.theme('Carregamento de tema ignorado', {
+				reason: 'não está no browser',
+				fallback: THEME_TYPES.SYSTEM
+			});
+			return THEME_TYPES.SYSTEM;
+		}
 
 		try {
 			const saved = localStorage.getItem(THEME_CONFIG.STORAGE_KEY);
-			return Object.values(THEME_TYPES).includes(saved) ? saved : THEME_TYPES.SYSTEM;
-		} catch {
+			const isValid = Object.values(THEME_TYPES).includes(saved);
+			const result = isValid ? saved : THEME_TYPES.SYSTEM;
+
+			logger.actions.theme('Tema carregado do localStorage', {
+				saved,
+				isValid,
+				result,
+				storageKey: THEME_CONFIG.STORAGE_KEY
+			});
+
+			return result;
+		} catch (error) {
+			logger.actions.error('Erro ao carregar tema do localStorage', {
+				error: error.message,
+				fallback: THEME_TYPES.SYSTEM
+			});
 			return THEME_TYPES.SYSTEM;
 		}
 	};
 
 	const saveTheme = (theme) => {
-		if (!browser) return;
+		if (!browser) {
+			logger.actions.theme('Salvamento de tema ignorado', {
+				theme,
+				reason: 'não está no browser'
+			});
+			return;
+		}
 
 		try {
 			if (theme === THEME_TYPES.SYSTEM) {
 				localStorage.removeItem(THEME_CONFIG.STORAGE_KEY);
+				logger.actions.theme('Tema removido do localStorage', {
+					theme,
+					action: 'removeItem',
+					reason: 'tema system usa detecção automática'
+				});
 			} else {
 				localStorage.setItem(THEME_CONFIG.STORAGE_KEY, theme);
+				logger.actions.theme('Tema salvo no localStorage', {
+					theme,
+					action: 'setItem',
+					storageKey: THEME_CONFIG.STORAGE_KEY
+				});
 			}
 		} catch (error) {
-			console.warn('Falha ao salvar tema:', error);
+			logger.actions.error('Erro ao salvar tema no localStorage', {
+				theme,
+				error: error.message,
+				storageQuota: 'possivelmente excedida'
+			});
 		}
 	};
 
@@ -202,7 +284,17 @@ const createThemeApplicator = (rehydrationSystem) => {
 	]);
 
 	const applyTheme = (theme) => {
-		if (!browser || theme === lastAppliedTheme) return;
+		if (!browser || theme === lastAppliedTheme) {
+			logger.actions.theme('Aplicação de tema ignorada', {
+				theme,
+				lastApplied: lastAppliedTheme,
+				reason: !browser ? 'não está no browser' : 'tema já aplicado'
+			});
+			return;
+		}
+
+		const startTime = performance.now();
+		logger.actions.transition('START', { from: lastAppliedTheme, to: theme });
 
 		const colors = THEME_COLORS.get(theme) || THEME_COLORS.get(THEME_TYPES.DARK);
 		const root = document.documentElement;
@@ -211,8 +303,16 @@ const createThemeApplicator = (rehydrationSystem) => {
 		const cssUpdates = [];
 
 		// Remove e adiciona classes de tema
-		root.classList.remove('theme-light', 'theme-dark', 'theme-system');
-		root.classList.add(`theme-${theme}`);
+		const removedClasses = ['theme-light', 'theme-dark', 'theme-system'];
+		const addedClass = `theme-${theme}`;
+
+		root.classList.remove(...removedClasses);
+		root.classList.add(addedClass);
+
+		logger.actions.theme('Classes CSS atualizadas', {
+			removed: removedClasses.join(', '),
+			added: addedClass
+		});
 
 		// Atualiza variável de tema atual
 		cssUpdates.push(['--theme-current', theme]);
@@ -222,39 +322,51 @@ const createThemeApplicator = (rehydrationSystem) => {
 			cssUpdates.push([cssVar, colors[colorKey]]);
 		}
 
+		logger.actions.theme('Propriedades CSS mapeadas', {
+			totalProperties: cssUpdates.length,
+			theme,
+			sampleProperty: cssUpdates[0]?.[0]
+		});
+
 		// Material Design - cores de texto específicas por tema
 		const textColors =
 			theme === THEME_TYPES.DARK
 				? {
-						'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
-						'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
-						'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
-						'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
-						'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--icon-filter': 'invert(1)'
-					}
+					'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
+					'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
+					'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
+					'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
+					'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--icon-filter': 'invert(1)'
+				}
 				: {
-						'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
-						'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
-						'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
-						'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
-						'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--icon-filter': 'none'
-					};
+					'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
+					'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
+					'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
+					'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
+					'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--icon-filter': 'none'
+				};
 
 		// Adiciona cores de texto ao lote
 		Object.entries(textColors).forEach(([prop, value]) => {
 			cssUpdates.push([prop, value]);
+		});
+
+		logger.actions.theme('Cores Material Design aplicadas', {
+			themeType: theme === THEME_TYPES.DARK ? 'dark' : 'light',
+			materialProperties: Object.keys(textColors).length,
+			iconFilter: textColors['--icon-filter']
 		});
 
 		// Aplica todas as atualizações em lote
@@ -262,8 +374,24 @@ const createThemeApplicator = (rehydrationSystem) => {
 			root.style.setProperty(property, value);
 		});
 
+		logger.actions.theme('Variáveis CSS atualizadas', {
+			totalUpdates: cssUpdates.length,
+			theme,
+			sampleUpdates: cssUpdates.slice(0, 3).map(([prop, val]) => `${prop}: ${val}`)
+		});
+
 		// Força reidratação otimizada
 		rehydrationSystem.forceElementsRehydration();
+
+		const endTime = performance.now();
+		const duration = Math.round(endTime - startTime);
+
+		logger.actions.transition('END', {
+			theme,
+			duration,
+			totalCSSUpdates: cssUpdates.length,
+			performance: duration < 16 ? 'excelente' : duration < 50 ? 'boa' : 'lenta'
+		});
 
 		lastAppliedTheme = theme;
 	};
@@ -272,21 +400,38 @@ const createThemeApplicator = (rehydrationSystem) => {
 };
 
 function createThemeStore() {
+	logger.actions.store('Inicializando Theme Store', {
+		browser,
+		availableThemes: Object.values(THEME_TYPES)
+	});
+
 	// Inicializa sistemas auxiliares
 	const rehydrationSystem = createRehydrationSystem();
 	const persistence = createThemePersistence();
 	const themeApplicator = createThemeApplicator(rehydrationSystem);
 
 	// Store para tema escolhido pelo usuário
-	const userTheme = writable(persistence.loadSavedTheme());
+	const initialUserTheme = persistence.loadSavedTheme();
+	const userTheme = writable(initialUserTheme);
+
+	logger.actions.store('Store userTheme criado', {
+		initialValue: initialUserTheme
+	});
 
 	// Store reativo para tema do sistema usando readable com StartStopNotifier
 	const systemTheme = createSystemThemeDetector();
 
 	// Store derivado principal - tema efetivo
-	const currentTheme = derived([userTheme, systemTheme], ([user, system]) =>
-		user === THEME_TYPES.SYSTEM ? system : user
-	);
+	const currentTheme = derived([userTheme, systemTheme], ([user, system]) => {
+		const result = user === THEME_TYPES.SYSTEM ? system : user;
+		logger.actions.store('Theme derivado calculado', {
+			userTheme: user,
+			systemTheme: system,
+			effectiveTheme: result,
+			logic: user === THEME_TYPES.SYSTEM ? 'usando sistema' : 'usando preferência'
+		});
+		return result;
+	});
 
 	// Stores derivados granulares para diferentes aspectos
 	const isDarkMode = derived(currentTheme, (theme) => theme === THEME_TYPES.DARK);
@@ -296,11 +441,26 @@ function createThemeStore() {
 
 	// Sistema reativo de aplicação automática
 	if (browser) {
+		logger.actions.store('Configurando reatividade automática', {
+			hasCurrentThemeSubscription: true,
+			hasUserThemeSubscription: true
+		});
+
 		// Aplica tema automaticamente quando muda
-		currentTheme.subscribe(themeApplicator.applyTheme);
+		currentTheme.subscribe((theme) => {
+			logger.actions.store('Reatividade: currentTheme mudou', { theme });
+			themeApplicator.applyTheme(theme);
+		});
 
 		// Reação a mudanças do tema do usuário para persistência
-		userTheme.subscribe(persistence.saveTheme);
+		userTheme.subscribe((theme) => {
+			logger.actions.store('Reatividade: userTheme mudou', { theme });
+			persistence.saveTheme(theme);
+		});
+	} else {
+		logger.actions.store('Reatividade desabilitada', {
+			reason: 'não está no browser'
+		});
 	}
 
 	return {
@@ -320,21 +480,51 @@ function createThemeStore() {
 		// API funcional otimizada
 		actions: {
 			setTheme: (theme) => {
+				logger.actions.theme('Solicitação de mudança de tema', {
+					requestedTheme: theme,
+					currentTheme: get(currentTheme),
+					userTheme: get(userTheme)
+				});
+
 				if (!Object.values(THEME_TYPES).includes(theme)) {
-					console.error('Tema inválido:', theme);
+					logger.actions.error('Tema inválido rejeitado', {
+						theme,
+						validThemes: Object.values(THEME_TYPES)
+					});
 					return false;
 				}
+
 				userTheme.set(theme);
+
+				logger.actions.theme('Tema atualizado com sucesso', {
+					newTheme: theme,
+					willTriggerReactivity: true
+				});
+
 				return true;
 			},
 
 			resetToSystem: () => {
+				const currentUserTheme = get(userTheme);
+				logger.actions.theme('Reset para tema do sistema', {
+					from: currentUserTheme,
+					to: THEME_TYPES.SYSTEM
+				});
 				userTheme.set(THEME_TYPES.SYSTEM);
 			},
 
 			toggleTheme: () => {
 				const current = get(currentTheme);
+				const currentUser = get(userTheme);
 				const next = current === THEME_TYPES.DARK ? THEME_TYPES.LIGHT : THEME_TYPES.DARK;
+
+				logger.actions.theme('Toggle de tema executado', {
+					currentEffective: current,
+					currentUser: currentUser,
+					next,
+					logic: `${current} → ${next}`
+				});
+
 				userTheme.set(next);
 				return next;
 			},
@@ -342,7 +532,15 @@ function createThemeStore() {
 			reapplyTheme: () => {
 				if (browser) {
 					const current = get(currentTheme);
+					logger.actions.theme('Reaplicação forçada de tema', {
+						theme: current,
+						reason: 'solicitação manual'
+					});
 					themeApplicator.applyTheme(current);
+				} else {
+					logger.actions.theme('Reaplicação ignorada', {
+						reason: 'não está no browser'
+					});
 				}
 			}
 		},
