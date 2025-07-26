@@ -18,7 +18,7 @@
 
 	onMount(() => {
 		themeTestLogger = new ThemeTestLogger();
-		
+
 		// Subscriptions para dados reativos
 		const unsubscribeTheme = themeStore.subscribe((theme) => {
 			currentTheme = theme;
@@ -33,7 +33,7 @@
 			const logs = logger.utils.getLogs();
 			logsCount = logs.length;
 			recentLogs = logs.slice(-10);
-			
+
 			const throttleStats = logger.actions.getThrottleStats();
 			throttledCount = throttleStats.throttledCount;
 		};
@@ -64,19 +64,19 @@
 
 	const runStressTest = async () => {
 		logger.actions.info('Iniciando teste de stress');
-		
+
 		const themes = [THEME_TYPES.LIGHT, THEME_TYPES.DARK, THEME_TYPES.SYSTEM];
 		const startTime = performance.now();
-		
+
 		for (let i = 0; i < 30; i++) {
 			const theme = themes[i % themes.length];
 			themeStore.actions.setTheme(theme);
-			await new Promise(resolve => setTimeout(resolve, 50));
+			await new Promise((resolve) => setTimeout(resolve, 50));
 		}
-		
+
 		const endTime = performance.now();
 		const duration = Math.round(endTime - startTime);
-		
+
 		logger.actions.info('Teste de stress concluído', {
 			duration: `${duration}ms`,
 			totalChanges: 30,
@@ -88,7 +88,7 @@
 
 	const runFullTest = async () => {
 		if (!themeTestLogger) return;
-		
+
 		logger.actions.info('Iniciando teste completo automatizado');
 		testResults = await themeTestLogger.runFullThemeTest();
 		updatePerformanceStats();
@@ -111,7 +111,7 @@
 		a.download = `theme-logs-${new Date().toISOString().slice(0, 19)}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
-		
+
 		logger.actions.info('Logs exportados');
 	};
 
@@ -126,17 +126,18 @@
 
 	const updatePerformanceStats = () => {
 		const logs = logger.utils.getLogs();
-		const themeLogs = logs.filter(l => l.category === 'theme');
-		const transitionLogs = logs.filter(l => l.category === 'transition');
-		
-		const transitionTimes = transitionLogs
-			.filter(l => l.action.includes('finalizada'))
-			.map(l => parseInt(l.data.duration) || 0)
-			.filter(t => t > 0);
+		const themeLogs = logs.filter((l) => l.category === 'theme');
+		const transitionLogs = logs.filter((l) => l.category === 'transition');
 
-		const avgTransitionTime = transitionTimes.length > 0
-			? Math.round(transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length)
-			: 0;
+		const transitionTimes = transitionLogs
+			.filter((l) => l.action.includes('finalizada'))
+			.map((l) => parseInt(l.data.duration) || 0)
+			.filter((t) => t > 0);
+
+		const avgTransitionTime =
+			transitionTimes.length > 0
+				? Math.round(transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length)
+				: 0;
 
 		performanceStats = {
 			totalLogs: logs.length,
@@ -158,7 +159,7 @@
 
 <div class="test-container">
 	<h1>🎨 Teste Avançado do Sistema de Temas</h1>
-	
+
 	<!-- Status Atual -->
 	<section class="status-panel">
 		<h2>📊 Status Atual</h2>
@@ -195,93 +196,95 @@
 			<button onclick={() => testThemeChange(THEME_TYPES.SYSTEM)} class="btn btn-system">
 				🖥️ Sistema
 			</button>
-			<button onclick={toggleTheme} class="btn btn-toggle">
-				🔄 Toggle
-			</button>
-			<button onclick={runStressTest} class="btn btn-stress">
-				⚡ Stress Test
-			</button>
-			<button onclick={runFullTest} class="btn btn-full">
-				🔬 Teste Completo
-			</button>
-			<button onclick={clearLogs} class="btn btn-clear">
-				🗑️ Limpar
-			</button>
-			<button onclick={exportLogs} class="btn btn-export">
-				📤 Exportar
-			</button>
+			<button onclick={toggleTheme} class="btn btn-toggle"> 🔄 Toggle </button>
+			<button onclick={runStressTest} class="btn btn-stress"> ⚡ Stress Test </button>
+			<button onclick={runFullTest} class="btn btn-full"> 🔬 Teste Completo </button>
+			<button onclick={clearLogs} class="btn btn-clear"> 🗑️ Limpar </button>
+			<button onclick={exportLogs} class="btn btn-export"> 📤 Exportar </button>
 		</div>
 	</section>
 
 	<!-- Performance Stats -->
 	{#if performanceStats}
-	<section class="performance-panel">
-		<h2>⚡ Estatísticas de Performance</h2>
-		<div class="stats-grid">
-			<div class="stat-card">
-				<div class="stat-value">{performanceStats.avgTransitionTime}ms</div>
-				<div class="stat-label">Tempo Médio de Transição</div>
+		<section class="performance-panel">
+			<h2>⚡ Estatísticas de Performance</h2>
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-value">{performanceStats.avgTransitionTime}ms</div>
+					<div class="stat-label">Tempo Médio de Transição</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value">{performanceStats.themeLogs}</div>
+					<div class="stat-label">Logs de Tema</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value">{performanceStats.transitionLogs}</div>
+					<div class="stat-label">Logs de Transição</div>
+				</div>
+				<div class="stat-card performance-{performanceStats.performance}">
+					<div class="stat-value">{performanceStats.performance}</div>
+					<div class="stat-label">Performance Geral</div>
+				</div>
 			</div>
-			<div class="stat-card">
-				<div class="stat-value">{performanceStats.themeLogs}</div>
-				<div class="stat-label">Logs de Tema</div>
-			</div>
-			<div class="stat-card">
-				<div class="stat-value">{performanceStats.transitionLogs}</div>
-				<div class="stat-label">Logs de Transição</div>
-			</div>
-			<div class="stat-card performance-{performanceStats.performance}">
-				<div class="stat-value">{performanceStats.performance}</div>
-				<div class="stat-label">Performance Geral</div>
-			</div>
-		</div>
-	</section>
+		</section>
 	{/if}
 
 	<!-- Logs em Tempo Real -->
 	<section class="logs-panel">
 		<div class="logs-header">
 			<h2>📝 Logs em Tempo Real</h2>
-			<button onclick={toggleRealTimeLogging} class="btn btn-{isRealTimeLogging ? 'stop' : 'start'}">
+			<button
+				onclick={toggleRealTimeLogging}
+				class="btn btn-{isRealTimeLogging ? 'stop' : 'start'}"
+			>
 				{isRealTimeLogging ? '⏹️ Parar' : '▶️ Iniciar'}
 			</button>
 		</div>
-		
+
 		{#if isRealTimeLogging}
-		<div class="logs-output">
-			{#each recentLogs as log (log.id)}
-				<div class="log-entry log-{log.category}">
-					<span class="log-time">[{formatTime(log.timestamp)}]</span>
-					<span class="log-content">{log.formatted}</span>
-				</div>
-			{/each}
-		</div>
+			<div class="logs-output">
+				{#each recentLogs as log (log.id)}
+					<div class="log-entry log-{log.category}">
+						<span class="log-time">[{formatTime(log.timestamp)}]</span>
+						<span class="log-content">{log.formatted}</span>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</section>
 
 	<!-- Resultados do Teste Completo -->
 	{#if testResults}
-	<section class="results-panel">
-		<h2>🔬 Resultados do Teste Completo</h2>
-		<div class="results-summary">
-			<p><strong>Tempo Total:</strong> {testResults.results[0]?.data?.totalTestTime || 'N/A'}</p>
-			<p><strong>Testes Executados:</strong> {testResults.results?.length || 0}</p>
-			<p><strong>Taxa de Sucesso:</strong> {testResults.results ? Math.round((testResults.results.filter(r => r.status === 'success').length / testResults.results.length) * 100) : 0}%</p>
-		</div>
-		
-		<details class="test-details">
-			<summary>Ver Detalhes dos Testes</summary>
-			<div class="test-results-list">
-				{#each testResults.results || [] as result}
-					<div class="test-result test-{result.status}">
-						<span class="test-name">{result.testName}</span>
-						<span class="test-status">{result.status}</span>
-						<span class="test-time">{formatTime(result.timestamp)}</span>
-					</div>
-				{/each}
+		<section class="results-panel">
+			<h2>🔬 Resultados do Teste Completo</h2>
+			<div class="results-summary">
+				<p><strong>Tempo Total:</strong> {testResults.results[0]?.data?.totalTestTime || 'N/A'}</p>
+				<p><strong>Testes Executados:</strong> {testResults.results?.length || 0}</p>
+				<p>
+					<strong>Taxa de Sucesso:</strong>
+					{testResults.results
+						? Math.round(
+								(testResults.results.filter((r) => r.status === 'success').length /
+									testResults.results.length) *
+									100
+							)
+						: 0}%
+				</p>
 			</div>
-		</details>
-	</section>
+
+			<details class="test-details">
+				<summary>Ver Detalhes dos Testes</summary>
+				<div class="test-results-list">
+					{#each testResults.results || [] as result, index (result.testName + index)}
+						<div class="test-result test-{result.status}">
+							<span class="test-name">{result.testName}</span>
+							<span class="test-status">{result.status}</span>
+							<span class="test-time">{formatTime(result.timestamp)}</span>
+						</div>
+					{/each}
+				</div>
+			</details>
+		</section>
 	{/if}
 </div>
 
@@ -311,10 +314,12 @@
 		border-radius: 12px;
 		padding: 24px;
 		margin: 24px 0;
-		box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 	}
 
-	.status-grid, .controls-grid, .stats-grid {
+	.status-grid,
+	.controls-grid,
+	.stats-grid {
 		display: grid;
 		gap: 16px;
 	}
@@ -388,19 +393,49 @@
 
 	.btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 	}
 
-	.btn-light { background: #fbbf24; color: #000; }
-	.btn-dark { background: #374151; color: #fff; }
-	.btn-system { background: #8b5cf6; color: #fff; }
-	.btn-toggle { background: var(--theme-primary); color: var(--theme-background); }
-	.btn-stress { background: #ef4444; color: #fff; }
-	.btn-full { background: #06b6d4; color: #fff; }
-	.btn-clear { background: #6b7280; color: #fff; }
-	.btn-export { background: #10b981; color: #fff; }
-	.btn-start { background: #22c55e; color: #fff; }
-	.btn-stop { background: #ef4444; color: #fff; }
+	.btn-light {
+		background: #fbbf24;
+		color: #000;
+	}
+	.btn-dark {
+		background: #374151;
+		color: #fff;
+	}
+	.btn-system {
+		background: #8b5cf6;
+		color: #fff;
+	}
+	.btn-toggle {
+		background: var(--theme-primary);
+		color: var(--theme-background);
+	}
+	.btn-stress {
+		background: #ef4444;
+		color: #fff;
+	}
+	.btn-full {
+		background: #06b6d4;
+		color: #fff;
+	}
+	.btn-clear {
+		background: #6b7280;
+		color: #fff;
+	}
+	.btn-export {
+		background: #10b981;
+		color: #fff;
+	}
+	.btn-start {
+		background: #22c55e;
+		color: #fff;
+	}
+	.btn-stop {
+		background: #ef4444;
+		color: #fff;
+	}
 
 	.stat-card {
 		text-align: center;
@@ -422,9 +457,15 @@
 		margin-top: 8px;
 	}
 
-	.performance-excelente .stat-value { color: #22c55e; }
-	.performance-boa .stat-value { color: #fbbf24; }
-	.performance-lenta .stat-value { color: #ef4444; }
+	.performance-excelente .stat-value {
+		color: #22c55e;
+	}
+	.performance-boa .stat-value {
+		color: #fbbf24;
+	}
+	.performance-lenta .stat-value {
+		color: #ef4444;
+	}
 
 	.logs-header {
 		display: flex;
@@ -459,12 +500,24 @@
 		flex: 1;
 	}
 
-	.log-theme { color: #ff6b9d; }
-	.log-transition { color: #4ecdc4; }
-	.log-component { color: #45b7d1; }
-	.log-store { color: #96ceb4; }
-	.log-error { color: #ff6b6b; }
-	.log-info { color: #4ecdc4; }
+	.log-theme {
+		color: #ff6b9d;
+	}
+	.log-transition {
+		color: #4ecdc4;
+	}
+	.log-component {
+		color: #45b7d1;
+	}
+	.log-store {
+		color: #96ceb4;
+	}
+	.log-error {
+		color: #ff6b6b;
+	}
+	.log-info {
+		color: #4ecdc4;
+	}
 
 	.results-summary {
 		background: var(--theme-background);

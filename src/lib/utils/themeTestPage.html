@@ -1,303 +1,319 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste do Sistema de Temas - ED | Acima das Nuvens</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: var(--theme-background, #1a1a1a);
-            color: var(--theme-text, #ffffff);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .test-panel {
-            background: var(--theme-surface, #2a2a2a);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        
-        .button {
-            background: var(--theme-primary, #4ade80);
-            color: var(--theme-background, #000);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
-        }
-        
-        .log-output {
-            background: #000;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            margin: 15px 0;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .stat-card {
-            background: var(--theme-surface, #2a2a2a);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--theme-primary, #4ade80);
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        
-        h1, h2 {
-            color: var(--theme-primary, #4ade80);
-        }
-        
-        .current-theme {
-            display: inline-block;
-            background: var(--theme-primary, #4ade80);
-            color: var(--theme-background, #000);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎨 Teste do Sistema de Temas com Logger</h1>
-        
-        <div class="test-panel">
-            <h2>Status Atual</h2>
-            <div>Tema Ativo: <span id="current-theme" class="current-theme">Carregando...</span></div>
-            <div>Logs Capturados: <span id="logs-count">0</span></div>
-            <div>Logs Throttled: <span id="throttled-count">0</span></div>
-        </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Teste do Sistema de Temas - ED | Acima das Nuvens</title>
+		<style>
+			body {
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				margin: 0;
+				padding: 20px;
+				background: var(--theme-background, #1a1a1a);
+				color: var(--theme-text, #ffffff);
+				transition:
+					background-color 0.3s ease,
+					color 0.3s ease;
+			}
 
-        <div class="test-panel">
-            <h2>Controles de Teste</h2>
-            <button class="button" onclick="testThemeChange('light')">🌞 Tema Claro</button>
-            <button class="button" onclick="testThemeChange('dark')">🌙 Tema Escuro</button>
-            <button class="button" onclick="testThemeChange('system')">🖥️ Tema Sistema</button>
-            <button class="button" onclick="toggleTheme()">🔄 Toggle Tema</button>
-            <button class="button" onclick="runStressTest()">⚡ Teste de Stress</button>
-            <button class="button" onclick="clearLogs()">🗑️ Limpar Logs</button>
-            <button class="button" onclick="exportLogs()">📤 Exportar Logs</button>
-        </div>
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="total-logs">0</div>
-                <div class="stat-label">Total de Logs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="theme-logs">0</div>
-                <div class="stat-label">Logs de Tema</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="transition-logs">0</div>
-                <div class="stat-label">Logs de Transição</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="throttle-stats">0</div>
-                <div class="stat-label">Logs Throttled</div>
-            </div>
-        </div>
+			.test-panel {
+				background: var(--theme-surface, #2a2a2a);
+				border-radius: 12px;
+				padding: 20px;
+				margin: 20px 0;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+			}
 
-        <div class="test-panel">
-            <h2>📊 Logs em Tempo Real</h2>
-            <button class="button" onclick="startRealTimeLogging()">▶️ Iniciar Monitoramento</button>
-            <button class="button" onclick="stopRealTimeLogging()">⏹️ Parar Monitoramento</button>
-            <div id="log-output" class="log-output">Aguardando logs...</div>
-        </div>
+			.button {
+				background: var(--theme-primary, #4ade80);
+				color: var(--theme-background, #000);
+				border: none;
+				padding: 12px 24px;
+				border-radius: 8px;
+				cursor: pointer;
+				font-weight: 600;
+				margin: 8px;
+				transition: all 0.2s ease;
+			}
 
-        <div class="test-panel">
-            <h2>🔧 Análise de Performance</h2>
-            <div id="performance-analysis"></div>
-        </div>
-    </div>
+			.button:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
+			}
 
-    <script type="module">
-        console.log('🚀 Iniciando teste do sistema de temas...');
-        
-        // Simulação do sistema (para quando não estivermos no SvelteKit)
-        window.mockThemeSystem = {
-            currentTheme: 'dark',
-            logs: [],
-            throttledCount: 0,
-            
-            setTheme(theme) {
-                const oldTheme = this.currentTheme;
-                this.currentTheme = theme;
-                this.addLog('theme', 'Mudança de tema', { from: oldTheme, to: theme });
-                this.updateUI();
-                return true;
-            },
-            
-            addLog(category, action, data) {
-                const log = {
-                    id: Date.now() + Math.random(),
-                    timestamp: Date.now(),
-                    category,
-                    action,
-                    data,
-                    formatted: `🎨 [${category.toUpperCase()}] ${action} | ${Object.entries(data).map(([k,v]) => `${k}: ${v}`).join(', ')}`
-                };
-                this.logs.push(log);
-                this.updateStats();
-            },
-            
-            updateUI() {
-                document.documentElement.style.setProperty('--theme-background', 
-                    this.currentTheme === 'light' ? '#ffffff' : '#1a1a1a');
-                document.documentElement.style.setProperty('--theme-text', 
-                    this.currentTheme === 'light' ? '#000000' : '#ffffff');
-                document.documentElement.style.setProperty('--theme-surface', 
-                    this.currentTheme === 'light' ? '#f5f5f5' : '#2a2a2a');
-                document.documentElement.style.setProperty('--theme-primary', '#4ade80');
-                
-                document.getElementById('current-theme').textContent = this.currentTheme;
-            },
-            
-            updateStats() {
-                document.getElementById('logs-count').textContent = this.logs.length;
-                document.getElementById('total-logs').textContent = this.logs.length;
-                document.getElementById('theme-logs').textContent = 
-                    this.logs.filter(l => l.category === 'theme').length;
-                document.getElementById('transition-logs').textContent = 
-                    this.logs.filter(l => l.category === 'transition').length;
-                document.getElementById('throttle-stats').textContent = this.throttledCount;
-            }
-        };
+			.log-output {
+				background: #000;
+				color: #00ff00;
+				padding: 15px;
+				border-radius: 8px;
+				font-family: 'Courier New', monospace;
+				font-size: 12px;
+				max-height: 400px;
+				overflow-y: auto;
+				white-space: pre-wrap;
+				margin: 15px 0;
+			}
 
-        // Inicializar UI
-        window.mockThemeSystem.updateUI();
-        window.mockThemeSystem.updateStats();
+			.stats {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 15px;
+				margin: 20px 0;
+			}
 
-        // Funções de teste
-        window.testThemeChange = (theme) => {
-            console.log(`Testando mudança para tema: ${theme}`);
-            window.mockThemeSystem.setTheme(theme);
-        };
+			.stat-card {
+				background: var(--theme-surface, #2a2a2a);
+				padding: 15px;
+				border-radius: 8px;
+				text-align: center;
+			}
 
-        window.toggleTheme = () => {
-            const current = window.mockThemeSystem.currentTheme;
-            const next = current === 'dark' ? 'light' : 'dark';
-            console.log(`Toggle: ${current} → ${next}`);
-            window.mockThemeSystem.setTheme(next);
-        };
+			.stat-value {
+				font-size: 24px;
+				font-weight: bold;
+				color: var(--theme-primary, #4ade80);
+			}
 
-        window.runStressTest = () => {
-            console.log('Iniciando teste de stress...');
-            window.mockThemeSystem.addLog('info', 'Iniciando teste de stress', {});
-            
-            let count = 0;
-            const interval = setInterval(() => {
-                window.mockThemeSystem.setTheme(count % 2 === 0 ? 'light' : 'dark');
-                count++;
-                
-                if (count >= 20) {
-                    clearInterval(interval);
-                    window.mockThemeSystem.addLog('info', 'Teste de stress concluído', { totalChanges: count });
-                    updatePerformanceAnalysis();
-                }
-            }, 100);
-        };
+			.stat-label {
+				font-size: 12px;
+				opacity: 0.8;
+				margin-top: 5px;
+			}
 
-        window.clearLogs = () => {
-            window.mockThemeSystem.logs = [];
-            window.mockThemeSystem.throttledCount = 0;
-            window.mockThemeSystem.updateStats();
-            document.getElementById('log-output').textContent = 'Logs limpos...';
-        };
+			h1,
+			h2 {
+				color: var(--theme-primary, #4ade80);
+			}
 
-        window.exportLogs = () => {
-            const logs = JSON.stringify(window.mockThemeSystem.logs, null, 2);
-            const blob = new Blob([logs], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `theme-logs-${new Date().toISOString()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        };
+			.current-theme {
+				display: inline-block;
+				background: var(--theme-primary, #4ade80);
+				color: var(--theme-background, #000);
+				padding: 8px 16px;
+				border-radius: 20px;
+				font-weight: bold;
+				margin: 10px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>🎨 Teste do Sistema de Temas com Logger</h1>
 
-        let realTimeInterval;
-        window.startRealTimeLogging = () => {
-            const output = document.getElementById('log-output');
-            output.textContent = 'Monitoramento ativo...\n';
-            
-            realTimeInterval = setInterval(() => {
-                const recentLogs = window.mockThemeSystem.logs.slice(-10);
-                const logText = recentLogs.map(log => 
-                    `[${new Date(log.timestamp).toLocaleTimeString()}] ${log.formatted}`
-                ).join('\n');
-                output.textContent = logText || 'Nenhum log recente...';
-                output.scrollTop = output.scrollHeight;
-            }, 500);
-        };
+			<div class="test-panel">
+				<h2>Status Atual</h2>
+				<div>Tema Ativo: <span id="current-theme" class="current-theme">Carregando...</span></div>
+				<div>Logs Capturados: <span id="logs-count">0</span></div>
+				<div>Logs Throttled: <span id="throttled-count">0</span></div>
+			</div>
 
-        window.stopRealTimeLogging = () => {
-            if (realTimeInterval) {
-                clearInterval(realTimeInterval);
-                realTimeInterval = null;
-            }
-            document.getElementById('log-output').textContent = 'Monitoramento parado.';
-        };
+			<div class="test-panel">
+				<h2>Controles de Teste</h2>
+				<button class="button" onclick="testThemeChange('light')">🌞 Tema Claro</button>
+				<button class="button" onclick="testThemeChange('dark')">🌙 Tema Escuro</button>
+				<button class="button" onclick="testThemeChange('system')">🖥️ Tema Sistema</button>
+				<button class="button" onclick="toggleTheme()">🔄 Toggle Tema</button>
+				<button class="button" onclick="runStressTest()">⚡ Teste de Stress</button>
+				<button class="button" onclick="clearLogs()">🗑️ Limpar Logs</button>
+				<button class="button" onclick="exportLogs()">📤 Exportar Logs</button>
+			</div>
 
-        function updatePerformanceAnalysis() {
-            const logs = window.mockThemeSystem.logs;
-            const themeLogs = logs.filter(l => l.category === 'theme');
-            const transitionTimes = [];
-            
-            for (let i = 1; i < themeLogs.length; i++) {
-                const timeDiff = themeLogs[i].timestamp - themeLogs[i-1].timestamp;
-                transitionTimes.push(timeDiff);
-            }
-            
-            const avgTime = transitionTimes.length > 0 
-                ? Math.round(transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length)
-                : 0;
-            
-            const minTime = transitionTimes.length > 0 ? Math.min(...transitionTimes) : 0;
-            const maxTime = transitionTimes.length > 0 ? Math.max(...transitionTimes) : 0;
-            
-            const analysis = `
+			<div class="stats">
+				<div class="stat-card">
+					<div class="stat-value" id="total-logs">0</div>
+					<div class="stat-label">Total de Logs</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="theme-logs">0</div>
+					<div class="stat-label">Logs de Tema</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="transition-logs">0</div>
+					<div class="stat-label">Logs de Transição</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="throttle-stats">0</div>
+					<div class="stat-label">Logs Throttled</div>
+				</div>
+			</div>
+
+			<div class="test-panel">
+				<h2>📊 Logs em Tempo Real</h2>
+				<button class="button" onclick="startRealTimeLogging()">▶️ Iniciar Monitoramento</button>
+				<button class="button" onclick="stopRealTimeLogging()">⏹️ Parar Monitoramento</button>
+				<div id="log-output" class="log-output">Aguardando logs...</div>
+			</div>
+
+			<div class="test-panel">
+				<h2>🔧 Análise de Performance</h2>
+				<div id="performance-analysis"></div>
+			</div>
+		</div>
+
+		<script type="module">
+			console.log('🚀 Iniciando teste do sistema de temas...');
+
+			// Simulação do sistema (para quando não estivermos no SvelteKit)
+			window.mockThemeSystem = {
+				currentTheme: 'dark',
+				logs: [],
+				throttledCount: 0,
+
+				setTheme(theme) {
+					const oldTheme = this.currentTheme;
+					this.currentTheme = theme;
+					this.addLog('theme', 'Mudança de tema', { from: oldTheme, to: theme });
+					this.updateUI();
+					return true;
+				},
+
+				addLog(category, action, data) {
+					const log = {
+						id: Date.now() + Math.random(),
+						timestamp: Date.now(),
+						category,
+						action,
+						data,
+						formatted: `🎨 [${category.toUpperCase()}] ${action} | ${Object.entries(data)
+							.map(([k, v]) => `${k}: ${v}`)
+							.join(', ')}`
+					};
+					this.logs.push(log);
+					this.updateStats();
+				},
+
+				updateUI() {
+					document.documentElement.style.setProperty(
+						'--theme-background',
+						this.currentTheme === 'light' ? '#ffffff' : '#1a1a1a'
+					);
+					document.documentElement.style.setProperty(
+						'--theme-text',
+						this.currentTheme === 'light' ? '#000000' : '#ffffff'
+					);
+					document.documentElement.style.setProperty(
+						'--theme-surface',
+						this.currentTheme === 'light' ? '#f5f5f5' : '#2a2a2a'
+					);
+					document.documentElement.style.setProperty('--theme-primary', '#4ade80');
+
+					document.getElementById('current-theme').textContent = this.currentTheme;
+				},
+
+				updateStats() {
+					document.getElementById('logs-count').textContent = this.logs.length;
+					document.getElementById('total-logs').textContent = this.logs.length;
+					document.getElementById('theme-logs').textContent = this.logs.filter(
+						(l) => l.category === 'theme'
+					).length;
+					document.getElementById('transition-logs').textContent = this.logs.filter(
+						(l) => l.category === 'transition'
+					).length;
+					document.getElementById('throttle-stats').textContent = this.throttledCount;
+				}
+			};
+
+			// Inicializar UI
+			window.mockThemeSystem.updateUI();
+			window.mockThemeSystem.updateStats();
+
+			// Funções de teste
+			window.testThemeChange = (theme) => {
+				console.log(`Testando mudança para tema: ${theme}`);
+				window.mockThemeSystem.setTheme(theme);
+			};
+
+			window.toggleTheme = () => {
+				const current = window.mockThemeSystem.currentTheme;
+				const next = current === 'dark' ? 'light' : 'dark';
+				console.log(`Toggle: ${current} → ${next}`);
+				window.mockThemeSystem.setTheme(next);
+			};
+
+			window.runStressTest = () => {
+				console.log('Iniciando teste de stress...');
+				window.mockThemeSystem.addLog('info', 'Iniciando teste de stress', {});
+
+				let count = 0;
+				const interval = setInterval(() => {
+					window.mockThemeSystem.setTheme(count % 2 === 0 ? 'light' : 'dark');
+					count++;
+
+					if (count >= 20) {
+						clearInterval(interval);
+						window.mockThemeSystem.addLog('info', 'Teste de stress concluído', {
+							totalChanges: count
+						});
+						updatePerformanceAnalysis();
+					}
+				}, 100);
+			};
+
+			window.clearLogs = () => {
+				window.mockThemeSystem.logs = [];
+				window.mockThemeSystem.throttledCount = 0;
+				window.mockThemeSystem.updateStats();
+				document.getElementById('log-output').textContent = 'Logs limpos...';
+			};
+
+			window.exportLogs = () => {
+				const logs = JSON.stringify(window.mockThemeSystem.logs, null, 2);
+				const blob = new Blob([logs], { type: 'application/json' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `theme-logs-${new Date().toISOString()}.json`;
+				a.click();
+				URL.revokeObjectURL(url);
+			};
+
+			let realTimeInterval;
+			window.startRealTimeLogging = () => {
+				const output = document.getElementById('log-output');
+				output.textContent = 'Monitoramento ativo...\n';
+
+				realTimeInterval = setInterval(() => {
+					const recentLogs = window.mockThemeSystem.logs.slice(-10);
+					const logText = recentLogs
+						.map((log) => `[${new Date(log.timestamp).toLocaleTimeString()}] ${log.formatted}`)
+						.join('\n');
+					output.textContent = logText || 'Nenhum log recente...';
+					output.scrollTop = output.scrollHeight;
+				}, 500);
+			};
+
+			window.stopRealTimeLogging = () => {
+				if (realTimeInterval) {
+					clearInterval(realTimeInterval);
+					realTimeInterval = null;
+				}
+				document.getElementById('log-output').textContent = 'Monitoramento parado.';
+			};
+
+			function updatePerformanceAnalysis() {
+				const logs = window.mockThemeSystem.logs;
+				const themeLogs = logs.filter((l) => l.category === 'theme');
+				const transitionTimes = [];
+
+				for (let i = 1; i < themeLogs.length; i++) {
+					const timeDiff = themeLogs[i].timestamp - themeLogs[i - 1].timestamp;
+					transitionTimes.push(timeDiff);
+				}
+
+				const avgTime =
+					transitionTimes.length > 0
+						? Math.round(transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length)
+						: 0;
+
+				const minTime = transitionTimes.length > 0 ? Math.min(...transitionTimes) : 0;
+				const maxTime = transitionTimes.length > 0 ? Math.max(...transitionTimes) : 0;
+
+				const analysis = `
                 📊 Análise de Performance:
                 • Mudanças de tema: ${themeLogs.length}
                 • Tempo médio entre mudanças: ${avgTime}ms
@@ -305,13 +321,13 @@
                 • Tempo máximo: ${maxTime}ms
                 • Performance: ${avgTime < 50 ? '✅ Excelente' : avgTime < 200 ? '⚠️ Boa' : '❌ Lenta'}
             `;
-            
-            document.getElementById('performance-analysis').innerHTML = `<pre>${analysis}</pre>`;
-        }
 
-        // Teste inicial
-        window.mockThemeSystem.addLog('info', 'Sistema de teste inicializado', { version: '1.0' });
-        console.log('✅ Sistema de teste carregado!');
-    </script>
-</body>
+				document.getElementById('performance-analysis').innerHTML = `<pre>${analysis}</pre>`;
+			}
+
+			// Teste inicial
+			window.mockThemeSystem.addLog('info', 'Sistema de teste inicializado', { version: '1.0' });
+			console.log('✅ Sistema de teste carregado!');
+		</script>
+	</body>
 </html>

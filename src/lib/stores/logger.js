@@ -58,16 +58,22 @@ const formatLogMessage = (category, action, data) => {
 	const icon = icons[category] || '📝';
 
 	// Formatação inteligente dos dados
-	const dataEntries = Object.entries(data).filter(([, value]) => value !== undefined && value !== null);
-	const summary = dataEntries.length > 0
-		? dataEntries.map(([key, value]) => {
-			// Trunca strings muito longas para melhor legibilidade
-			const displayValue = typeof value === 'string' && value.length > 50
-				? `${value.substring(0, 47)}...`
-				: value;
-			return `${key}: ${displayValue}`;
-		}).join(', ')
-		: '';
+	const dataEntries = Object.entries(data).filter(
+		([, value]) => value !== undefined && value !== null
+	);
+	const summary =
+		dataEntries.length > 0
+			? dataEntries
+					.map(([key, value]) => {
+						// Trunca strings muito longas para melhor legibilidade
+						const displayValue =
+							typeof value === 'string' && value.length > 50
+								? `${value.substring(0, 47)}...`
+								: value;
+						return `${key}: ${displayValue}`;
+					})
+					.join(', ')
+			: '';
 
 	return `${icon} [${category.toUpperCase()}] ${action}${summary ? ` | ${summary}` : ''}`;
 };
@@ -82,9 +88,9 @@ const createThrottleSystem = () => {
 
 		// Limpa entradas antigas
 		if (recentLogs.has(key)) {
-			const timestamps = recentLogs.get(key).filter(
-				ts => now - ts < LOGGER_CONFIG.THROTTLE_WINDOW
-			);
+			const timestamps = recentLogs
+				.get(key)
+				.filter((ts) => now - ts < LOGGER_CONFIG.THROTTLE_WINDOW);
 			recentLogs.set(key, timestamps);
 		}
 
@@ -196,8 +202,11 @@ function createLoggerStore() {
 				const newThrottledCount = state.throttledCount + 1;
 
 				// Log throttling apenas no console, não adiciona ao store para evitar spam
-				if (dev && newThrottledCount % 10 === 1) { // Log a cada 10 throttles
-					console.warn(`🚀 [ED] ⚠️ Throttling ativo: ${newThrottledCount} logs similares suprimidos`);
+				if (dev && newThrottledCount % 10 === 1) {
+					// Log a cada 10 throttles
+					console.warn(
+						`🚀 [ED] ⚠️ Throttling ativo: ${newThrottledCount} logs similares suprimidos`
+					);
 				}
 
 				return {

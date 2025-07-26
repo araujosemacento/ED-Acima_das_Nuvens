@@ -77,7 +77,7 @@
 		});
 
 		const success = themeStore.actions.setTheme(newTheme);
-		
+
 		if (success) {
 			logger.actions.component('ThemeToggle', 'Tema alterado com sucesso', {
 				newTheme,
@@ -89,7 +89,7 @@
 				reason: 'setTheme retornou false'
 			});
 		}
-		
+
 		menu.setOpen(false);
 	};
 

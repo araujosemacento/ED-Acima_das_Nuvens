@@ -332,31 +332,31 @@ const createThemeApplicator = (rehydrationSystem) => {
 		const textColors =
 			theme === THEME_TYPES.DARK
 				? {
-					'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
-					'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
-					'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
-					'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
-					'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
-					'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
-					'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
-					'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
-					'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
-					'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
-					'--icon-filter': 'invert(1)'
-				}
+						'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
+						'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
+						'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
+						'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
+						'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
+						'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
+						'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
+						'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
+						'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
+						'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
+						'--icon-filter': 'invert(1)'
+					}
 				: {
-					'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
-					'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
-					'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
-					'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
-					'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
-					'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
-					'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
-					'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
-					'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
-					'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
-					'--icon-filter': 'none'
-				};
+						'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
+						'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
+						'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
+						'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
+						'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
+						'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
+						'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
+						'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
+						'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
+						'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
+						'--icon-filter': 'none'
+					};
 
 		// Adiciona cores de texto ao lote
 		Object.entries(textColors).forEach(([prop, value]) => {
