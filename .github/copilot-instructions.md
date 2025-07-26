@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-**"ED | Acima das Nuvens"** é uma plataforma educacional interativa que combina jogo narrativo RPG com ensino de estruturas de dados usando Python no browser.
+**"ED | Acima das Nuvens"** é uma plataforma interativa que combina jogo narrativo RPG com execução Python no browser.
 
 ## Stack Tecnológica
 
@@ -102,6 +102,24 @@ bun run lint       # Linting
 bun run format     # Formatação
 ```
 
+## Atualizações Recentes - Sistema de Temas
+
+### Melhorias de Acessibilidade e Legibilidade (Julho 2025)
+
+- **Paleta Otimizada**: Saturação reduzida de 100% para 20-85% na `_palette.scss`
+- **Refatoração app.scss**: Eliminada redundância (~400 linhas), foco em aplicação de temas
+- **Variáveis CSS**: Sistema unificado de cores e sombras para componentes
+- **WCAG Compliance**: Melhor contraste e legibilidade visual
+- **Hardcoded Removal**: Cores hardcoded substituídas por variáveis CSS
+
+### Comandos de Tema
+
+```bash
+bun run prepare-themes   # Regenera ambos os temas
+bun run smui-theme-light # Tema claro apenas
+bun run smui-theme-dark  # Tema escuro apenas
+```
+
 ## Estado Atual
 
 - ✅ SvelteKit 5 + Svelte 5 (runes)
@@ -111,8 +129,9 @@ bun run format     # Formatação
 - ✅ Pyodide integrado
 - ✅ Logger desenvolvimento
 - ✅ Ionicons 7.1.0
+- ✅ Paleta de cores otimizada para acessibilidade
 - 🚧 Jogo narrativo
-- 🚧 Conteúdo educacional
+- 🚧 Scripts Python customizados
 
 ## Deploy
 

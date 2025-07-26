@@ -96,7 +96,7 @@ Sistema de scrollbar integrado com Material Design e paleta de cores do projeto.
 }
 ```
 
-## Uso no Contexto Educacional
+## Uso nos Componentes
 
 ### Componente PyodideInteractive
 

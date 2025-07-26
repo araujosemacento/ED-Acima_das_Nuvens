@@ -28,7 +28,7 @@ const THEME_COLORS = {
 
 		// Surface variants
 		'surface-100': 'hsl(171, 28%, 90%)',
-		'surface-200': 'hsl(171, 28%, 80%)',
+		'surface-200': 'hsl(171, 28%, 80%)'
 	},
 	dark: {
 		// Cores principais (invertidas para tema escuro)
@@ -47,7 +47,7 @@ const THEME_COLORS = {
 
 		// Surface variants
 		'surface-100': 'hsl(171, 28%, 10%)',
-		'surface-200': 'hsl(171, 28%, 20%)',
+		'surface-200': 'hsl(171, 28%, 20%)'
 	}
 };
 
@@ -66,9 +66,9 @@ const forceElementsRehidration = () => {
 		'.welcome-content'
 	];
 
-	criticalSelectors.forEach(selector => {
+	criticalSelectors.forEach((selector) => {
 		const elements = document.querySelectorAll(selector);
-		elements.forEach(element => {
+		elements.forEach((element) => {
 			// Força recálculo do estilo usando uma propriedade temporária
 			const originalDisplay = element.style.display;
 			element.style.display = 'none';
@@ -79,9 +79,11 @@ const forceElementsRehidration = () => {
 	});
 
 	// Dispara evento customizado para componentes que precisam reagir
-	window.dispatchEvent(new CustomEvent('theme-changed', {
-		detail: { timestamp: Date.now() }
-	}));
+	window.dispatchEvent(
+		new CustomEvent('theme-changed', {
+			detail: { timestamp: Date.now() }
+		})
+	);
 };
 
 function createThemeStore() {
@@ -138,9 +140,15 @@ function createThemeStore() {
 		if (theme === 'dark') {
 			// Para tema escuro - usar valores rgba otimizados
 			root.style.setProperty('--mdc-theme-text-primary-on-background', 'rgba(255, 255, 255, 0.87)');
-			root.style.setProperty('--mdc-theme-text-secondary-on-background', 'rgba(255, 255, 255, 0.60)');
+			root.style.setProperty(
+				'--mdc-theme-text-secondary-on-background',
+				'rgba(255, 255, 255, 0.60)'
+			);
 			root.style.setProperty('--mdc-theme-text-hint-on-background', 'rgba(255, 255, 255, 0.38)');
-			root.style.setProperty('--mdc-theme-text-disabled-on-background', 'rgba(255, 255, 255, 0.38)');
+			root.style.setProperty(
+				'--mdc-theme-text-disabled-on-background',
+				'rgba(255, 255, 255, 0.38)'
+			);
 			root.style.setProperty('--mdc-theme-text-icon-on-background', 'rgba(255, 255, 255, 0.38)');
 
 			// Cores específicas para superfícies escuras
@@ -150,7 +158,7 @@ function createThemeStore() {
 			root.style.setProperty('--mdc-theme-text-disabled-on-dark', 'rgba(255, 255, 255, 0.38)');
 			root.style.setProperty('--mdc-theme-text-icon-on-dark', 'rgba(255, 255, 255, 0.38)');
 		} else {
-			// Para tema claro - usar valores rgba otimizados  
+			// Para tema claro - usar valores rgba otimizados
 			root.style.setProperty('--mdc-theme-text-primary-on-background', 'rgba(0, 0, 0, 0.87)');
 			root.style.setProperty('--mdc-theme-text-secondary-on-background', 'rgba(0, 0, 0, 0.60)');
 			root.style.setProperty('--mdc-theme-text-hint-on-background', 'rgba(0, 0, 0, 0.38)');
@@ -198,9 +206,14 @@ function createThemeStore() {
 		currentTheme.subscribe(applyTheme);
 
 		// Aplica tema inicial imediatamente
-		const initialTheme = savedTheme && Object.values(THEME_TYPES).includes(savedTheme)
-			? (savedTheme === THEME_TYPES.SYSTEM ? (mediaQuery.matches ? THEME_TYPES.DARK : THEME_TYPES.LIGHT) : savedTheme)
-			: THEME_TYPES.DARK; // Mudado para DARK como padrão
+		const initialTheme =
+			savedTheme && Object.values(THEME_TYPES).includes(savedTheme)
+				? savedTheme === THEME_TYPES.SYSTEM
+					? mediaQuery.matches
+						? THEME_TYPES.DARK
+						: THEME_TYPES.LIGHT
+					: savedTheme
+				: THEME_TYPES.DARK; // Mudado para DARK como padrão
 
 		// Pequeno delay para garantir que o DOM esteja pronto
 		setTimeout(() => applyTheme(initialTheme), 0);

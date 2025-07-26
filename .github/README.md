@@ -8,7 +8,11 @@ Configurações automatizadas para **ED | Acima das Nuvens**.
 .github/
 ├── workflows/
 │   └── pages.yml           # Deploy GitHub Pages
-├── dependabot.yml          # Atualizações automáticas
+├── dependabot.y- 🐛 **bug** - Problemas e correções
+- ✨ **enhancement** - Novas funcionalidades
+- 🎮 **game** - Jogo narrativo
+- 🎨 **ui/ux** - Interface e experiência
+- 🐍 **python** - Código Python/Pyodide         # Atualizações automáticas
 ├── pull_request_template.md # Template de PR
 └── copilot-instructions.md # Instruções para Copilot
 ```
@@ -82,14 +86,7 @@ Atualizações semanais para:
 - Descrição da funcionalidade
 - Casos de uso
 - Mockups/wireframes
-- Impacto educacional
-
-### Educational Content
-
-- Novo conteúdo Python
-- Estruturas de dados
-- Algoritmos
-- Exercícios interativos
+- Impacto nas funcionalidades
 
 ## 📝 Pull Request Template
 
@@ -99,7 +96,7 @@ Template abrangente incluindo:
 - Tipo de mudança (bug fix, feature, etc.)
 - Área afetada do projeto
 - Checklist de testes
-- Impacto educacional
+- Impacto nas funcionalidades
 - Screenshots (se aplicável)
 
 ## 🔄 Dependabot
@@ -113,7 +110,7 @@ Configuração automatizada para:
 
 ## 🎯 Configurações Especiais
 
-### Ambiente Educacional
+### Ambiente de Desenvolvimento
 
 - Foco em **Python + Pyodide**
 - **Material Design** consistente
@@ -202,10 +199,7 @@ O projeto utiliza um sistema abrangente de labels automáticas:
 
 - 🐛 **bug** - Problemas e correções
 - ✨ **enhancement** - Novas funcionalidades
-- 📚 **educational** - Conteúdo educacional
-- 🎮 **game** - Jogo narrativo
-- 🎨 **ui/ux** - Interface e experiência
-- 🐍 **python** - Código Python/Pyodide
+- **python** - Código Python/Pyodide
 
 ### Prioridades
 
@@ -234,7 +228,7 @@ O projeto utiliza um sistema abrangente de labels automáticas:
 - **Gerenciamento automático** de issues/PRs antigas
 - **Notificações** antes do fechamento
 - **Exceções** para prioridades altas
-- **Configuração específica** para projetos educacionais
+- **Configuração específica** para projetos interativos
 
 ---
 

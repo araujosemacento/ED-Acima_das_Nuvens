@@ -107,10 +107,7 @@
 			<p class="theme-text-transition text-outlined">{m.initial_disclaimer_paragraph1()}</p>
 			<p class="theme-text-transition text-outlined">{m.initial_disclaimer_paragraph2()}</p>
 		</div>
-		<Button
-			variant="unelevated"
-			class="theme-interactive-transition game-start-button"
-		>
+		<Button variant="unelevated" class="theme-interactive-transition game-start-button">
 			<Label>{m.start_game()}</Label>
 		</Button>
 	</div>

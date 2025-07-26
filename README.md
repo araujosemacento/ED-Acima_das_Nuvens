@@ -1,13 +1,12 @@
 # 🌥️ ED | Acima das Nuvens
 
-> Plataforma educacional interativa para ensino de estruturas de dados e algoritmos através de narrativa gamificada inspirada em João e o Pé de Feijão.
+> Plataforma interativa de jogo narrativo RPG inspirada em João e o Pé de Feijão com execução Python no browser.
 
 ## 🎯 Visão Geral
 
 **ED | Acima das Nuvens** combina:
 
 - **Jogo narrativo RPG** baseado em texto
-- **Plataforma educacional** para Python e estruturas de dados
 - **Interface moderna** com animações de nuvens e sistema de temas
 - **Execução Python no browser** via Pyodide
 - **Sistema de temas avançado** com transições JavaScript puras
@@ -72,7 +71,7 @@ bun run format
 ### Python Interativo
 
 - **Pyodide** para execução segura no browser
-- **Scripts educacionais** em `/static/scripts/`
+- **Scripts customizados** em `/static/scripts/`
 - **API simplificada** com cache automático
 - **Instalação de pacotes** via pip no browser
 
@@ -89,14 +88,14 @@ bun run format
 - **Medição de performance** automática
 - **Categorização** por tipo de evento
 
-## 📚 Conteúdo Educacional
+## 📚 Scripts Python
 
 Scripts Python em `/static/scripts/`:
 
-- Estruturas de dados básicas
-- Algoritmos de ordenação
+- Demonstrações de código
+- Exemplos de programação
 - Conceitos de programação
-- Exercícios interativos
+- Scripts interativos
 
 ## 🏗️ Estrutura
 
@@ -122,7 +121,7 @@ static/
 ├── assets/
 │   ├── nuvens/            # 17 assets SVG de nuvens (light/dark)
 │   └── ionicons/          # 1338+ ícones SVG
-├── scripts/               # Scripts Python educacionais
+├── scripts/               # Scripts Python personalizados
 └── fonts/                 # Fontes Noto customizadas
 ```
 
@@ -161,14 +160,14 @@ let showImages = $state(false);
 let currentTheme = $state('light');
 
 if (typeof window !== 'undefined') {
-    $effect(() => {
-        if (!showImages) {
-            currentTheme = $themeStore;
-            showImages = true;
-        } else {
-            currentTheme = $themeStore;
-        }
-    });
+	$effect(() => {
+		if (!showImages) {
+			currentTheme = $themeStore;
+			showImages = true;
+		} else {
+			currentTheme = $themeStore;
+		}
+	});
 }
 ```
 
@@ -180,4 +179,4 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 
 **Status do Projeto**: ✅ Produção
 **Última Atualização**: Julho 2025
-Desenvolvido com ❤️ para educação
+Desenvolvido com ❤️ para inovação

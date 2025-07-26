@@ -1,12 +1,17 @@
+// ========================================
+// APP.SCSS - ESTILOS GLOBAIS OTIMIZADOS
+// ========================================
+
 @use '@fontsource/fira-mono';
 @use 'sass:map';
-@use 'sass:string';
 
 @use './theme/palette' as palette;
-@use './lib/styles/cloudMotion' as cloudMotion; // Novo sistema de animações
+@use './lib/styles/cloudMotion' as cloudMotion;
 @use '@material/typography' as mdctypography;
 
-/* Carregamento das fontes */ // Mixins para componentes SMUI
+// ========================================
+// CARREGAMENTO DE FONTES
+// ========================================
 
 @font-face {
 	font-family: 'Noto Sans Display';
@@ -24,11 +29,13 @@
 	font-display: swap;
 }
 
-// Sistema de cores mais eficiente baseado na paleta
+// ========================================
+// SISTEMA DE CORES E FUNÇÃO AUXILIAR
+// ========================================
+
 $light-theme: map.get(palette.$themes, 'light');
 $dark-theme: map.get(palette.$themes, 'dark');
 
-// Função principal para acessar cores da paleta
 @function theme-color($color-name, $theme: 'light') {
 	$theme-map: if($theme == 'dark', $dark-theme, $light-theme);
 	@if map.has-key($theme-map, $color-name) {
@@ -38,128 +45,41 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	@return null;
 }
 
-// Função para criar variáveis CSS customizadas
-@function theme-var($color-name, $prefix: 'theme') {
-	@return var(--#{$prefix}-#{$color-name});
-}
+// ========================================
+// VARIÁVEIS GLOBAIS BASE
+// ========================================
 
-// Mixin para aplicar cores do tema
-@mixin theme-color($property, $color-name, $theme: 'light') {
-	#{$property}: theme-color($color-name, $theme);
-}
-
-// Mixin para cores responsivas - agora controlado via JavaScript
-@mixin theme-color-responsive($property, $color-name) {
-	// As cores agora são controladas via JavaScript e arquivos CSS SMUI separados
-	#{$property}: var(--mdc-theme-#{$color-name});
-}
-
-// Função para compatibilidade com Material Design
-@function mdc-theme-color($color-name) {
-	@return var(--mdc-theme-#{$color-name});
-}
-
-// Mixin para compatibilidade com Material Design
-@mixin mdc-theme-color($property, $color-name) {
-	#{$property}: mdc-theme-color($color-name);
-}
 :root {
+	// Fontes
 	--font-body:
 		'Noto Sans Display', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
 		Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Noto Sans Mono', 'Fira Mono', monospace;
 
-	/* Variáveis CSS customizadas baseadas na paleta */
-	// Text colors
-	--theme-text: #{theme-color('text')};
-	--theme-text-50: #{theme-color('text-50')};
-	--theme-text-100: #{theme-color('text-100')};
-	--theme-text-200: #{theme-color('text-200')};
-	--theme-text-300: #{theme-color('text-300')};
-	--theme-text-400: #{theme-color('text-400')};
-	--theme-text-500: #{theme-color('text-500')};
-	--theme-text-600: #{theme-color('text-600')};
-	--theme-text-700: #{theme-color('text-700')};
-	--theme-text-800: #{theme-color('text-800')};
-	--theme-text-900: #{theme-color('text-900')};
-	--theme-text-950: #{theme-color('text-950')};
+	// Transições (controladas por JavaScript)
+	--theme-transition-duration: 0ms; // Desabilitado - JavaScript controla
+	--theme-transition-timing: ease-in-out;
+	--element-transition-duration: 200ms;
 
-	// Background colors
-	--theme-background: #{theme-color('background')};
-	--theme-background-50: #{theme-color('background-50')};
-	--theme-background-100: #{theme-color('background-100')};
-	--theme-background-200: #{theme-color('background-200')};
-	--theme-background-300: #{theme-color('background-300')};
-	--theme-background-400: #{theme-color('background-400')};
-	--theme-background-500: #{theme-color('background-500')};
-	--theme-background-600: #{theme-color('background-600')};
-	--theme-background-700: #{theme-color('background-700')};
-	--theme-background-800: #{theme-color('background-800')};
-	--theme-background-900: #{theme-color('background-900')};
-	--theme-background-950: #{theme-color('background-950')};
+	// Cores base (tema escuro por padrão)
+	--theme-text: #{theme-color('text', 'dark')};
+	--theme-background: #{theme-color('background', 'dark')};
+	--theme-primary: #{theme-color('primary', 'dark')};
+	--theme-secondary: #{theme-color('secondary', 'dark')};
+	--theme-accent: #{theme-color('accent', 'dark')};
+	--theme-surface: #{theme-color('surface', 'dark')};
 
-	// Primary colors
-	--theme-primary: #{theme-color('primary')};
-	--theme-primary-50: #{theme-color('primary-50')};
-	--theme-primary-100: #{theme-color('primary-100')};
-	--theme-primary-200: #{theme-color('primary-200')};
-	--theme-primary-300: #{theme-color('primary-300')};
-	--theme-primary-400: #{theme-color('primary-400')};
-	--theme-primary-500: #{theme-color('primary-500')};
-	--theme-primary-600: #{theme-color('primary-600')};
-	--theme-primary-700: #{theme-color('primary-700')};
-	--theme-primary-800: #{theme-color('primary-800')};
-	--theme-primary-900: #{theme-color('primary-900')};
-	--theme-primary-950: #{theme-color('primary-950')};
+	// Sombras temáticas
+	--theme-shadow-light: rgba(0, 0, 0, 0.1);
+	--theme-shadow-medium: rgba(0, 0, 0, 0.14);
+	--theme-shadow-dark: rgba(0, 0, 0, 0.2);
 
-	// Secondary colors
-	--theme-secondary: #{theme-color('secondary')};
-	--theme-secondary-50: #{theme-color('secondary-50')};
-	--theme-secondary-100: #{theme-color('secondary-100')};
-	--theme-secondary-200: #{theme-color('secondary-200')};
-	--theme-secondary-300: #{theme-color('secondary-300')};
-	--theme-secondary-400: #{theme-color('secondary-400')};
-	--theme-secondary-500: #{theme-color('secondary-500')};
-	--theme-secondary-600: #{theme-color('secondary-600')};
-	--theme-secondary-700: #{theme-color('secondary-700')};
-	--theme-secondary-800: #{theme-color('secondary-800')};
-	--theme-secondary-900: #{theme-color('secondary-900')};
-	--theme-secondary-950: #{theme-color('secondary-950')};
-
-	// Accent colors
-	--theme-accent: #{theme-color('accent')};
-	--theme-accent-50: #{theme-color('accent-50')};
-	--theme-accent-100: #{theme-color('accent-100')};
-	--theme-accent-200: #{theme-color('accent-200')};
-	--theme-accent-300: #{theme-color('accent-300')};
-	--theme-accent-400: #{theme-color('accent-400')};
-	--theme-accent-500: #{theme-color('accent-500')};
-	--theme-accent-600: #{theme-color('accent-600')};
-	--theme-accent-700: #{theme-color('accent-700')};
-	--theme-accent-800: #{theme-color('accent-800')};
-	--theme-accent-900: #{theme-color('accent-900')};
-	--theme-accent-950: #{theme-color('accent-950')};
-
-	// Surface colors
-	--theme-surface: #{theme-color('surface')};
-	--theme-surface-50: #{theme-color('surface-50')};
-	--theme-surface-100: #{theme-color('surface-100')};
-	--theme-surface-200: #{theme-color('surface-200')};
-	--theme-surface-300: #{theme-color('surface-300')};
-	--theme-surface-400: #{theme-color('surface-400')};
-	--theme-surface-500: #{theme-color('surface-500')};
-	--theme-surface-600: #{theme-color('surface-600')};
-	--theme-surface-700: #{theme-color('surface-700')};
-	--theme-surface-800: #{theme-color('surface-800')};
-	--theme-surface-900: #{theme-color('surface-900')};
-	--theme-surface-950: #{theme-color('surface-950')};
-
-	/* Compatibilidade com Material Design - valores padrão para tema escuro */
+	// Compatibilidade Material Design (tema escuro)
 	--mdc-theme-primary: #{theme-color('primary', 'dark')};
 	--mdc-theme-secondary: #{theme-color('secondary', 'dark')};
 	--mdc-theme-background: #{theme-color('background', 'dark')};
 	--mdc-theme-surface: #{theme-color('surface', 'dark')};
-	--mdc-theme-error: hsl(5, 100%, 70%);
+	--mdc-theme-error: hsl(5, 65%, 70%);
 	--mdc-theme-on-primary: #{theme-color('text', 'dark')};
 	--mdc-theme-on-secondary: #{theme-color('text', 'dark')};
 	--mdc-theme-on-surface: #{theme-color('text', 'dark')};
@@ -170,11 +90,16 @@ $dark-theme: map.get(palette.$themes, 'dark');
 	--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38);
 	--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38);
 
+	// Aplicação base
 	font-family: var(--font-body);
-	background-color: var(--mdc-theme-background) !important;
-	color: var(--mdc-theme-text-primary-on-background) !important;
-	color-scheme: dark; /* Padrão escuro */
+	background-color: var(--mdc-theme-background);
+	color: var(--mdc-theme-text-primary-on-background);
+	color-scheme: dark;
 }
+
+// ========================================
+// ESTILOS GLOBAIS BASE
+// ========================================
 
 body {
 	min-height: 100vh;
@@ -227,30 +152,18 @@ h2 {
 	display: contents;
 }
 
-/* Estilos personalizados para scrollbar */
+// ========================================
+// ESTILOS DE SCROLLBAR PERSONALIZADOS
+// ========================================
+
 /* Firefox */
 * {
-	/* Prefixo para Firefox - única implementação atual consistente */
-	@supports (-moz-appearance: none) {
-		/* Padrão CSS futuro */
-		-moz-appearance: none;
-	}
 	@supports (scrollbar-width: thin) {
-		/* Padrão CSS futuro */
 		scrollbar-width: thin;
 	}
-	/* Cores da scrollbar para Firefox */
-	@supports (-moz-scrollbar-color: var(--theme-primary-400) var(--theme-surface-100)) {
-		/* stylelint-disable-next-line property-no-unknown */
-		-moz-scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
+	@supports (scrollbar-color: var(--theme-primary) var(--theme-surface)) {
+		scrollbar-color: var(--theme-primary) var(--theme-surface);
 	}
-	@supports (scrollbar-color: var(--theme-primary-400) var(--theme-surface-100)) {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-primary-400) var(--theme-surface-100);
-	}
-
-	/* Nota: scrollbar-color só funciona no Firefox atualmente.
-	   Para outros navegadores, usamos ::-webkit-scrollbar abaixo */
 }
 
 /* Webkit scrollbar (Chrome, Safari, Edge) */
@@ -260,394 +173,122 @@ h2 {
 }
 
 ::-webkit-scrollbar-track {
-	background: var(--theme-surface-100);
+	background: var(--theme-surface);
 	border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-	background: var(--theme-primary-400);
+	background: var(--theme-primary);
 	border-radius: 4px;
-	border: 1px solid var(--theme-surface-200);
+	border: 1px solid var(--theme-surface);
 	transition: background-color 0.2s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: var(--theme-primary-500);
+	background: var(--theme-accent);
 }
 
 ::-webkit-scrollbar-thumb:active {
-	background: var(--theme-primary-600);
+	background: var(--theme-secondary);
 }
 
 ::-webkit-scrollbar-corner {
-	background: var(--theme-surface-100);
+	background: var(--theme-surface);
 }
 
-/* Scrollbar para elementos específicos com temas alternativos */
-/* Uso: <div class="scrollbar-secondary">...</div> */
-.scrollbar-secondary {
-	/* stylelint-disable-next-line property-no-unknown */
-	@supports (scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100)) {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-secondary-400) var(--theme-surface-100);
-	}
-}
+// ========================================
+// SISTEMA DE TEMAS DINÂMICO
+// ========================================
 
-.scrollbar-secondary::-webkit-scrollbar-thumb {
-	background: var(--theme-secondary-400);
-}
-
-.scrollbar-secondary::-webkit-scrollbar-thumb:hover {
-	background: var(--theme-secondary-500);
-}
-
-.scrollbar-secondary::-webkit-scrollbar-thumb:active {
-	background: var(--theme-secondary-600);
-}
-
-/* Uso: <div class="scrollbar-accent">...</div> */
-.scrollbar-accent {
-	/* stylelint-disable-next-line property-no-unknown */
-	@supports (scrollbar-color: var(--theme-accent-400) var(--theme-surface-100)) {
-		/* stylelint-disable-next-line property-no-unknown */
-		scrollbar-color: var(--theme-accent-400) var(--theme-surface-100);
-	}
-}
-
-.scrollbar-accent::-webkit-scrollbar-thumb {
-	background: var(--theme-accent-400);
-}
-
-.scrollbar-accent::-webkit-scrollbar-thumb:hover {
-	background: var(--theme-accent-500);
-}
-
-.scrollbar-accent::-webkit-scrollbar-thumb:active {
-	background: var(--theme-accent-600);
-}
-
-/* Agora as variáveis de tema são controladas exclusivamente via JavaScript
-   As definições de tema escuro estão nos arquivos SMUI compilados */
-
-/* Sistema de temas dinâmico - aplicado via JavaScript com classes do DOM */
-
-/* Tema claro - redefine todas as variáveis usando a paleta light */
+/* Tema claro - redefine apenas cores essenciais */
 :global(.theme-light) {
 	color-scheme: light;
 
-	/* Text colors */
 	--theme-text: #{theme-color('text', 'light')};
-	--theme-text-50: #{theme-color('text-50', 'light')};
-	--theme-text-100: #{theme-color('text-100', 'light')};
-	--theme-text-200: #{theme-color('text-200', 'light')};
-	--theme-text-300: #{theme-color('text-300', 'light')};
-	--theme-text-400: #{theme-color('text-400', 'light')};
-	--theme-text-500: #{theme-color('text-500', 'light')};
-	--theme-text-600: #{theme-color('text-600', 'light')};
-	--theme-text-700: #{theme-color('text-700', 'light')};
-	--theme-text-800: #{theme-color('text-800', 'light')};
-	--theme-text-900: #{theme-color('text-900', 'light')};
-	--theme-text-950: #{theme-color('text-950', 'light')};
-
-	/* Background colors */
 	--theme-background: #{theme-color('background', 'light')};
-	--theme-background-50: #{theme-color('background-50', 'light')};
-	--theme-background-100: #{theme-color('background-100', 'light')};
-	--theme-background-200: #{theme-color('background-200', 'light')};
-	--theme-background-300: #{theme-color('background-300', 'light')};
-	--theme-background-400: #{theme-color('background-400', 'light')};
-	--theme-background-500: #{theme-color('background-500', 'light')};
-	--theme-background-600: #{theme-color('background-600', 'light')};
-	--theme-background-700: #{theme-color('background-700', 'light')};
-	--theme-background-800: #{theme-color('background-800', 'light')};
-	--theme-background-900: #{theme-color('background-900', 'light')};
-	--theme-background-950: #{theme-color('background-950', 'light')};
-
-	/* Primary colors */
 	--theme-primary: #{theme-color('primary', 'light')};
-	--theme-primary-50: #{theme-color('primary-50', 'light')};
-	--theme-primary-100: #{theme-color('primary-100', 'light')};
-	--theme-primary-200: #{theme-color('primary-200', 'light')};
-	--theme-primary-300: #{theme-color('primary-300', 'light')};
-	--theme-primary-400: #{theme-color('primary-400', 'light')};
-	--theme-primary-500: #{theme-color('primary-500', 'light')};
-	--theme-primary-600: #{theme-color('primary-600', 'light')};
-	--theme-primary-700: #{theme-color('primary-700', 'light')};
-	--theme-primary-800: #{theme-color('primary-800', 'light')};
-	--theme-primary-900: #{theme-color('primary-900', 'light')};
-	--theme-primary-950: #{theme-color('primary-950', 'light')};
-
-	/* Surface colors */
+	--theme-secondary: #{theme-color('secondary', 'light')};
+	--theme-accent: #{theme-color('accent', 'light')};
 	--theme-surface: #{theme-color('surface', 'light')};
-	--theme-surface-50: #{theme-color('surface-50', 'light')};
-	--theme-surface-100: #{theme-color('surface-100', 'light')};
-	--theme-surface-200: #{theme-color('surface-200', 'light')};
-	--theme-surface-300: #{theme-color('surface-300', 'light')};
-	--theme-surface-400: #{theme-color('surface-400', 'light')};
-	--theme-surface-500: #{theme-color('surface-500', 'light')};
-	--theme-surface-600: #{theme-color('surface-600', 'light')};
-	--theme-surface-700: #{theme-color('surface-700', 'light')};
-	--theme-surface-800: #{theme-color('surface-800', 'light')};
-	--theme-surface-900: #{theme-color('surface-900', 'light')};
-	--theme-surface-950: #{theme-color('surface-950', 'light')};
 
-	/* Compatibilidade com Material Design - redefinindo para tema claro com melhor contraste */
-	--mdc-theme-primary: #{theme-color('primary', 'light')} !important;
-	--mdc-theme-secondary: #{theme-color('secondary', 'light')} !important;
-	--mdc-theme-background: #{theme-color('background', 'light')} !important;
-	--mdc-theme-surface: #{theme-color('surface', 'light')} !important;
+	/* Compatibilidade Material Design */
+	--mdc-theme-primary: #{theme-color('primary', 'light')};
+	--mdc-theme-secondary: #{theme-color('secondary', 'light')};
+	--mdc-theme-background: #{theme-color('background', 'light')};
+	--mdc-theme-surface: #{theme-color('surface', 'light')};
 	--mdc-theme-error: hsl(5, 50%, 50%);
-	--mdc-theme-on-primary: #{theme-color('background', 'light')} !important;
-	--mdc-theme-on-secondary: #{theme-color('background', 'light')} !important;
-	--mdc-theme-on-surface: #{theme-color('text', 'light')} !important;
-	--mdc-theme-on-error: #{theme-color('background', 'light')} !important;
-
-	/* Cores de texto com alto contraste para tema claro baseadas nas diretrizes Material Design */
-	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87) !important;
-	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.6) !important;
-	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38) !important;
-	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38) !important;
-	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38) !important;
-
-	--theme-current: light;
-
-	/* Estilos SMUI para tema claro usando CSS variables */
-	.mdc-button,
-	.mdc-button--unelevated {
-		--mdc-theme-primary: var(--theme-primary);
-		--mdc-protected-button-container-color: var(--theme-primary);
-		--mdc-protected-button-label-text-color: var(--theme-background);
-		--mdc-text-button-label-text-color: var(--theme-primary);
-	}
-
-	.mdc-list,
-	.mdc-list-item {
-		--mdc-list-list-item-label-text-color: var(--theme-text);
-		--mdc-list-list-item-supporting-text-color: var(--theme-text-700);
-		--mdc-list-list-item-container-color: var(--theme-surface);
-		--mdc-list-list-item-hover-state-layer-color: var(--theme-primary-100);
-		--mdc-list-list-item-focus-state-layer-color: var(--theme-primary-200);
-	}
-
-	.mdc-menu,
-	.mdc-menu-surface {
-		--mdc-menu-container-color: var(--theme-surface);
-		--mdc-menu-container-elevation: 0 4px 8px rgba(0, 0, 0, 0.1);
-	}
+	--mdc-theme-on-primary: #{theme-color('background', 'light')};
+	--mdc-theme-on-secondary: #{theme-color('background', 'light')};
+	--mdc-theme-on-surface: #{theme-color('text', 'light')};
+	--mdc-theme-on-error: #{theme-color('background', 'light')};
+	--mdc-theme-text-primary-on-background: rgba(0, 0, 0, 0.87);
+	--mdc-theme-text-secondary-on-background: rgba(0, 0, 0, 0.6);
+	--mdc-theme-text-hint-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-disabled-on-background: rgba(0, 0, 0, 0.38);
+	--mdc-theme-text-icon-on-background: rgba(0, 0, 0, 0.38);
 }
 
-/* Tema escuro - redefine todas as variáveis usando a paleta dark */
+/* Tema escuro - redefine apenas cores essenciais */
 :global(.theme-dark) {
 	color-scheme: dark;
 
-	/* Text colors - corrigido para melhor contraste */
 	--theme-text: #{theme-color('text', 'dark')};
-	--theme-text-50: #{theme-color('text-50', 'dark')};
-	--theme-text-100: #{theme-color('text-100', 'dark')};
-	--theme-text-200: #{theme-color('text-200', 'dark')};
-	--theme-text-300: #{theme-color('text-300', 'dark')};
-	--theme-text-400: #{theme-color('text-400', 'dark')};
-	--theme-text-500: #{theme-color('text-500', 'dark')};
-	--theme-text-600: #{theme-color('text-600', 'dark')};
-	--theme-text-700: #{theme-color('text-700', 'dark')};
-	--theme-text-800: #{theme-color('text-800', 'dark')};
-	--theme-text-900: #{theme-color('text-900', 'dark')};
-	--theme-text-950: #{theme-color('text-950', 'dark')};
-
-	/* Background colors */
 	--theme-background: #{theme-color('background', 'dark')};
-	--theme-background-50: #{theme-color('background-50', 'dark')};
-	--theme-background-100: #{theme-color('background-100', 'dark')};
-	--theme-background-200: #{theme-color('background-200', 'dark')};
-	--theme-background-300: #{theme-color('background-300', 'dark')};
-	--theme-background-400: #{theme-color('background-400', 'dark')};
-	--theme-background-500: #{theme-color('background-500', 'dark')};
-	--theme-background-600: #{theme-color('background-600', 'dark')};
-	--theme-background-700: #{theme-color('background-700', 'dark')};
-	--theme-background-800: #{theme-color('background-800', 'dark')};
-	--theme-background-900: #{theme-color('background-900', 'dark')};
-	--theme-background-950: #{theme-color('background-950', 'dark')};
-
-	/* Primary colors */
 	--theme-primary: #{theme-color('primary', 'dark')};
-	--theme-primary-50: #{theme-color('primary-50', 'dark')};
-	--theme-primary-100: #{theme-color('primary-100', 'dark')};
-	--theme-primary-200: #{theme-color('primary-200', 'dark')};
-	--theme-primary-300: #{theme-color('primary-300', 'dark')};
-	--theme-primary-400: #{theme-color('primary-400', 'dark')};
-	--theme-primary-500: #{theme-color('primary-500', 'dark')};
-	--theme-primary-600: #{theme-color('primary-600', 'dark')};
-	--theme-primary-700: #{theme-color('primary-700', 'dark')};
-	--theme-primary-800: #{theme-color('primary-800', 'dark')};
-	--theme-primary-900: #{theme-color('primary-900', 'dark')};
-	--theme-primary-950: #{theme-color('primary-950', 'dark')};
+	--theme-secondary: #{theme-color('secondary', 'dark')};
+	--theme-accent: #{theme-color('accent', 'dark')};
+	--theme-surface: #{theme-color('surface', 'dark')};
 
-	/* Surface colors */
-	--theme-surface: #{theme-color('surface-100', 'dark')};
-	--theme-surface-50: #{theme-color('surface-50', 'dark')};
-	--theme-surface-100: #{theme-color('surface-100', 'dark')};
-	--theme-surface-200: #{theme-color('surface-200', 'dark')};
-	--theme-surface-300: #{theme-color('surface-300', 'dark')};
-	--theme-surface-400: #{theme-color('surface-400', 'dark')};
-	--theme-surface-500: #{theme-color('surface-500', 'dark')};
-	--theme-surface-600: #{theme-color('surface-600', 'dark')};
-	--theme-surface-700: #{theme-color('surface-700', 'dark')};
-	--theme-surface-800: #{theme-color('surface-800', 'dark')};
-	--theme-surface-900: #{theme-color('surface-900', 'dark')};
-	--theme-surface-950: #{theme-color('surface-950', 'dark')};
-
-	/* Compatibilidade com Material Design - redefinindo para tema escuro com melhor contraste */
-	--mdc-theme-primary: #{theme-color('primary', 'dark')} !important;
-	--mdc-theme-secondary: #{theme-color('secondary', 'dark')} !important;
-	--mdc-theme-background: #{theme-color('background', 'dark')} !important;
-	--mdc-theme-surface: #{theme-color('surface', 'dark')} !important;
-	--mdc-theme-error: hsl(5, 100%, 70%);
-	--mdc-theme-on-primary: #{theme-color('text', 'dark')} !important;
-	--mdc-theme-on-secondary: #{theme-color('text', 'dark')} !important;
-	--mdc-theme-on-surface: #{theme-color('text', 'dark')} !important;
-	--mdc-theme-on-error: #{theme-color('background', 'dark')} !important;
-
-	/* Cores de texto com alto contraste para tema escuro baseadas nas diretrizes Material Design */
-	--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87) !important;
-	--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.6) !important;
-	--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38) !important;
-	--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38) !important;
-	--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38) !important;
-
-	--theme-current: dark;
-
-	/* Estilos SMUI para tema escuro usando CSS variables */
-	.mdc-button,
-	.mdc-button--unelevated {
-		--mdc-theme-primary: var(--theme-primary);
-		--mdc-protected-button-container-color: var(--theme-primary);
-		--mdc-protected-button-label-text-color: var(--theme-background);
-		--mdc-text-button-label-text-color: var(--theme-primary);
-	}
-
-	.mdc-list,
-	.mdc-list-item {
-		--mdc-list-list-item-label-text-color: var(--theme-text);
-		--mdc-list-list-item-supporting-text-color: var(--theme-text-700);
-		--mdc-list-list-item-container-color: var(--theme-surface);
-		--mdc-list-list-item-hover-state-layer-color: var(--theme-primary-100);
-		--mdc-list-list-item-focus-state-layer-color: var(--theme-primary-200);
-	}
-
-	.mdc-menu,
-	.mdc-menu-surface {
-		--mdc-menu-container-color: var(--theme-surface);
-		--mdc-menu-container-elevation: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
+	/* Compatibilidade Material Design */
+	--mdc-theme-primary: #{theme-color('primary', 'dark')};
+	--mdc-theme-secondary: #{theme-color('secondary', 'dark')};
+	--mdc-theme-background: #{theme-color('background', 'dark')};
+	--mdc-theme-surface: #{theme-color('surface', 'dark')};
+	--mdc-theme-error: hsl(5, 65%, 70%);
+	--mdc-theme-on-primary: #{theme-color('text', 'dark')};
+	--mdc-theme-on-secondary: #{theme-color('text', 'dark')};
+	--mdc-theme-on-surface: #{theme-color('text', 'dark')};
+	--mdc-theme-on-error: #{theme-color('background', 'dark')};
+	--mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);
+	--mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.6);
+	--mdc-theme-text-hint-on-background: rgba(255, 255, 255, 0.38);
+	--mdc-theme-text-disabled-on-background: rgba(255, 255, 255, 0.38);
+	--mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.38);
 }
 
-/* Theme Toggle Styles */
-:global(.theme-light) {
-	color-scheme: light;
-}
-
-:global(.theme-dark) {
-	color-scheme: dark;
-}
-
+/* Tema system - detecta automaticamente */
 :global(.theme-system) {
 	color-scheme: auto;
 }
 
-/* Sistema de temas dinâmico - controlado totalmente via JavaScript */
-:root {
-	/* Cores padrão do tema - inicialmente dark */
-	--theme-background: var(--mdc-theme-background);
-	--theme-surface: var(--mdc-theme-surface);
-	--theme-text: var(--mdc-theme-text-primary-on-background);
-	--theme-outline: rgba(255, 255, 255, 0.12);
-	--theme-current: dark;
-}
+// ========================================
+// SISTEMA DE TRANSIÇÕES GLOBAIS DE TEMA
+// ========================================
 
-/* Temas específicos - aplicados via JavaScript dinamicamente */
-:global(.theme-light) {
-	--theme-background: var(--mdc-theme-background);
-	--theme-surface: var(--mdc-theme-surface);
-	--theme-text: var(--mdc-theme-text-primary-on-background);
-	--theme-outline: rgba(0, 0, 0, 0.12);
-	--theme-current: light;
-}
-
-:global(.theme-dark) {
-	--theme-background: var(--mdc-theme-background);
-	--theme-surface: var(--mdc-theme-surface);
-	--theme-text: var(--mdc-theme-text-primary-on-background);
-	--theme-outline: rgba(255, 255, 255, 0.12);
-	--theme-current: dark;
-}
-
-:global(.theme-system) {
-	/* Para o modo sistema, ainda detectamos a preferência mas sem interferir */
-	--theme-current: auto;
-}
-
-/* Responsividade a mudanças dinâmicas - apenas para componentes que precisam */
-/* ========================================
-   SISTEMA DE TRANSIÇÕES GLOBAIS DE TEMA
-   ======================================== */
-
-/* Transições suaves para mudanças de tema - aplicadas globalmente */
-:root {
-	/* Duração das transições - DESABILITADAS para tema, apenas para elementos menores */
-	--theme-transition-duration: 0ms; /* Desabilitado - usando JavaScript */
-	--theme-transition-timing: ease-in-out;
-	--theme-transition-fast: 150ms; /* Apenas para elementos pequenos */
-	--theme-transition-medium: 300ms; /* Apenas para elementos médios */
-	--element-transition-duration: 200ms; /* Para elementos individuais */
-}
-
-/* Classes CSS específicas para diferentes tipos de transições */
-
-/* ✅ TRANSIÇÕES DESABILITADAS PARA TEMA - JavaScript assumiu controle */
+/* ✅ TRANSIÇÕES DESABILITADAS PARA CORES DE TEMA - JavaScript assumiu controle */
 .theme-transition,
-.theme-transition-long {
-	transition: none !important; /* Desabilitado - JavaScript controla */
-}
-
-/* Classe para surfaces e backgrounds - DESABILITADAS */
+.theme-transition-long,
 .theme-surface,
 .theme-background,
 .theme-surface-transition,
-.theme-background-transition {
-	transition: none !important; /* Desabilitado - JavaScript controla */
-}
-
-/* Classe para texto - DESABILITADA */
+.theme-background-transition,
 .theme-text,
 .theme-text-transition {
-	transition: none !important; /* Desabilitado - JavaScript controla */
+	transition: none !important; /* JavaScript controla cores de tema */
 }
 
-/* Classe para elementos interativos - REDUZIDAS apenas para propriedades não relacionadas ao tema */
+/* Transições permitidas apenas para propriedades não relacionadas ao tema */
 .theme-interactive,
-.theme-interactive-transition {
-	transition:
-		transform var(--element-transition-duration) var(--theme-transition-timing),
-		box-shadow var(--element-transition-duration) var(--theme-transition-timing),
-		opacity var(--element-transition-duration) var(--theme-transition-timing) !important;
-	/* Removido: background-color, color, border-color - agora controlados por JavaScript */
-}
-
-/* Classe para transições médias - APENAS para elementos não relacionados ao tema */
-.theme-transition-medium {
-	transition:
-		transform var(--theme-transition-medium) var(--theme-transition-timing),
-		opacity var(--theme-transition-medium) var(--theme-transition-timing) !important;
-}
-
-/* Classe para transições rápidas - APENAS para elementos não relacionados ao tema */
+.theme-interactive-transition,
+.theme-transition-medium,
 .theme-transition-fast {
 	transition:
-		transform var(--theme-transition-fast) var(--theme-transition-timing),
-		opacity var(--theme-transition-fast) var(--theme-transition-timing) !important;
+		transform var(--element-transition-duration) var(--theme-transition-timing),
+		opacity var(--element-transition-duration) var(--theme-transition-timing) !important;
+	/* Removido: background-color, color, border-color - controlados por JavaScript */
 }
 
-/* DESABILITADAS: Transições automáticas baseadas em seletores de elemento */
+/* Transições desabilitadas para elementos HTML e SMUI - JavaScript controla cores */
 body,
 html,
 main,
@@ -656,24 +297,13 @@ article,
 aside,
 header,
 footer,
-nav {
-	transition: none !important; /* JavaScript controla cores de tema */
-}
-
-/* DESABILITADAS: Correção para elementos SMUI */
+nav,
 :global(.mdc-button),
 :global(.mdc-menu),
 :global(.mdc-menu-surface),
 :global(.mdc-list),
 :global(.mdc-list-item),
-:global(.mdc-card) {
-	transition:
-		transform var(--element-transition-duration) var(--theme-transition-timing),
-		box-shadow var(--element-transition-duration) var(--theme-transition-timing) !important;
-	/* Removido: background-color, color, border-color - JavaScript controla */
-}
-
-/* DESABILITADAS: Garantia para elementos SMUI */
+:global(.mdc-card),
 :global([class*='mdc-']) {
 	transition:
 		transform var(--element-transition-duration) var(--theme-transition-timing),
@@ -681,26 +311,13 @@ nav {
 	/* Removido: background-color, color, border-color - JavaScript controla */
 }
 
-/* ✅ TRANSIÇÕES GLOBAIS DESABILITADAS PARA CORES DE TEMA */
-:global(*) {
-	transition: none !important; /* JavaScript assumiu controle total das cores */
-}
-
-/* Transições para pseudo-elementos - DESABILITADAS para cores de tema */
-*::before,
-*::after {
-	transition:
-		transform var(--element-transition-duration) var(--theme-transition-timing),
-		opacity var(--element-transition-duration) var(--theme-transition-timing);
-	/* Removido: all - JavaScript controla cores */
-}
-
-/* Excluir transições de elementos que podem causar problemas de performance */
+/* Elementos que não devem ter transições por questões de performance */
 img,
 video,
 iframe,
 canvas,
-svg {
+svg,
+[data-theme-reactive] {
 	transition: none !important;
 }
 
@@ -714,8 +331,4 @@ svg {
 		--theme-transition-duration: 0ms;
 		--element-transition-duration: 0ms;
 	}
-}
-
-[data-theme-reactive] {
-	transition: none; /* JavaScript controla */
 }

@@ -10,9 +10,9 @@ labels:
     color: 'a2eeef'
     description: 'Nova funcionalidade ou melhoria'
 
-  - name: '📚 educational'
+  - name: '📚 content'
     color: '7057ff'
-    description: 'Conteúdo educacional ou exercícios'
+    description: 'Scripts Python ou demonstrações'
 
   - name: '🎨 ui/ux'
     color: 'e99695'

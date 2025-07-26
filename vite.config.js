@@ -20,9 +20,11 @@ export default defineConfig({
 				logger: {
 					warn: (message) => {
 						// Filtrar avisos específicos de color-functions deprecated
-						if (message.includes('color.red()') ||
+						if (
+							message.includes('color.red()') ||
 							message.includes('color.green()') ||
-							message.includes('color.blue()')) {
+							message.includes('color.blue()')
+						) {
 							return; // Ignorar esses avisos
 						}
 						console.warn(message);

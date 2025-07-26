@@ -50,7 +50,7 @@
 - [ ] ✅ Temas são gerados corretamente (`bun run prepare-themes`)
 - [ ] ✅ Componentes Svelte funcionam corretamente
 - [ ] ✅ Integração Pyodide funciona (se aplicável)
-- [ ] ✅ Scripts Python educacionais executam sem erro
+- [ ] ✅ Scripts Python customizados executam sem erro
 - [ ] ✅ Internacionalização funciona (pt-br/en)
 - [ ] ✅ Interface responsiva em diferentes tamanhos de tela
 - [ ] ✅ Temas claro e escuro funcionam corretamente
@@ -69,14 +69,14 @@
 
 <!-- Adicione screenshots das mudanças visuais -->
 
-## 📚 Impacto Educacional
+## 📚 Impacto nas Funcionalidades
 
-<!-- Se aplicável, descreva o impacto educacional das mudanças -->
+<!-- Se aplicável, descreva o impacto nas funcionalidades das mudanças -->
 
-- **Conceitos ensinados**:
-- **Nível de dificuldade**:
-- **Estruturas de dados abordadas**:
-- **Algoritmos implementados**:
+- **Conceitos implementados**:
+- **Nível de complexidade**:
+- **Funcionalidades abordadas**:
+- **Scripts implementados**:
 
 ## 🔗 Issues Relacionadas
 
@@ -99,8 +99,8 @@
 ### 📝 Notas para Revisão
 
 - [ ] Código segue os padrões do projeto
-- [ ] Comentários estão em português (contexto educacional)
-- [ ] Funcionalidades educacionais estão bem documentadas
+- [ ] Comentários estão em português
+- [ ] Funcionalidades estão bem documentadas
 - [ ] Mensagens de i18n foram atualizadas (se necessário)
 - [ ] Temas Material Design estão consistentes
 - [ ] Performance não foi impactada negativamente
