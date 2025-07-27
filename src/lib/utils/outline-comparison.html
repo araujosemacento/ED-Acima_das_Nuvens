@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="pt-br">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Comparação: Outline Matemático vs Tradicional</title>
+		<style>
+			body {
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				margin: 0;
+				padding: 2rem;
+				min-height: 100vh;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+
+			.comparison-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 3rem;
+				margin: 2rem 0;
+			}
+
+			.method-card {
+				background: rgba(255, 255, 255, 0.1);
+				padding: 2rem;
+				border-radius: 1rem;
+				@supports (backdrop-filter: blur(10px)) {
+					backdrop-filter: blur(10px);
+				}
+				@supports (-webkit-backdrop-filter: blur(10px)) {
+					-webkit-backdrop-filter: blur(10px);
+				}
+			}
+
+			.method-title {
+				font-size: 1.5rem;
+				margin-bottom: 1rem;
+				text-align: center;
+				border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+				padding-bottom: 0.5rem;
+			}
+
+			/* Método Tradicional (4 shadows) */
+			.traditional-outline {
+				font-size: 2rem;
+				font-weight: bold;
+				text-align: center;
+				margin: 1rem 0;
+				text-shadow:
+					-8px -8px 0 #000,
+					8px -8px 0 #000,
+					-8px 8px 0 #000,
+					8px 8px 0 #000;
+			}
+
+			/* Método Matemático (será aplicado via JavaScript) */
+			.mathematical-outline {
+				font-size: 2rem;
+				font-weight: bold;
+				text-align: center;
+				margin: 1rem 0;
+			}
+
+			.controls {
+				margin: 2rem 0;
+				text-align: center;
+			}
+
+			.control-group {
+				display: inline-block;
+				margin: 0 1rem;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 0.5rem;
+				font-weight: bold;
+			}
+
+			input[type='range'] {
+				width: 200px;
+			}
+
+			input[type='color'] {
+				width: 60px;
+				height: 40px;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+
+			.stats {
+				background: rgba(0, 0, 0, 0.3);
+				padding: 1rem;
+				border-radius: 0.5rem;
+				margin: 1rem 0;
+				font-family: monospace;
+				font-size: 0.9rem;
+			}
+
+			.code-sample {
+				background: rgba(0, 0, 0, 0.5);
+				padding: 1rem;
+				border-radius: 0.5rem;
+				margin: 1rem 0;
+				font-family: monospace;
+				font-size: 0.8rem;
+				white-space: pre-wrap;
+				overflow-x: auto;
+			}
+
+			@media (max-width: 768px) {
+				.comparison-grid {
+					grid-template-columns: 1fr;
+					gap: 2rem;
+				}
+
+				.traditional-outline,
+				.mathematical-outline {
+					font-size: 1.5rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1 style="text-align: center; font-size: 3rem; margin-bottom: 2rem">
+				🎨 Outline Matemático vs Tradicional
+			</h1>
+
+			<div class="controls">
+				<div class="control-group">
+					<label for="thickness">Espessura (px):</label>
+					<input type="range" id="thickness" min="1" max="20" value="8" />
+					<span id="thickness-value">8px</span>
+				</div>
+
+				<div class="control-group">
+					<label for="color">Cor do Outline:</label>
+					<input type="color" id="color" value="#000000" />
+				</div>
+			</div>
+
+			<div class="comparison-grid">
+				<!-- Método Tradicional -->
+				<div class="method-card">
+					<h2 class="method-title">🔶 Método Tradicional</h2>
+					<p class="traditional-outline">TEXTO EXEMPLO</p>
+
+					<div class="stats">
+						<strong>Estatísticas:</strong><br />
+						• Shadows usadas: <span id="traditional-shadows">4</span><br />
+						• Qualidade: ⭐⭐<br />
+						• Performance: ⭐⭐⭐⭐<br />
+						• Compatibilidade: ⭐⭐⭐⭐⭐
+					</div>
+
+					<div class="code-sample" id="traditional-css">
+						text-shadow: -8px -8px 0 #000, 8px -8px 0 #000, -8px 8px 0 #000, 8px 8px 0 #000;
+					</div>
+				</div>
+
+				<!-- Método Matemático -->
+				<div class="method-card">
+					<h2 class="method-title">✨ Método Matemático</h2>
+					<p class="mathematical-outline">TEXTO EXEMPLO</p>
+
+					<div class="stats">
+						<strong>Estatísticas:</strong><br />
+						• Shadows usadas: <span id="mathematical-shadows">0</span><br />
+						• Qualidade: ⭐⭐⭐⭐⭐<br />
+						• Performance: ⭐⭐⭐<br />
+						• Compatibilidade: ⭐⭐⭐⭐⭐
+					</div>
+
+					<div class="code-sample" id="mathematical-css">Gerando...</div>
+				</div>
+			</div>
+
+			<div style="text-align: center; margin: 3rem 0">
+				<h3>🔍 Observações</h3>
+				<ul style="text-align: left; max-width: 600px; margin: 0 auto">
+					<li>
+						<strong>Tradicional:</strong> Rápido para valores pequenos, mas qualidade limitada
+					</li>
+					<li><strong>Matemático:</strong> Outline perfeito e circular, mas mais shadows</li>
+					<li><strong>Responsividade:</strong> Matemático adapta automaticamente</li>
+					<li><strong>Temas:</strong> Matemático integra melhor com mudanças dinâmicas</li>
+				</ul>
+			</div>
+		</div>
+
+		<script>
+			// Função matemática para gerar outline (copiada do utilitário)
+			function generateMathematicalOutline(radiusPx, color, blur = 0) {
+				if (radiusPx <= 0) return '';
+
+				const shadowCount = Math.ceil(2 * Math.PI * radiusPx);
+				const shadows = [];
+
+				for (let i = 0; i < shadowCount; i++) {
+					const theta = (2 * Math.PI * i) / shadowCount;
+					const x = Math.round(radiusPx * Math.cos(theta) * 1000) / 1000;
+					const y = Math.round(radiusPx * Math.sin(theta) * 1000) / 1000;
+					shadows.push(`${x}px ${y}px ${blur}px ${color}`);
+				}
+
+				return shadows.join(', ');
+			}
+
+			// Função para gerar outline tradicional
+			function generateTraditionalOutline(radiusPx, color) {
+				return `
+                -${radiusPx}px -${radiusPx}px 0 ${color},
+                 ${radiusPx}px -${radiusPx}px 0 ${color},
+                -${radiusPx}px  ${radiusPx}px 0 ${color},
+                 ${radiusPx}px  ${radiusPx}px 0 ${color}`;
+			}
+
+			// Elementos
+			const thicknessSlider = document.getElementById('thickness');
+			const thicknessValue = document.getElementById('thickness-value');
+			const colorPicker = document.getElementById('color');
+
+			const traditionalText = document.querySelector('.traditional-outline');
+			const mathematicalText = document.querySelector('.mathematical-outline');
+
+			const traditionalShadowsSpan = document.getElementById('traditional-shadows');
+			const mathematicalShadowsSpan = document.getElementById('mathematical-shadows');
+
+			const traditionalCSS = document.getElementById('traditional-css');
+			const mathematicalCSS = document.getElementById('mathematical-css');
+
+			// Função para atualizar os outlines
+			function updateOutlines() {
+				const thickness = parseInt(thicknessSlider.value);
+				const color = colorPicker.value;
+
+				// Atualizar valor exibido
+				thicknessValue.textContent = thickness + 'px';
+
+				// Método tradicional
+				const traditionalShadow = generateTraditionalOutline(thickness, color);
+				traditionalText.style.textShadow = traditionalShadow;
+				traditionalShadowsSpan.textContent = '4';
+				traditionalCSS.textContent = `text-shadow:${traditionalShadow};`;
+
+				// Método matemático
+				const mathematicalShadow = generateMathematicalOutline(thickness, color);
+				mathematicalText.style.textShadow = mathematicalShadow;
+
+				const shadowCount = Math.ceil(2 * Math.PI * thickness);
+				mathematicalShadowsSpan.textContent = shadowCount;
+
+				// Truncar CSS para exibição (mostrar apenas primeiras 3 linhas)
+				const shadowLines = mathematicalShadow.split(', ');
+				const displayCSS =
+					shadowLines.slice(0, 3).join(',\n') +
+					(shadowLines.length > 3 ? `\n... mais ${shadowLines.length - 3} shadows` : '');
+				mathematicalCSS.textContent = `text-shadow:\n${displayCSS};`;
+			}
+
+			// Event listeners
+			thicknessSlider.addEventListener('input', updateOutlines);
+			colorPicker.addEventListener('input', updateOutlines);
+
+			// Inicializar
+			updateOutlines();
+
+			// Animação de demonstração
+			let animationFrame = 0;
+			function animateDemo() {
+				animationFrame++;
+
+				// Mudar espessura suavemente a cada 3 segundos
+				if (animationFrame % 180 === 0) {
+					const newThickness = 4 + Math.round(Math.sin(animationFrame / 180) * 6);
+					thicknessSlider.value = newThickness;
+					updateOutlines();
+				}
+
+				requestAnimationFrame(animateDemo);
+			}
+
+			// Iniciar animação após 3 segundos
+			setTimeout(() => {
+				console.log('🎨 Demonstração automática iniciada!');
+				animateDemo();
+			}, 3000);
+		</script>
+	</body>
+</html>

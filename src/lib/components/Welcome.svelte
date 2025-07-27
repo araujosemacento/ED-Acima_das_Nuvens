@@ -3,10 +3,18 @@
 	import Button, { Label } from '@smui/button';
 	import { onMount } from 'svelte';
 	import { logger } from '$lib/stores/logger.js';
+	import { createOutlineThemeObserver, isMobileDevice } from '$lib/utils/textOutline.js';
+	import { dev } from '$app/environment';
+	import { base } from '$app/paths';
 
 	let mousePosition = $state({ x: 0, y: 0 }); // Posição absoluta do mouse para cálculos vetoriais
 	let welcomeSection;
 	let glimmerElement;
+
+	// === SISTEMA DE OUTLINE MATEMÁTICO ===
+	let outlineObserverCleanup = null;
+	let titleElement = null;
+	let paragraphElements = [];
 
 	// === SISTEMA DE NUVENS ===
 	let cloudAssets = $state([]);
@@ -100,8 +108,10 @@
 					localPerformanceLogs.shift();
 				}
 
-				// Console log direto para desenvolvimento
-				console.log(`🌤️ [CloudPerf] ${message}`, logEntry);
+				// Console log apenas para desenvolvimento
+				if (dev) {
+					console.log(`🌤️ [CloudPerf] ${message}`, logEntry);
+				}
 				lastPerformanceLogTime = now;
 			}
 		},
@@ -109,7 +119,9 @@
 		// Logs críticos (sempre logados, sem throttle)
 		critical: (message, data = {}) => {
 			logger.actions.error(`[CRÍTICO] CloudSystem: ${message}`, data);
-			console.error(`🚨 [CloudSystem] ${message}`, data);
+			if (dev) {
+				console.error(`🚨 [CloudSystem] ${message}`, data);
+			}
 		},
 
 		// Utilitários de memória
@@ -415,7 +427,7 @@
 		const updatedAssets = cloudAssets.map((cloud) => {
 			// Extrair número da nuvem do ID ou src atual
 			const cloudNumber = cloud.id.replace('cloud-', '') || '1';
-			const newSrc = `/assets/nuvens/${newTheme}/SVG/nuvem${cloudNumber}.svg`;
+			const newSrc = `${base}/assets/nuvens/${newTheme}/SVG/nuvem${cloudNumber}.svg`;
 
 			return {
 				...cloud,
@@ -580,7 +592,7 @@
 			if (initialPosition) {
 				const cloud = {
 					id: `cloud-${i}`,
-					src: `/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
+					src: `${base}/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
 					position: initialPosition, // em rem
 					element: null,
 					isPriority
@@ -623,7 +635,7 @@
 					if (fallbackPosition) {
 						const cloud = {
 							id: `cloud-${i}`,
-							src: `/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
+							src: `${base}/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
 							position: fallbackPosition,
 							element: null,
 							isPriority: true,
@@ -754,11 +766,30 @@
 			// Configurar observador de mudanças de tema
 			setupThemeObserver();
 
+			// === INICIALIZAÇÃO DO SISTEMA DE OUTLINE MATEMÁTICO ===
+			// Coletar elementos que precisam de outline
+			const outlineElements = [
+				{ element: titleElement, preset: 'title' },
+				...paragraphElements.map((el) => ({ element: el, preset: 'normal' }))
+			].filter((item) => item.element); // Filtrar elementos válidos
+
+			if (outlineElements.length > 0) {
+				// Criar observador integrado com sistema de temas (sem função personalizada)
+				outlineObserverCleanup = createOutlineThemeObserver(outlineElements);
+
+				logger.actions.component('OutlineSystem', 'inicialização', {
+					elementsCount: outlineElements.length,
+					isMobile: isMobileDevice(),
+					themeIntegration: 'ativo-paleta-ed'
+				});
+			}
+
 			cloudLogger.structured.init({
 				message: 'sistema-inicializado-com-sucesso',
 				activeAssets: cloudAssets.length,
 				activeControllers: cloudControllers.size,
 				themeSystem: 'ativo',
+				outlineSystem: 'ativo',
 				currentTheme
 			});
 		} catch (error) {
@@ -1026,8 +1057,16 @@
 				activeIntervals: cloudAnimationIntervals.size,
 				activeControllers: cloudControllers.size,
 				themeObserverActive: themeObserver !== null,
+				outlineObserverActive: outlineObserverCleanup !== null,
 				memoryStats: cloudLogger.getMemoryStats()
 			});
+
+			// Limpar observador de outline matemático
+			if (outlineObserverCleanup) {
+				outlineObserverCleanup();
+				outlineObserverCleanup = null;
+				logger.actions.component('OutlineSystem', 'cleanup', { status: 'concluído' });
+			}
 
 			// Limpar observador de tema
 			cleanupThemeObserver();
@@ -1088,7 +1127,11 @@
 	<!-- Conteúdo principal -->
 	<div class="welcome-content">
 		<div class="text-container">
-			<h1 class="theme-text-transition text-outlined title-text" data-text="{m.welcome()}!">
+			<h1
+				class="theme-text-transition text-outlined title-text"
+				data-text="{m.welcome()}!"
+				bind:this={titleElement}
+			>
 				{m.welcome()}!
 			</h1>
 		</div>
@@ -1097,6 +1140,7 @@
 				<p
 					class="theme-text-transition text-outlined"
 					data-text={m.initial_disclaimer_paragraph1()}
+					bind:this={paragraphElements[0]}
 				>
 					{m.initial_disclaimer_paragraph1()}
 				</p>
@@ -1105,6 +1149,7 @@
 				<p
 					class="theme-text-transition text-outlined"
 					data-text={m.initial_disclaimer_paragraph2()}
+					bind:this={paragraphElements[1]}
 				>
 					{m.initial_disclaimer_paragraph2()}
 				</p>
@@ -1227,55 +1272,31 @@
 		position: relative;
 		z-index: 2;
 		font-weight: 600;
-		color: var(--mdc-theme-text-primary-on-background);
+		color: var(--ed-text, var(--mdc-theme-text-primary-on-background));
 
-		/* MÉTODO PRINCIPAL: Pseudo-elemento para outline com blur independente */
-		&::before {
-			position: absolute;
-			top: 0;
-			left: 0;
-			z-index: -1;
-			font-family: inherit;
-			font-size: inherit;
-			font-weight: inherit;
-			line-height: inherit;
-			text-align: inherit;
-			color: transparent;
-			pointer-events: none;
+		/* 
+		 * SISTEMA HÍBRIDO DE PERFORMANCE OTIMIZADA:
+		 * 
+		 * OUTLINE: CSS transitions via --outline-color variable
+		 * - Usa CSS custom property --outline-color para transições automáticas
+		 * - text-shadow aplicado via JavaScript usando var(--outline-color)
+		 * - CSS transition gerencia mudanças de tema (muito mais performático)
+		 * 
+		 * TEXTO: Interpolação suave mantida para cores sólidas
+		 * - Continua usando sistema de interpolação do theme.js
+		 * - Transições suaves apenas para propriedades simples (color, background)
+		 * 
+		 * Vantagens do sistema híbrido:
+		 * - Outline: CSS transitions >> interpolação de múltiplas sombras
+		 * - Responsivo por padrão (unidades em)
+		 * - Outline sutil e elegante 
+		 * - Performance maximizada
+		 */
 
-			/* Outline com blur aplicado apenas ao pseudo-elemento */
-			-webkit-text-stroke: 0.5rem var(--theme-background);
-			filter: blur(0.04rem);
-		}
-
-		/* FALLBACK: text-shadow para browsers que não suportam -webkit-text-stroke */
-		@supports not (-webkit-text-stroke: 1px) {
-			&::before {
-				display: none;
-			}
-
-			text-shadow:
-				-0.5rem -0.5rem 0 var(--theme-background),
-				0.5rem -0.5rem 0 var(--theme-background),
-				-0.5rem 0.5rem 0 var(--theme-background),
-				0.5rem 0.5rem 0 var(--theme-background);
-		}
-
-		/* Ajuste especial para títulos */
-		&.title-text::before {
-			-webkit-text-stroke: 0.7rem var(--theme-background);
-			filter: blur(0.06rem);
-		}
-
-		&.title-text {
-			@supports not (-webkit-text-stroke: 1px) {
-				text-shadow:
-					-0.7rem -0.7rem 0 var(--theme-background),
-					0.7rem -0.7rem 0 var(--theme-background),
-					-0.7rem 0.7rem 0 var(--theme-background),
-					0.7rem 0.7rem 0 var(--theme-background);
-			}
-		}
+		/* CSS Transition para --outline-color (performance otimizada) */
+		transition:
+			color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+			--outline-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	/* Responsividade */
@@ -1290,39 +1311,12 @@
 			max-height: 6rem;
 		}
 
-		.text-outlined {
-			/* Mobile: reduzir intensidade do outline e blur */
-			&::before {
-				-webkit-text-stroke: 0.3rem var(--theme-background);
-				filter: blur(0.03rem);
-			}
-
-			&.title-text::before {
-				-webkit-text-stroke: 0.4rem var(--theme-background);
-				filter: blur(0.04rem);
-			}
-
-			/* Fallback mobile para text-shadow */
-			@supports not (-webkit-text-stroke: 1px) {
-				&::before {
-					display: none;
-				}
-
-				text-shadow:
-					-0.3rem -0.3rem 0 var(--theme-background),
-					0.3rem -0.3rem 0 var(--theme-background),
-					-0.3rem 0.3rem 0 var(--theme-background),
-					0.3rem 0.3rem 0 var(--theme-background);
-
-				&.title-text {
-					text-shadow:
-						-0.4rem -0.4rem 0 var(--theme-background),
-						0.4rem -0.4rem 0 var(--theme-background),
-						-0.4rem 0.4rem 0 var(--theme-background),
-						0.4rem 0.4rem 0 var(--theme-background);
-				}
-			}
-		}
+		/* 
+		 * OUTLINE RESPONSIVO: Tratado automaticamente pelo sistema JavaScript
+		 * - Mobile: radius reduzido (5px normal, 6px title)
+		 * - Desktop: radius padrão (8px normal, 11px title)
+		 * - Detecção automática via viewport width
+		 */
 	}
 
 	/* Container da borda - estrutura similar à referência */
