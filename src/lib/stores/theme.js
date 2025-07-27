@@ -12,9 +12,17 @@ export const THEME_TYPES = Object.freeze({
 
 // Configurações de transição para melhor UX
 const THEME_CONFIG = Object.freeze({
-	TRANSITION_DURATION: 300,
+	TRANSITION_DURATION: 100, // Agora usado para interpolação real
 	REHYDRATION_DELAY: 16, // 1 frame para garantir DOM ready
 	STORAGE_KEY: 'theme',
+	INTERPOLATION: {
+		ENABLED: true,
+		STEPS: 30, // 30 steps para suavidade
+		EASING: 'cubic-bezier(0.4, 0, 0.2, 1)',
+		HSL_PRECISION: 1, // casas decimais para HSL
+		FAILSAFE_TIMEOUT: 1000, // timeout para fallback instantâneo
+		MAX_CONCURRENT: 20 // máximo de transições simultâneas
+	},
 	CRITICAL_SELECTORS: [
 		'body',
 		'[class*="mdc-"]',
@@ -76,6 +84,178 @@ const createThemeColors = () =>
 	]);
 
 const THEME_COLORS = createThemeColors();
+
+// Sistema de interpolação suave de cores HSL
+const createColorInterpolator = () => {
+	let activeAnimations = new Map();
+	let animationCounter = 0;
+
+	// Parse HSL string para objeto
+	const parseHSL = (hslString) => {
+		if (!hslString || typeof hslString !== 'string') return null;
+
+		// Suporte para diferentes formatos: hsl(h,s%,l%) e hsla(h,s%,l%,a)
+		const match = hslString.match(
+			/hsla?\((\d+(?:\.\d+)?),?\s*(\d+(?:\.\d+)?)%?,?\s*(\d+(?:\.\d+)?)%?(?:,?\s*(\d+(?:\.\d+)?))?\)/
+		);
+		if (!match) return null;
+
+		return {
+			h: parseFloat(match[1]),
+			s: parseFloat(match[2]),
+			l: parseFloat(match[3]),
+			a: match[4] ? parseFloat(match[4]) : 1
+		};
+	};
+
+	// Interpolação circular otimizada para hue (considera caminho mais curto)
+	const interpolateHSL = (from, to, progress) => {
+		if (!from || !to) return null;
+
+		// Interpolação circular para hue (0-360°)
+		let hDiff = to.h - from.h;
+		if (Math.abs(hDiff) > 180) {
+			hDiff = hDiff > 0 ? hDiff - 360 : hDiff + 360;
+		}
+
+		const eased = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+
+		return {
+			h:
+				Math.round((from.h + hDiff * eased) * THEME_CONFIG.INTERPOLATION.HSL_PRECISION) /
+				THEME_CONFIG.INTERPOLATION.HSL_PRECISION,
+			s:
+				Math.round((from.s + (to.s - from.s) * eased) * THEME_CONFIG.INTERPOLATION.HSL_PRECISION) /
+				THEME_CONFIG.INTERPOLATION.HSL_PRECISION,
+			l:
+				Math.round((from.l + (to.l - from.l) * eased) * THEME_CONFIG.INTERPOLATION.HSL_PRECISION) /
+				THEME_CONFIG.INTERPOLATION.HSL_PRECISION,
+			a: from.a + (to.a - from.a) * eased
+		};
+	};
+
+	// Converter HSL objeto de volta para string
+	const hslToString = (hsl) => {
+		if (!hsl) return null;
+		return hsl.a !== undefined && hsl.a !== 1
+			? `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${hsl.a})`
+			: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+	};
+
+	// Animar propriedade individual com failsafe
+	const animateProperty = (
+		property,
+		fromColor,
+		toColor,
+		duration = THEME_CONFIG.TRANSITION_DURATION
+	) => {
+		return new Promise((resolve) => {
+			// Failsafe timeout
+			const timeoutId = setTimeout(() => {
+				document.documentElement.style.setProperty(property, toColor);
+				activeAnimations.delete(property);
+				logger.actions.theme('Interpolação timeout - fallback instantâneo', {
+					property,
+					duration: THEME_CONFIG.INTERPOLATION.FAILSAFE_TIMEOUT
+				});
+				resolve();
+			}, THEME_CONFIG.INTERPOLATION.FAILSAFE_TIMEOUT);
+
+			const fromHSL = parseHSL(fromColor);
+			const toHSL = parseHSL(toColor);
+
+			// Fallback instantâneo se parsing falhar
+			if (!fromHSL || !toHSL) {
+				clearTimeout(timeoutId);
+				document.documentElement.style.setProperty(property, toColor);
+				logger.actions.theme('Parse HSL falhou - fallback instantâneo', {
+					property,
+					fromColor,
+					toColor
+				});
+				resolve();
+				return;
+			}
+
+			// Verificar se cores são iguais
+			if (
+				fromColor === toColor ||
+				(fromHSL.h === toHSL.h && fromHSL.s === toHSL.s && fromHSL.l === toHSL.l)
+			) {
+				clearTimeout(timeoutId);
+				resolve();
+				return;
+			}
+
+			const animationId = ++animationCounter;
+			const startTime = performance.now();
+			const stepDuration = duration / THEME_CONFIG.INTERPOLATION.STEPS;
+
+			logger.actions.theme('Iniciando interpolação', {
+				property,
+				animationId,
+				duration,
+				steps: THEME_CONFIG.INTERPOLATION.STEPS
+			});
+
+			let currentStep = 0;
+
+			const animate = () => {
+				const progress = Math.min(currentStep / THEME_CONFIG.INTERPOLATION.STEPS, 1);
+				const interpolated = interpolateHSL(fromHSL, toHSL, progress);
+				const colorString = hslToString(interpolated);
+
+				if (colorString) {
+					document.documentElement.style.setProperty(property, colorString);
+				}
+
+				currentStep++;
+
+				if (progress >= 1) {
+					clearTimeout(timeoutId);
+					activeAnimations.delete(property);
+
+					const totalDuration = performance.now() - startTime;
+					logger.actions.theme('Interpolação concluída', {
+						property,
+						animationId,
+						totalDuration: Math.round(totalDuration)
+					});
+
+					resolve();
+				} else {
+					setTimeout(animate, stepDuration);
+				}
+			};
+
+			activeAnimations.set(property, animationId);
+			animate();
+		});
+	};
+
+	// Cancelar animação específica
+	const cancelAnimation = (property) => {
+		if (activeAnimations.has(property)) {
+			activeAnimations.delete(property);
+			logger.actions.theme('Animação cancelada', { property });
+		}
+	};
+
+	// Cancelar todas as animações
+	const cancelAllAnimations = () => {
+		const count = activeAnimations.size;
+		activeAnimations.clear();
+		logger.actions.theme('Todas animações canceladas', { count });
+	};
+
+	return {
+		animateProperty,
+		cancelAnimation,
+		cancelAllAnimations,
+		getActiveAnimations: () => new Map(activeAnimations),
+		isAnimating: (property) => activeAnimations.has(property)
+	};
+};
 
 // Sistema de reidratação otimizado usando requestAnimationFrame
 const createRehydrationSystem = () => {
@@ -257,12 +437,15 @@ const createThemePersistence = () => {
 	return { loadSavedTheme, saveTheme };
 };
 
-// Sistema otimizado de aplicação de tema ao DOM
+// Sistema otimizado de aplicação de tema ao DOM com interpolação suave
 const createThemeApplicator = (rehydrationSystem) => {
 	// Cache para evitar reaplicações desnecessárias
 	let lastAppliedTheme = null;
 
-	// Mapeamento otimizado de propriedades CSS
+	// Inicializar sistema de interpolação
+	const colorInterpolator = createColorInterpolator();
+
+	// Mapeamento expandido de propriedades CSS (incluindo SMUI e variáveis ED)
 	const cssPropertyMap = new Map([
 		// Material Design Core
 		['--mdc-theme-primary', 'primary'],
@@ -283,7 +466,96 @@ const createThemeApplicator = (rehydrationSystem) => {
 		['--theme-accent', 'accent']
 	]);
 
-	const applyTheme = (theme) => {
+	// Mapeamento completo de variáveis ED (extraído da análise dos arquivos SMUI)
+	const edVariablesMap = new Map([
+		// Cores principais ED
+		['--ed-text', 'text'],
+		['--ed-background', 'background'],
+		['--ed-primary', 'primary'],
+		['--ed-secondary', 'secondary'],
+		['--ed-accent', 'accent'],
+		['--ed-surface', 'surface'],
+
+		// Shades de texto (50-950)
+		['--ed-text-50', 'text-50'],
+		['--ed-text-100', 'text-100'],
+		['--ed-text-200', 'text-200'],
+		['--ed-text-300', 'text-300'],
+		['--ed-text-400', 'text-400'],
+		['--ed-text-500', 'text-500'],
+		['--ed-text-600', 'text-600'],
+		['--ed-text-700', 'text-700'],
+		['--ed-text-800', 'text-800'],
+		['--ed-text-900', 'text-900'],
+		['--ed-text-950', 'text-950'],
+
+		// Shades de primary (50-950)
+		['--ed-primary-50', 'primary-50'],
+		['--ed-primary-100', 'primary-100'],
+		['--ed-primary-200', 'primary-200'],
+		['--ed-primary-300', 'primary-300'],
+		['--ed-primary-400', 'primary-400'],
+		['--ed-primary-500', 'primary-500'],
+		['--ed-primary-600', 'primary-600'],
+		['--ed-primary-700', 'primary-700'],
+		['--ed-primary-800', 'primary-800'],
+		['--ed-primary-900', 'primary-900'],
+		['--ed-primary-950', 'primary-950'],
+
+		// Shades de secondary (50-950)
+		['--ed-secondary-50', 'secondary-50'],
+		['--ed-secondary-100', 'secondary-100'],
+		['--ed-secondary-200', 'secondary-200'],
+		['--ed-secondary-300', 'secondary-300'],
+		['--ed-secondary-400', 'secondary-400'],
+		['--ed-secondary-500', 'secondary-500'],
+		['--ed-secondary-600', 'secondary-600'],
+		['--ed-secondary-700', 'secondary-700'],
+		['--ed-secondary-800', 'secondary-800'],
+		['--ed-secondary-900', 'secondary-900'],
+		['--ed-secondary-950', 'secondary-950'],
+
+		// Shades de accent (50-950)
+		['--ed-accent-50', 'accent-50'],
+		['--ed-accent-100', 'accent-100'],
+		['--ed-accent-200', 'accent-200'],
+		['--ed-accent-300', 'accent-300'],
+		['--ed-accent-400', 'accent-400'],
+		['--ed-accent-500', 'accent-500'],
+		['--ed-accent-600', 'accent-600'],
+		['--ed-accent-700', 'accent-700'],
+		['--ed-accent-800', 'accent-800'],
+		['--ed-accent-900', 'accent-900'],
+		['--ed-accent-950', 'accent-950'],
+
+		// Shades de surface (50-950)
+		['--ed-surface-50', 'surface-50'],
+		['--ed-surface-100', 'surface-100'],
+		['--ed-surface-200', 'surface-200'],
+		['--ed-surface-300', 'surface-300'],
+		['--ed-surface-400', 'surface-400'],
+		['--ed-surface-500', 'surface-500'],
+		['--ed-surface-600', 'surface-600'],
+		['--ed-surface-700', 'surface-700'],
+		['--ed-surface-800', 'surface-800'],
+		['--ed-surface-900', 'surface-900'],
+		['--ed-surface-950', 'surface-950'],
+
+		// Shades de background (50-950)
+		['--ed-background-50', 'background-50'],
+		['--ed-background-100', 'background-100'],
+		['--ed-background-200', 'background-200'],
+		['--ed-background-300', 'background-300'],
+		['--ed-background-400', 'background-400'],
+		['--ed-background-500', 'background-500'],
+		['--ed-background-600', 'background-600'],
+		['--ed-background-700', 'background-700'],
+		['--ed-background-800', 'background-800'],
+		['--ed-background-900', 'background-900'],
+		['--ed-background-950', 'background-950']
+	]);
+
+	const applyTheme = async (theme) => {
 		if (!browser || theme === lastAppliedTheme) {
 			logger.actions.theme('Aplicação de tema ignorada', {
 				theme,
@@ -299,10 +571,10 @@ const createThemeApplicator = (rehydrationSystem) => {
 		const colors = THEME_COLORS.get(theme) || THEME_COLORS.get(THEME_TYPES.DARK);
 		const root = document.documentElement;
 
-		// Aplicação em lote para melhor performance
-		const cssUpdates = [];
+		// Cancelar animações ativas para evitar conflitos
+		colorInterpolator.cancelAllAnimations();
 
-		// Remove e adiciona classes de tema
+		// Aplicação de classes CSS (instantânea)
 		const removedClasses = ['theme-light', 'theme-dark', 'theme-system'];
 		const addedClass = `theme-${theme}`;
 
@@ -314,70 +586,128 @@ const createThemeApplicator = (rehydrationSystem) => {
 			added: addedClass
 		});
 
-		// Atualiza variável de tema atual
-		cssUpdates.push(['--theme-current', theme]);
+		// Coletar cores atuais para interpolação
+		const getCurrentColor = (cssVar) => {
+			return getComputedStyle(root).getPropertyValue(cssVar).trim();
+		};
 
-		// Aplica propriedades principais usando o mapa otimizado
-		for (const [cssVar, colorKey] of cssPropertyMap) {
-			cssUpdates.push([cssVar, colors[colorKey]]);
+		// Preparar todas as animações
+		const animationPromises = [];
+		let totalProperties = 0;
+
+		// Aplicar propriedades principais com interpolação
+		if (THEME_CONFIG.INTERPOLATION.ENABLED) {
+			// Animar variáveis MDC e theme
+			for (const [cssVar, colorKey] of cssPropertyMap) {
+				const currentColor = getCurrentColor(cssVar);
+				const targetColor = colors[colorKey];
+
+				if (currentColor && targetColor && currentColor !== targetColor) {
+					animationPromises.push(
+						colorInterpolator.animateProperty(cssVar, currentColor, targetColor)
+					);
+					totalProperties++;
+				} else {
+					// Aplicação instantânea se interpolação não for possível
+					root.style.setProperty(cssVar, targetColor);
+				}
+			}
+
+			// Animar variáveis ED existentes no DOM
+			for (const [cssVar, colorKey] of edVariablesMap) {
+				const currentColor = getCurrentColor(cssVar);
+				const targetColor = colors[colorKey];
+
+				// Apenas animar se a variável existe no DOM e tem valor diferente
+				if (currentColor && targetColor && currentColor !== targetColor) {
+					animationPromises.push(
+						colorInterpolator.animateProperty(cssVar, currentColor, targetColor)
+					);
+					totalProperties++;
+				}
+			}
+
+			// Limitar animações simultâneas para performance
+			const maxConcurrent = Math.min(
+				animationPromises.length,
+				THEME_CONFIG.INTERPOLATION.MAX_CONCURRENT
+			);
+
+			logger.actions.theme('Iniciando interpolações', {
+				totalProperties,
+				concurrentAnimations: maxConcurrent,
+				theme
+			});
+
+			// Executar animações em lotes para não sobrecarregar
+			const results = [];
+			for (let i = 0; i < animationPromises.length; i += maxConcurrent) {
+				const batch = animationPromises.slice(i, i + maxConcurrent);
+				const batchResults = await Promise.allSettled(batch);
+				results.push(...batchResults);
+			}
+
+			// Log de resultados
+			const successful = results.filter((r) => r.status === 'fulfilled').length;
+			const failed = results.filter((r) => r.status === 'rejected').length;
+
+			logger.actions.theme('Interpolações concluídas', {
+				successful,
+				failed,
+				total: results.length
+			});
+		} else {
+			// Aplicação instantânea se interpolação estiver desabilitada
+			logger.actions.theme('Interpolação desabilitada - aplicação instantânea');
+
+			for (const [cssVar, colorKey] of cssPropertyMap) {
+				root.style.setProperty(cssVar, colors[colorKey]);
+				totalProperties++;
+			}
 		}
 
-		logger.actions.theme('Propriedades CSS mapeadas', {
-			totalProperties: cssUpdates.length,
-			theme,
-			sampleProperty: cssUpdates[0]?.[0]
-		});
+		// Atualizar variável de tema atual (sempre instantâneo)
+		root.style.setProperty('--theme-current', theme);
 
-		// Material Design - cores de texto específicas por tema
+		// Material Design - cores de texto específicas por tema (instantâneo)
 		const textColors =
 			theme === THEME_TYPES.DARK
 				? {
-						'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
-						'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
-						'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
-						'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
-						'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
-						'--icon-filter': 'invert(1)'
-					}
+					'--mdc-theme-text-primary-on-background': 'rgba(255, 255, 255, 0.87)',
+					'--mdc-theme-text-secondary-on-background': 'rgba(255, 255, 255, 0.60)',
+					'--mdc-theme-text-hint-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-disabled-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-icon-on-background': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-primary-on-dark': 'rgba(255, 255, 255, 0.87)',
+					'--mdc-theme-text-secondary-on-dark': 'rgba(255, 255, 255, 0.60)',
+					'--mdc-theme-text-hint-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-disabled-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--mdc-theme-text-icon-on-dark': 'rgba(255, 255, 255, 0.38)',
+					'--icon-filter': 'invert(1)'
+				}
 				: {
-						'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
-						'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
-						'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
-						'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
-						'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
-						'--icon-filter': 'none'
-					};
+					'--mdc-theme-text-primary-on-background': 'rgba(0, 0, 0, 0.87)',
+					'--mdc-theme-text-secondary-on-background': 'rgba(0, 0, 0, 0.60)',
+					'--mdc-theme-text-hint-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-disabled-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-icon-on-background': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-primary-on-light': 'rgba(0, 0, 0, 0.87)',
+					'--mdc-theme-text-secondary-on-light': 'rgba(0, 0, 0, 0.60)',
+					'--mdc-theme-text-hint-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-disabled-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--mdc-theme-text-icon-on-light': 'rgba(0, 0, 0, 0.38)',
+					'--icon-filter': 'none'
+				};
 
-		// Adiciona cores de texto ao lote
+		// Aplicar cores de texto instantaneamente (não precisam de interpolação)
 		Object.entries(textColors).forEach(([prop, value]) => {
-			cssUpdates.push([prop, value]);
+			root.style.setProperty(prop, value);
 		});
 
 		logger.actions.theme('Cores Material Design aplicadas', {
 			themeType: theme === THEME_TYPES.DARK ? 'dark' : 'light',
 			materialProperties: Object.keys(textColors).length,
 			iconFilter: textColors['--icon-filter']
-		});
-
-		// Aplica todas as atualizações em lote
-		cssUpdates.forEach(([property, value]) => {
-			root.style.setProperty(property, value);
-		});
-
-		logger.actions.theme('Variáveis CSS atualizadas', {
-			totalUpdates: cssUpdates.length,
-			theme,
-			sampleUpdates: cssUpdates.slice(0, 3).map(([prop, val]) => `${prop}: ${val}`)
 		});
 
 		// Força reidratação otimizada
@@ -389,14 +719,24 @@ const createThemeApplicator = (rehydrationSystem) => {
 		logger.actions.transition('END', {
 			theme,
 			duration,
-			totalCSSUpdates: cssUpdates.length,
-			performance: duration < 16 ? 'excelente' : duration < 50 ? 'boa' : 'lenta'
+			totalProperties,
+			interpolationEnabled: THEME_CONFIG.INTERPOLATION.ENABLED,
+			performance: duration < 50 ? 'excelente' : duration < 100 ? 'boa' : 'lenta'
 		});
 
 		lastAppliedTheme = theme;
 	};
 
-	return { applyTheme };
+	return {
+		applyTheme,
+		// Expor controles de interpolação
+		interpolation: {
+			cancel: (property) => colorInterpolator.cancelAnimation(property),
+			cancelAll: () => colorInterpolator.cancelAllAnimations(),
+			isAnimating: (property) => colorInterpolator.isAnimating(property),
+			getActive: () => colorInterpolator.getActiveAnimations()
+		}
+	};
 };
 
 function createThemeStore() {
