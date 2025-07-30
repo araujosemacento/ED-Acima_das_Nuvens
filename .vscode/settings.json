@@ -33,5 +33,6 @@
 		"wdth",
 		"wght",
 		"Zork"
-	]
+	],
+	"nxConsole.generateAiAgentRules": true
 }

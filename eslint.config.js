@@ -30,7 +30,9 @@ export default [
 			'.svelte-kit/',
 			'dist/',
 			'static/assets/ionicons/**',
-			'build/assets/ionicons/**'
+			'build/assets/ionicons/**',
+			'**/vite.config.*.timestamp*',
+			'**/vitest.config.*.timestamp*'
 		]
 	}
 ];

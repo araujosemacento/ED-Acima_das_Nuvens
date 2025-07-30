@@ -4,9 +4,9 @@
 	"version": "0.1.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
+		"dev": "nx serve dev",
+		"build": "nx vite:build",
+		"preview": "nx vite:preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"clear": "rimraf .svelte-kit build dist .vite node_modules/.vite && echo 'Cache limpo com sucesso!'",
 		"recache": "bun run clear && bun i && bun run prepare",
@@ -23,16 +23,22 @@
 		"@eslint/js": "^9.18.0",
 		"@fontsource/fira-mono": "^5.0.0",
 		"@neoconfetti/svelte": "^2.0.0",
+		"@nx/eslint": "21.3.9",
+		"@nx/vite": "21.3.9",
+		"@nx/web": "21.3.9",
 		"@smui/button": "^8.0.0-beta.3",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^6.1.0",
 		"@types/node": "^24.1.0",
+		"@vitest/ui": "^3.0.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
 		"globals": "^16.0.0",
+		"jiti": "2.4.2",
 		"mdsvex": "^0.12.3",
+		"nx": "21.3.9",
 		"prettier": "^3.4.2",
 		"prettier-plugin-sort-package-json": "^1.1.0",
 		"prettier-plugin-svelte": "^3.3.3",
@@ -41,7 +47,8 @@
 		"svelte-check": "^4.3.0",
 		"svelte-reactive-preprocessor": "^0.8.3",
 		"vite": "^7.0.6",
-		"vite-plugin-devtools-json": "^0.3.0"
+		"vite-plugin-devtools-json": "^0.3.0",
+		"vitest": "^3.0.0"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "^2.0.0",
@@ -52,5 +59,6 @@
 		"smui-theme": "^8.0.0-beta.3",
 		"svelte-material-ui": "^8.0.0-beta.3",
 		"svelte-moveable": "^0.45.0"
-	}
+	},
+	"nx": {}
 }

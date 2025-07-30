@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "build": {
+      "outputs": [
+        "{projectRoot}/build/"
+      ],
+      "cache": true
+    },
+    "format": {
+      "outputs": [
+        "{projectRoot}/src/"
+      ],
+      "cache": true
+    },
+    "smui-theme-light": {
+      "outputs": [
+        "{projectRoot}/static/smui.css"
+      ],
+      "cache": true
+    },
+    "smui-theme-dark": {
+      "outputs": [
+        "{projectRoot}/static/smui-dark.css"
+      ],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "vite:build",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "devTargetName": "vite:dev",
+        "previewTargetName": "vite:preview",
+        "serveStaticTargetName": "serve-static",
+        "typecheckTargetName": "typecheck",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps"
+      }
+    }
+  ],
+  "nxCloudId": "6889f02b1fc5e5754f7686d0"
+}
