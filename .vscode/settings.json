@@ -32,7 +32,8 @@
 		"Warsim",
 		"wdth",
 		"wght",
-		"Zork"
+		"Zork",
+		"Perc"
 	],
 	"nxConsole.generateAiAgentRules": true
 }

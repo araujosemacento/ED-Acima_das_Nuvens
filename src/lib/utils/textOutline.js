@@ -48,16 +48,16 @@ export function generateMathematicalOutline(radiusEm, colorVar = '--outline-colo
 export const OUTLINE_PRESETS = {
 	// Desktop - outline sutil responsivo
 	desktop: {
-		normal: () => generateMathematicalOutline(0.1, '--outline-color'), // 0.1em usando CSS var
-		title: () => generateMathematicalOutline(0.15, '--outline-color'), // 0.15em usando CSS var
-		titleBlur: () => generateMathematicalOutline(0.15, '--outline-color', 0.05) // Com blur sutil
+		normal: () => generateMathematicalOutline(0.15, '--outline-color'), // 0.1em usando CSS var
+		title: () => generateMathematicalOutline(0.075, '--outline-color'), // 0.15em usando CSS var
+		titleBlur: () => generateMathematicalOutline(0.075, '--outline-color', 0.05) // Com blur sutil
 	},
 
 	// Mobile - outline ainda mais sutil
 	mobile: {
-		normal: () => generateMathematicalOutline(0.08, '--outline-color'), // 0.08em usando CSS var
-		title: () => generateMathematicalOutline(0.12, '--outline-color'), // 0.12em usando CSS var
-		titleBlur: () => generateMathematicalOutline(0.12, '--outline-color', 0.03) // Com blur reduzido
+		normal: () => generateMathematicalOutline(0.33, '--outline-color'), // 0.08em usando CSS var
+		title: () => generateMathematicalOutline(0.2, '--outline-color'), // 0.12em usando CSS var
+		titleBlur: () => generateMathematicalOutline(0.2, '--outline-color', 0.03) // Com blur reduzido
 	}
 };
 

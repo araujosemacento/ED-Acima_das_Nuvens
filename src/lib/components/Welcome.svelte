@@ -28,36 +28,60 @@
 	let currentTheme = $state('dark');
 	let themeObserver = $state(null);
 
-	// Configurações do sistema de nuvens
+	// Configurações do sistema de nuvens (refatorado)
 	const CLOUD_CONFIG = {
-		stepDistance: 0.25, // rem - distância de cada passo (corrigido: 0.25rem ao invés de 0.025rem)
-		maxDistance: 5, // rem - raio máximo da origem
-		moveInterval: 1000, // ms - intervalo base entre movimentos (~1s para estética retrô)
-		intervalVariation: 250, // ms - variação para dessincronização (±250ms)
-		opacity: 0.8, // 80% de opacidade
-		totalClouds: 17, // Renderizar todas as 17 nuvens
-		// Sistema de posicionamento com exclusão de proximidade
+		stepDistance: 0.25,
+		maxDistance: 5,
+		moveInterval: 1000,
+		intervalVariation: 250,
+		opacity: 0.9,
 		placement: {
-			minDistance: 3, // rem - distância mínima entre nuvens
-			maxAttempts: 50, // tentativas máximas para encontrar posição válida
-			priorityAssets: 8, // número de assets prioritários (sempre renderizados)
-			gridCellSize: 2, // rem - tamanho da célula do grid para otimização
-			safetyMargin: 0.7 // 70% de margem de segurança para cálculo de área disponível
+			minDistance: 3,
+			maxAttempts: 50,
+			gridCellSize: 2,
+			safetyMargin: 0.7
 		},
-		// Sistema de logging híbrido
 		logging: {
-			performanceThrottle: 5000, // ms - throttle para logs de performance crítica
-			maxLocalLogs: 50, // máximo de logs locais em memória
-			useStructuredLogs: true // usar logger store para logs estruturados
+			performanceThrottle: 5000,
+			maxLocalLogs: 50,
+			useStructuredLogs: true
 		},
-		// Sistema de reidratação de tema
 		themeSystem: {
-			observerDebounce: 150, // ms - debounce para mudanças de tema
-			preloadAssets: true, // pre-carregar assets de ambos os temas
-			preserveState: true, // preservar posições e movimento ao trocar tema
-			fallbackTheme: 'dark' // tema padrão se detecção falhar
-		}
+			observerDebounce: 150,
+			preloadAssets: true,
+			preserveState: true,
+			fallbackTheme: 'dark'
+		},
+		sizes: {
+			fixa: 25,
+			grande: 15,
+			mediana: 10,
+			pequena: 7,
+			detalhe: 2.5
+		},
+		detalheCopies: 8 // máximo de cópias de nuvem detalhe
 	};
+
+	// Mapeamento das nuvens por categoria e lado
+	const CLOUD_DEFS = [
+		{ id: 'nuvem10', categoria: 'fixa', lado: 'direita' },
+		{ id: 'nuvem11', categoria: 'fixa', lado: 'esquerda' },
+		{ id: 'nuvem13', categoria: 'grande', lado: 'esquerda' },
+		{ id: 'nuvem14', categoria: 'grande', lado: 'esquerda' },
+		{ id: 'nuvem15', categoria: 'grande', lado: 'esquerda' },
+		{ id: 'nuvem12', categoria: 'mediana', lado: 'direita' },
+		{ id: 'nuvem16', categoria: 'mediana', lado: 'direita' },
+		{ id: 'nuvem17', categoria: 'mediana', lado: 'esquerda' },
+		{ id: 'nuvem1', categoria: 'mediana', lado: 'direita' },
+		{ id: 'nuvem4', categoria: 'mediana', lado: 'direita' },
+		{ id: 'nuvem5', categoria: 'mediana', lado: 'esquerda' },
+		{ id: 'nuvem2', categoria: 'pequena', lado: 'esquerda' },
+		{ id: 'nuvem3', categoria: 'pequena', lado: 'esquerda' },
+		{ id: 'nuvem7', categoria: 'pequena', lado: 'direita' },
+		{ id: 'nuvem8', categoria: 'pequena', lado: 'direita' },
+		{ id: 'nuvem9', categoria: 'pequena', lado: 'direita' }
+		// nuvem6 (detalhe) será tratada separadamente
+	];
 
 	// 8 direções possíveis (estilo retrô)
 	const DIRECTIONS = {
@@ -425,10 +449,15 @@
 
 		// Preservar estado atual e apenas trocar URLs dos assets
 		const updatedAssets = cloudAssets.map((cloud) => {
-			// Extrair número da nuvem do ID ou src atual
-			const cloudNumber = cloud.id.replace('cloud-', '') || '1';
-			const newSrc = `${base}/assets/nuvens/${newTheme}/SVG/nuvem${cloudNumber}.svg`;
-
+			let assetName;
+			if (cloud.id.startsWith('nuvem6')) {
+				assetName = 'nuvem6.svg';
+			} else if (cloud.id.startsWith('nuvem')) {
+				assetName = `${cloud.id}.svg`;
+			} else {
+				assetName = 'nuvem1.svg'; // fallback
+			}
+			const newSrc = `${base}/assets/nuvens/${newTheme}/SVG/${assetName}`;
 			return {
 				...cloud,
 				src: newSrc
@@ -547,134 +576,123 @@
 	}
 
 	function initializeCloudAssets() {
-		// Usar detector de tema em vez de verificação manual
 		const detectedTheme = detectCurrentTheme();
 		currentTheme = detectedTheme;
 		const isMobile = window.innerWidth <= 768;
-
-		// Inicializar o placement manager
 		placementManager = new CloudPlacementManager();
-
-		cloudLogger.structured.init({
-			theme: detectedTheme,
-			isMobile,
-			totalClouds: CLOUD_CONFIG.totalClouds,
-			stepDistance: CLOUD_CONFIG.stepDistance,
-			maxDistance: CLOUD_CONFIG.maxDistance,
-			minPlacementDistance: CLOUD_CONFIG.placement.minDistance,
-			priorityAssets: CLOUD_CONFIG.placement.priorityAssets
-		});
-
+		cloudLogger.structured.init({ theme: detectedTheme, isMobile });
 		const themeFolder = detectedTheme;
 		const clouds = [];
 		let successfulPlacements = 0;
 		let failedPlacements = 0;
 
-		// Tentar posicionar todas as nuvens, respeitando prioridades
-		for (let i = 1; i <= CLOUD_CONFIG.totalClouds; i++) {
-			const isPriority = i <= CLOUD_CONFIG.placement.priorityAssets;
+		// 1. Renderizar nuvens fixas primeiro, com posicionamento circuncêntrico
+		for (const def of CLOUD_DEFS.filter((n) => n.categoria === 'fixa')) {
+			let xPerc = def.lado === 'direita' ? (isMobile ? 0.52 : 0.75) : 0;
+			let yPerc = isMobile ? 0.92 : 0.8;
+			const viewportWidth = window.innerWidth / 16;
+			const viewportHeight = window.innerHeight / 16;
+			const position = {
+				x: viewportWidth * xPerc,
+				y: viewportHeight * yPerc
+			};
+			const cloud = {
+				id: def.id,
+				src: `${base}/assets/nuvens/${themeFolder}/SVG/${def.id}.svg`,
+				position,
+				element: null,
+				categoria: def.categoria,
+				lado: def.lado
+			};
+			clouds.push(cloud);
+			placementManager.addPlacedCloud(cloud);
+			successfulPlacements++;
+			cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+		}
 
-			// Verificar se ainda é matematicamente possível posicionar mais nuvens
-			const remainingClouds = CLOUD_CONFIG.totalClouds - i + 1;
-			if (!isPriority && !placementManager.canPlaceMoreClouds(remainingClouds)) {
-				cloudLogger.structured.init({
-					message: 'interrompendo-posicionamento-por-falta-de-espaço',
-					cloudIndex: i,
-					remainingClouds,
-					successfulPlacements,
-					placementStats: placementManager.getPlacementStats()
-				});
-				break;
-			}
-
-			const initialPosition = generateValidPosition();
-
-			if (initialPosition) {
-				const cloud = {
-					id: `cloud-${i}`,
-					src: `${base}/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
-					position: initialPosition, // em rem
-					element: null,
-					isPriority
-				};
-
-				clouds.push(cloud);
-				placementManager.addPlacedCloud(cloud);
-				successfulPlacements++;
-
-				// Criar controller de movimento para cada nuvem
-				cloudControllers.set(cloud.id, new CloudMovementController(initialPosition, cloud.id));
-
-				cloudLogger.structured.debug('nuvem-posicionada', {
-					cloudId: cloud.id,
-					position: { x: initialPosition.x.toFixed(2), y: initialPosition.y.toFixed(2) },
-					isPriority,
-					successfulPlacements
-				});
-			} else {
-				failedPlacements++;
-				cloudLogger.structured.debug('falha-posicionamento-nuvem', {
-					cloudIndex: i,
-					isPriority,
-					failedPlacements,
-					placementStats: placementManager.getPlacementStats()
-				});
-
-				// Se é uma nuvem prioritária e falhou, tentar com distância reduzida
-				if (isPriority) {
-					cloudLogger.structured.init({
-						message: 'tentando-posicionamento-prioritário-com-distância-reduzida',
-						cloudIndex: i
-					});
-
-					// Temporariamente reduzir distância mínima para nuvens prioritárias
-					const originalMinDistance = placementManager.minDistance;
-					placementManager.minDistance = originalMinDistance * 0.7; // 70% da distância original
-
-					const fallbackPosition = generateValidPosition();
-					if (fallbackPosition) {
-						const cloud = {
-							id: `cloud-${i}`,
-							src: `${base}/assets/nuvens/${themeFolder}/SVG/nuvem${i}.svg`,
-							position: fallbackPosition,
-							element: null,
-							isPriority: true,
-							usedFallback: true
-						};
-
-						clouds.push(cloud);
-						placementManager.addPlacedCloud(cloud);
-						successfulPlacements++;
-
-						cloudControllers.set(cloud.id, new CloudMovementController(fallbackPosition, cloud.id));
-
-						cloudLogger.structured.init({
-							message: 'nuvem-prioritária-posicionada-com-fallback',
-							cloudId: cloud.id,
-							originalMinDistance,
-							fallbackMinDistance: placementManager.minDistance
-						});
+		// 2. Renderizar grandes, medianas, pequenas (respeitando lado preferencial)
+		for (const cat of ['grande', 'mediana', 'pequena']) {
+			for (const def of CLOUD_DEFS.filter((n) => n.categoria === cat)) {
+				let attempts = 0;
+				let position = null;
+				while (attempts < CLOUD_CONFIG.placement.maxAttempts && !position) {
+					attempts++;
+					const viewportWidth = window.innerWidth / 16;
+					const viewportHeight = window.innerHeight / 16;
+					const xMin = def.lado === 'direita' ? viewportWidth * 0.5 : 0;
+					const xMax = def.lado === 'direita' ? viewportWidth : viewportWidth * 0.5;
+					const x = Math.random() * (xMax - xMin) + xMin;
+					const y = Math.random() * (viewportHeight * 0.8) + viewportHeight * 0.1;
+					const candidate = { x, y };
+					if (placementManager.isPositionValid(candidate)) {
+						position = candidate;
 					}
+				}
+				if (position) {
+					const cloud = {
+						id: def.id,
+						src: `${base}/assets/nuvens/${themeFolder}/SVG/${def.id}.svg`,
+						position,
+						element: null,
+						categoria: def.categoria,
+						lado: def.lado
+					};
+					clouds.push(cloud);
+					placementManager.addPlacedCloud(cloud);
+					successfulPlacements++;
+					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+				}
+			}
+		}
 
-					// Restaurar distância original
-					placementManager.minDistance = originalMinDistance;
+		// 3. Renderizar até 8 cópias de nuvem6 (detalhe), alternando orientação, exceto em mobile
+		if (!isMobile) {
+			let detalheCount = 0;
+			let flip = false;
+			while (detalheCount < CLOUD_CONFIG.detalheCopies) {
+				let attempts = 0;
+				let position = null;
+				while (attempts < CLOUD_CONFIG.placement.maxAttempts && !position) {
+					attempts++;
+					const viewportWidth = window.innerWidth / 16;
+					const viewportHeight = window.innerHeight / 16;
+					const x = Math.random() * viewportWidth;
+					const y = Math.random() * (viewportHeight * 0.8) + viewportHeight * 0.1;
+					const candidate = { x, y };
+					if (placementManager.isPositionValid(candidate)) {
+						position = candidate;
+					}
+				}
+				if (position) {
+					const cloud = {
+						id: `nuvem6-${detalheCount}`,
+						src: `${base}/assets/nuvens/${themeFolder}/SVG/nuvem6.svg`,
+						position,
+						element: null,
+						categoria: 'detalhe',
+						lado: 'ambos',
+						flip: flip
+					};
+					clouds.push(cloud);
+					placementManager.addPlacedCloud(cloud);
+					successfulPlacements++;
+					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+					detalheCount++;
+					flip = !flip;
 				}
 			}
 		}
 
 		cloudAssets = clouds;
-
-		// Log final do posicionamento
 		const finalStats = placementManager.getPlacementStats();
 		cloudLogger.structured.init({
 			message: 'posicionamento-concluído',
 			successfulPlacements,
 			failedPlacements,
-			totalAttempted: CLOUD_CONFIG.totalClouds,
+			totalAttempted: clouds.length,
 			theme: themeFolder,
 			placementStats: finalStats
 		});
-
 		cloudLogger.performance('posicionamento-final', {
 			...finalStats,
 			successfulPlacements,
@@ -846,9 +864,9 @@
 					[
 						{
 							background: `radial-gradient(
-							${circleSize} circle at ${x}% ${y}%,
-							${gradientStops}
-						)`
+                            ${circleSize} circle at ${x}% ${y}%,
+                            ${gradientStops}
+                        )`
 						}
 					],
 					{
@@ -927,13 +945,13 @@
 					if (isDarkTheme) {
 						// Dark theme: usar cores secondary com variações apropriadas
 						gradientColors = `${themeColor}, 
-							hsla(290, 40%, 53%, ${borderIntensity * 0.99}),
-							hsla(290, 40%, 53%, ${borderIntensity * 0.44})`;
+                            hsla(290, 40%, 53%, ${borderIntensity * 0.99}),
+                            hsla(290, 40%, 53%, ${borderIntensity * 0.44})`;
 					} else {
 						// Light theme: usar cores accent (mantendo comportamento original)
 						gradientColors = `${themeColor}, 
-							hsla(273, 65%, 55%, ${borderIntensity * 0.66}),
-							hsla(273, 65%, 55%, ${borderIntensity * 0.33})`;
+                            hsla(273, 65%, 55%, ${borderIntensity * 0.66}),
+                            hsla(273, 65%, 55%, ${borderIntensity * 0.33})`;
 					}
 
 					container.animate(
@@ -990,9 +1008,9 @@
 					[
 						{
 							background: `radial-gradient(
-							${circleSize} circle at 50% 50%,
-							${gradientStops}
-						)`
+                            ${circleSize} circle at 50% 50%,
+                            ${gradientStops}
+                        )`
 						}
 					],
 					{
@@ -1027,10 +1045,10 @@
 						[
 							{
 								background: `linear-gradient(45deg, 
-								rgba(255, 255, 255, 0.15), 
-								rgba(255, 255, 255, 0.05),
-								rgba(255, 255, 255, 0.15)
-							)`
+                                rgba(255, 255, 255, 0.15), 
+                                rgba(255, 255, 255, 0.05),
+                                rgba(255, 255, 255, 0.15)
+                            )`
 							}
 						],
 						{
@@ -1114,8 +1132,11 @@
 			<img
 				src={cloud.src}
 				alt="Nuvem decorativa"
-				class="cloud-asset"
-				style="transform: translate({cloud.position.x}rem, {cloud.position.y}rem);"
+				class="cloud-asset cloud-{cloud.categoria}"
+				style="transform: translate({cloud.position.x}rem, {cloud.position.y}rem){cloud.flip
+					? ' scaleX(-1)'
+					: ''}; max-width: {CLOUD_CONFIG.sizes[cloud.categoria]}rem; max-height: {CLOUD_CONFIG
+					.sizes[cloud.categoria]}rem;"
 				bind:this={cloud.element}
 			/>
 		{/each}
@@ -1221,25 +1242,30 @@
 
 	.cloud-asset {
 		position: absolute;
-		opacity: 0.8; /* 80% conforme especificado */
+		opacity: 0.8;
 		pointer-events: none;
-
-		/* TODO: Futuro workflow - implementar tamanhos proporcionais diferentes */
 		width: auto;
 		height: auto;
-		max-width: 8rem; /* Tamanho duplicado: 4rem → 8rem */
-		max-height: 8rem;
-
-		/* Movimento step-based sem interpolação (estética pixelada/retrô) */
-		transition: none; /* Remover suavização para movimento discreto */
-
-		/* Sem rotação conforme especificado */
+		transition: none;
 		transform-origin: center;
-
-		/* Evitar blur/antialiasing para manter estética pixelada */
 		image-rendering: pixelated;
 		image-rendering: -moz-crisp-edges;
 		image-rendering: crisp-edges;
+	}
+	.cloud-fixa {
+		z-index: 1;
+	}
+	.cloud-grande {
+		z-index: 1;
+	}
+	.cloud-mediana {
+		z-index: 1;
+	}
+	.cloud-pequena {
+		z-index: 1;
+	}
+	.cloud-detalhe {
+		z-index: 0;
 	}
 
 	.disclaimer-text {
@@ -1275,23 +1301,23 @@
 		color: var(--ed-text, var(--mdc-theme-text-primary-on-background));
 
 		/* 
-		 * SISTEMA HÍBRIDO DE PERFORMANCE OTIMIZADA:
-		 * 
-		 * OUTLINE: CSS transitions via --outline-color variable
-		 * - Usa CSS custom property --outline-color para transições automáticas
-		 * - text-shadow aplicado via JavaScript usando var(--outline-color)
-		 * - CSS transition gerencia mudanças de tema (muito mais performático)
-		 * 
-		 * TEXTO: Interpolação suave mantida para cores sólidas
-		 * - Continua usando sistema de interpolação do theme.js
-		 * - Transições suaves apenas para propriedades simples (color, background)
-		 * 
-		 * Vantagens do sistema híbrido:
-		 * - Outline: CSS transitions >> interpolação de múltiplas sombras
-		 * - Responsivo por padrão (unidades em)
-		 * - Outline sutil e elegante 
-		 * - Performance maximizada
-		 */
+         * SISTEMA HÍBRIDO DE PERFORMANCE OTIMIZADA:
+         * 
+         * OUTLINE: CSS transitions via --outline-color variable
+         * - Usa CSS custom property --outline-color para transições automáticas
+         * - text-shadow aplicado via JavaScript usando var(--outline-color)
+         * - CSS transition gerencia mudanças de tema (muito mais performático)
+         * 
+         * TEXTO: Interpolação suave mantida para cores sólidas
+         * - Continua usando sistema de interpolação do theme.js
+         * - Transições suaves apenas para propriedades simples (color, background)
+         * 
+         * Vantagens do sistema híbrido:
+         * - Outline: CSS transitions >> interpolação de múltiplas sombras
+         * - Responsivo por padrão (unidades em)
+         * - Outline sutil e elegante 
+         * - Performance maximizada
+         */
 
 		/* CSS Transition para --outline-color (performance otimizada) */
 		transition:
@@ -1312,11 +1338,11 @@
 		}
 
 		/* 
-		 * OUTLINE RESPONSIVO: Tratado automaticamente pelo sistema JavaScript
-		 * - Mobile: radius reduzido (5px normal, 6px title)
-		 * - Desktop: radius padrão (8px normal, 11px title)
-		 * - Detecção automática via viewport width
-		 */
+         * OUTLINE RESPONSIVO: Tratado automaticamente pelo sistema JavaScript
+         * - Mobile: radius reduzido (5px normal, 6px title)
+         * - Desktop: radius padrão (8px normal, 11px title)
+         * - Detecção automática via viewport width
+         */
 	}
 
 	/* Container da borda - estrutura similar à referência */
@@ -1394,26 +1420,26 @@
 	}
 
 	/*
-	 * === DOCUMENTAÇÃO DE FUTUROS WORKFLOWS ===
-	 * 
-	 * 1. SUBCONJUNTOS DE NUVENS:
-	 *    - Grupo A: Posição inicial fixa (não pode ser ocultado)
-	 *    - Grupo B: Posição aleatória (pode ser ocultado no mobile)
-	 *    - Grupo C: Nuvens temáticas/especiais
-	 * 
-	 * 2. REDIMENSIONAMENTO PROPORCIONAL:
-	 *    - Pequenas (2-3rem), Médias (4-5rem), Grandes (6-7rem)
-	 *    - Distribuição baseada em peso visual
-	 * 
-	 * 3. OTIMIZAÇÃO MOBILE:
-	 *    - Reduzir quantidade de nuvens ativas
-	 *    - Priorizar Grupo A (posição fixa)
-	 *    - Intervalos de movimento mais longos
-	 * 
-	 * 4. EXPANSÃO DE ÁREA DE MOVIMENTO:
-	 *    - Permitir movimento além do viewport
-	 *    - Integração com outros componentes
-	 *    - Sistema de "entrada/saída" de nuvens
-	 *    - Área de movimento expandida para acomodar novos componentes
-	 */
+     * === DOCUMENTAÇÃO DE FUTUROS WORKFLOWS ===
+     * 
+     * 1. SUBCONJUNTOS DE NUVENS:
+     *    - Grupo A: Posição inicial fixa (não pode ser ocultado)
+     *    - Grupo B: Posição aleatória (pode ser ocultado no mobile)
+     *    - Grupo C: Nuvens temáticas/especiais
+     * 
+     * 2. REDIMENSIONAMENTO PROPORCIONAL:
+     *    - Pequenas (2-3rem), Médias (4-5rem), Grandes (6-7rem)
+     *    - Distribuição baseada em peso visual
+     * 
+     * 3. OTIMIZAÇÃO MOBILE:
+     *    - Reduzir quantidade de nuvens ativas
+     *    - Priorizar Grupo A (posição fixa)
+     *    - Intervalos de movimento mais longos
+     * 
+     * 4. EXPANSÃO DE ÁREA DE MOVIMENTO:
+     *    - Permitir movimento além do viewport
+     *    - Integração com outros componentes
+     *    - Sistema de "entrada/saída" de nuvens
+     *    - Área de movimento expandida para acomodar novos componentes
+     */
 </style>

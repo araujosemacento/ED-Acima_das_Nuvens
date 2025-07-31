@@ -1,0 +1,209 @@
+[
+	{
+		"label": "json",
+		"kind": 6,
+		"isExtraImport": true,
+		"importPath": "json",
+		"description": "json",
+		"detail": "json",
+		"documentation": {}
+	},
+	{
+		"label": "saudacao",
+		"kind": 2,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "def saudacao(nome=\"Desenvolvedor\"):\n    \"\"\"Função de saudação personalizada\"\"\"\n    return f\"🐍 Olá, {nome}! Bem-vindo ao Pyodide!\"\ndef calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "calcular_fibonacci",
+		"kind": 2,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "def calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:\n        return [0, 1]\n    fib = [0, 1]\n    for i in range(2, n):",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes_matematicas",
+		"kind": 2,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "def operacoes_matematicas(a, b):\n    \"\"\"Realiza operações matemáticas básicas\"\"\"\n    return {\n        'soma': a + b,\n        'subtracao': a - b,\n        'multiplicacao': a * b,\n        'divisao': a / b if b != 0 else 'Divisão por zero!',\n        'potencia': a ** b\n    }\n# Execução de exemplo quando o script é carregado",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "numeros_fib",
+		"kind": 5,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "numeros_fib = calcular_fibonacci(10)\nprint(f\"🔢 Fibonacci (10 termos): {numeros_fib}\")\noperacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes",
+		"kind": 5,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "operacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "resultado_exemplo",
+		"kind": 5,
+		"importPath": ".svelte-kit.output.client.scripts.exemplo",
+		"description": ".svelte-kit.output.client.scripts.exemplo",
+		"peekOfCode": "resultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": ".svelte-kit.output.client.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "saudacao",
+		"kind": 2,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "def saudacao(nome=\"Desenvolvedor\"):\n    \"\"\"Função de saudação personalizada\"\"\"\n    return f\"🐍 Olá, {nome}! Bem-vindo ao Pyodide!\"\ndef calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "calcular_fibonacci",
+		"kind": 2,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "def calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:\n        return [0, 1]\n    fib = [0, 1]\n    for i in range(2, n):",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes_matematicas",
+		"kind": 2,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "def operacoes_matematicas(a, b):\n    \"\"\"Realiza operações matemáticas básicas\"\"\"\n    return {\n        'soma': a + b,\n        'subtracao': a - b,\n        'multiplicacao': a * b,\n        'divisao': a / b if b != 0 else 'Divisão por zero!',\n        'potencia': a ** b\n    }\n# Execução de exemplo quando o script é carregado",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "numeros_fib",
+		"kind": 5,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "numeros_fib = calcular_fibonacci(10)\nprint(f\"🔢 Fibonacci (10 termos): {numeros_fib}\")\noperacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes",
+		"kind": 5,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "operacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "resultado_exemplo",
+		"kind": 5,
+		"importPath": "build.scripts.exemplo",
+		"description": "build.scripts.exemplo",
+		"peekOfCode": "resultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": "build.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "_Known",
+		"kind": 6,
+		"importPath": "node_modules.flatted.python.flatted",
+		"description": "node_modules.flatted.python.flatted",
+		"peekOfCode": "class _Known:\n    def __init__(self):\n        self.key = []\n        self.value = []\nclass _String:\n    def __init__(self, value):\n        self.value = value\ndef _array_keys(value):\n    keys = []\n    i = 0",
+		"detail": "node_modules.flatted.python.flatted",
+		"documentation": {}
+	},
+	{
+		"label": "_String",
+		"kind": 6,
+		"importPath": "node_modules.flatted.python.flatted",
+		"description": "node_modules.flatted.python.flatted",
+		"peekOfCode": "class _String:\n    def __init__(self, value):\n        self.value = value\ndef _array_keys(value):\n    keys = []\n    i = 0\n    for _ in value:\n        keys.append(i)\n        i += 1\n    return keys",
+		"detail": "node_modules.flatted.python.flatted",
+		"documentation": {}
+	},
+	{
+		"label": "parse",
+		"kind": 2,
+		"importPath": "node_modules.flatted.python.flatted",
+		"description": "node_modules.flatted.python.flatted",
+		"peekOfCode": "def parse(value, *args, **kwargs):\n    json = _json.loads(value, *args, **kwargs)\n    wrapped = []\n    for value in json:\n        wrapped.append(_wrap(value))\n    input = []\n    for value in wrapped:\n        if isinstance(value, _String):\n            input.append(value.value)\n        else:",
+		"detail": "node_modules.flatted.python.flatted",
+		"documentation": {}
+	},
+	{
+		"label": "stringify",
+		"kind": 2,
+		"importPath": "node_modules.flatted.python.flatted",
+		"description": "node_modules.flatted.python.flatted",
+		"peekOfCode": "def stringify(value, *args, **kwargs):\n    known = _Known()\n    input = []\n    output = []\n    i = int(_index(known, input, value))\n    while i < len(input):\n        output.append(_transform(known, input, input[i]))\n        i += 1\n    return _json.dumps(output, *args, **kwargs)",
+		"detail": "node_modules.flatted.python.flatted",
+		"documentation": {}
+	},
+	{
+		"label": "saudacao",
+		"kind": 2,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "def saudacao(nome=\"Desenvolvedor\"):\n    \"\"\"Função de saudação personalizada\"\"\"\n    return f\"🐍 Olá, {nome}! Bem-vindo ao Pyodide!\"\ndef calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "calcular_fibonacci",
+		"kind": 2,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "def calcular_fibonacci(n):\n    \"\"\"Calcula sequência de Fibonacci até n termos\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:\n        return [0, 1]\n    fib = [0, 1]\n    for i in range(2, n):",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes_matematicas",
+		"kind": 2,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "def operacoes_matematicas(a, b):\n    \"\"\"Realiza operações matemáticas básicas\"\"\"\n    return {\n        'soma': a + b,\n        'subtracao': a - b,\n        'multiplicacao': a * b,\n        'divisao': a / b if b != 0 else 'Divisão por zero!',\n        'potencia': a ** b\n    }\n# Execução de exemplo quando o script é carregado",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "numeros_fib",
+		"kind": 5,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "numeros_fib = calcular_fibonacci(10)\nprint(f\"🔢 Fibonacci (10 termos): {numeros_fib}\")\noperacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "operacoes",
+		"kind": 5,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "operacoes = operacoes_matematicas(15, 3)\nprint(f\"🧮 Operações com 15 e 3: {operacoes}\")\n# Resultado para retorno\nresultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	},
+	{
+		"label": "resultado_exemplo",
+		"kind": 5,
+		"importPath": "static.scripts.exemplo",
+		"description": "static.scripts.exemplo",
+		"peekOfCode": "resultado_exemplo = {\n    'saudacao': saudacao(),\n    'fibonacci': numeros_fib[:5],  # Primeiros 5 números\n    'operacao_exemplo': operacoes['soma']\n}\nresultado_exemplo",
+		"detail": "static.scripts.exemplo",
+		"documentation": {}
+	}
+]

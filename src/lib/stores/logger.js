@@ -190,25 +190,44 @@ function createLoggerStore() {
 		return stats;
 	});
 
-	// Sistema de adição de logs otimizado
+	// Throttling global para DEBUG e ANIMATION: 1 mensagem a cada 5s
+	const lastCategoryLogTimestamps = {
+		[LOGGER_CONFIG.CATEGORIES.DEBUG]: 0,
+		[LOGGER_CONFIG.CATEGORIES.ANIMATION]: 0
+	};
+	const CATEGORY_THROTTLE_WINDOW = 5000; // 5 segundos
+
 	const addLog = (category, action, data = {}, level = LOGGER_CONFIG.LEVELS.INFO) => {
 		if (!get(isEnabled)) return;
 
+		// Throttling global para DEBUG e ANIMATION
+		if (
+			category === LOGGER_CONFIG.CATEGORIES.DEBUG ||
+			category === LOGGER_CONFIG.CATEGORIES.ANIMATION
+		) {
+			const now = Date.now();
+			if (now - lastCategoryLogTimestamps[category] < CATEGORY_THROTTLE_WINDOW) {
+				// Conta como throttled
+				baseState.update((state) => ({
+					...state,
+					throttledCount: state.throttledCount + 1
+				}));
+				return;
+			}
+			lastCategoryLogTimestamps[category] = now;
+		}
+
 		const logEntry = createLogEntry(category, action, data, level);
 
-		// Verifica throttling
+		// Throttling por similaridade (original)
 		if (throttleSystem.shouldThrottle(logEntry)) {
 			baseState.update((state) => {
 				const newThrottledCount = state.throttledCount + 1;
-
-				// Log throttling apenas no console, não adiciona ao store para evitar spam
 				if (dev && newThrottledCount % 10 === 1) {
-					// Log a cada 10 throttles
 					console.warn(
 						`🚀 [ED] ⚠️ Throttling ativo: ${newThrottledCount} logs similares suprimidos`
 					);
 				}
-
 				return {
 					...state,
 					throttledCount: newThrottledCount
@@ -219,7 +238,6 @@ function createLoggerStore() {
 
 		baseState.update((state) => {
 			const newLogs = [...state.logs, logEntry].slice(-LOGGER_CONFIG.MAX_LOGS);
-
 			return {
 				...state,
 				logs: newLogs,
