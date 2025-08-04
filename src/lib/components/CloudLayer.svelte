@@ -28,6 +28,19 @@
 	let currentTheme = $state('dark');
 	let themeObserver = $state(null);
 
+	// === SISTEMA DE VIEWPORT RESPONSIVO ===
+	let viewportDimensions = $state({ width: 0, height: 0 });
+	let isMobile = $derived(viewportDimensions.width <= 768);
+	let isTablet = $derived(viewportDimensions.width > 768 && viewportDimensions.width <= 1024);
+	let isDesktop = $derived(viewportDimensions.width > 1024);
+	let viewportObserver = $state(null);
+
+	// === SISTEMA DE ESTADOS DE TRANSIÇÃO ===
+	let gameState = $state('waiting'); // 'waiting', 'transitioning', 'playing'
+	let transitionProgress = $state(0); // 0-1 progresso da transição
+	let transitionStartTime = $state(null);
+	let transitionAnimationFrame = $state(null);
+
 	// Configurações do sistema de nuvens (refatorado e configurável)
 	const CLOUD_CONFIG = $derived({
 		stepDistance: 0.25,
@@ -203,7 +216,7 @@
 			for (let attempt = 0; attempt < maxAttempts; attempt++) {
 				const position = {
 					x: Math.random() * (100 - this.safeMargin * 2) + this.safeMargin, // 2% a 98%
-					y: Math.random() * (100 - this.safeMargin * 2) + this.safeMargin  // 2% a 98%
+					y: Math.random() * (100 - this.safeMargin * 2) + this.safeMargin // 2% a 98%
 				};
 
 				if (this.isPositionValid(position)) {
@@ -288,14 +301,23 @@
 
 	// Controller de movimento para cada nuvem
 	class CloudMovementController {
-		constructor(initialPosition, cloudId) {
+		constructor(initialPosition, cloudId, lado = 'ambos') {
 			this.cloudId = cloudId;
+			this.lado = lado; // 'esquerda', 'direita', 'ambos'
 			this.originalPosition = { ...initialPosition };
 			this.currentPosition = { ...initialPosition };
 			this.movementHistory = [];
 			this.maxDistance = CLOUD_CONFIG.maxDistance;
 			this.stepDistance = CLOUD_CONFIG.stepDistance;
 			this.moveCount = 0;
+
+			// Sistema de transição
+			this.isTransitioning = false;
+			this.transitionTarget = null;
+			this.transitionStartTime = null;
+			this.transitionDuration = 2000; // 2s de duração
+			this.transitionStartPosition = null;
+			this.preTransitionState = null;
 		}
 
 		calculateDistanceFromOrigin() {
@@ -339,6 +361,11 @@
 		}
 
 		getNextDirection() {
+			// Se estiver em transição, não usar lógica de movimento normal
+			if (this.isTransitioning) {
+				return { x: 0, y: 0, name: 'TRANSITION' };
+			}
+
 			this.moveCount++;
 
 			if (this.movementHistory.length >= 2) {
@@ -379,6 +406,95 @@
 				});
 			}
 			return randomDir;
+		}
+
+		// === MÉTODOS DE TRANSIÇÃO ===
+		startExitTransition(targetPosition) {
+			this.preTransitionState = {
+				originalPosition: { ...this.originalPosition },
+				currentPosition: { ...this.currentPosition },
+				movementHistory: [...this.movementHistory],
+				moveCount: this.moveCount
+			};
+
+			this.isTransitioning = true;
+			this.transitionTarget = { ...targetPosition };
+			this.transitionStartPosition = { ...this.currentPosition };
+			this.transitionStartTime = Date.now();
+
+			cloudLogger.structured.animation('transição-iniciada', {
+				cloudId: this.cloudId,
+				lado: this.lado,
+				from: this.transitionStartPosition,
+				to: this.transitionTarget,
+				duration: this.transitionDuration
+			});
+		}
+
+		updateTransitionState(progress) {
+			if (!this.isTransitioning || !this.transitionTarget || !this.transitionStartPosition) {
+				return;
+			}
+
+			// Bezier easing para transição suave (ease-in-out-cubic)
+			const easedProgress = this.easeInOutCubic(progress);
+
+			// Interpolação das posições
+			this.currentPosition = {
+				x:
+					this.transitionStartPosition.x +
+					(this.transitionTarget.x - this.transitionStartPosition.x) * easedProgress,
+				y:
+					this.transitionStartPosition.y +
+					(this.transitionTarget.y - this.transitionStartPosition.y) * easedProgress
+			};
+		}
+
+		completeTransition() {
+			if (!this.isTransitioning) return;
+
+			// Nova origem = posição final da transição (nas bordas)
+			this.originalPosition = { ...this.transitionTarget };
+			this.currentPosition = { ...this.transitionTarget };
+
+			// Reset dos estados de transição
+			this.isTransitioning = false;
+			this.transitionTarget = null;
+			this.transitionStartPosition = null;
+			this.transitionStartTime = null;
+
+			// Reset do histórico de movimento para novo comportamento
+			this.movementHistory = [];
+			this.moveCount = 0;
+
+			cloudLogger.structured.animation('transição-concluída', {
+				cloudId: this.cloudId,
+				newOrigin: this.originalPosition
+			});
+		}
+
+		rollbackTransition() {
+			if (!this.preTransitionState) return;
+
+			this.originalPosition = { ...this.preTransitionState.originalPosition };
+			this.currentPosition = { ...this.preTransitionState.currentPosition };
+			this.movementHistory = [...this.preTransitionState.movementHistory];
+			this.moveCount = this.preTransitionState.moveCount;
+
+			this.isTransitioning = false;
+			this.transitionTarget = null;
+			this.transitionStartPosition = null;
+			this.transitionStartTime = null;
+			this.preTransitionState = null;
+
+			cloudLogger.structured.animation('transição-revertida', {
+				cloudId: this.cloudId
+			});
+		}
+
+		// Função de easing cubic-bezier para movimento suave
+		easeInOutCubic(t) {
+			return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 		}
 	}
 
@@ -515,6 +631,103 @@
 	}
 
 	// === FUNÇÕES DO SISTEMA DE NUVENS ===
+
+	// Função para calcular posições de saída (parcialmente visíveis nas bordas)
+	function calculateExitPosition(cloud) {
+		const isDesktop = window.innerWidth > 768;
+
+		// Obter tamanho do asset em porcentagem baseado na categoria
+		const getAssetSizePercentage = (categoria) => {
+			const sizeInRem = CLOUD_CONFIG.sizes[categoria];
+			// Converter rem para porcentagem aproximada da viewport
+			// 1rem ≈ 16px, viewport padrão ≈ 1200px desktop / 375px mobile
+			const viewportWidth = isDesktop ? 1200 : 375;
+			const sizeInPx = sizeInRem * 16;
+			return (sizeInPx / viewportWidth) * 100;
+		};
+
+		const assetSizePercentage = getAssetSizePercentage(cloud.categoria);
+
+		// Margem fixa de 5% da tela para garantir visibilidade
+		const visibilityMargin = 5;
+
+		// Calcular posição baseada na extremidade oposta do asset
+		// Para nuvens da esquerda: extremidade direita fica a 5% da borda esquerda
+		// Para nuvens da direita: extremidade esquerda fica a 5% da borda direita
+
+		// Variação no eixo Y para movimento mais natural
+		const yVariation = (Math.random() - 0.5) * 15; // ±7.5% de variação
+
+		let exitPosition;
+
+		switch (cloud.lado) {
+			case 'esquerda':
+				// Extremidade direita do asset fica a 5% da borda esquerda
+				// Posição do centro = 5% - (metade do tamanho do asset)
+				exitPosition = {
+					x: visibilityMargin + 5 - assetSizePercentage / 2,
+					y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+				};
+				break;
+			case 'direita':
+				// Extremidade esquerda do asset fica a 5% da borda direita
+				// Posição do centro = (100% - 5%) + (metade do tamanho do asset)
+				exitPosition = {
+					x: 85 - visibilityMargin + assetSizePercentage / 2,
+					y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+				};
+				break;
+			case 'ambos': // nuvens detalhe escolhem lado baseado na posição atual
+				const goLeft = cloud.position.x < 50;
+				if (goLeft) {
+					// Vai para esquerda
+					exitPosition = {
+						x: visibilityMargin - assetSizePercentage / 2,
+						y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+					};
+				} else {
+					// Vai para direita
+					exitPosition = {
+						x: 100 - visibilityMargin + assetSizePercentage / 2,
+						y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+					};
+				}
+				break;
+			default:
+				// Fallback: vai para o lado mais próximo
+				const defaultGoLeft = cloud.position.x < 50;
+				if (defaultGoLeft) {
+					exitPosition = {
+						x: visibilityMargin - assetSizePercentage / 2,
+						y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+					};
+				} else {
+					exitPosition = {
+						x: 100 - visibilityMargin + assetSizePercentage / 2,
+						y: Math.max(5, Math.min(95, cloud.position.y + yVariation))
+					};
+				}
+		}
+
+		// Debug log para verificar cálculos
+		console.log(`🎯 [PositionCalc] ${cloud.id}:`, {
+			categoria: cloud.categoria,
+			lado: cloud.lado,
+			assetSizeRem: CLOUD_CONFIG.sizes[cloud.categoria],
+			assetSizePercentage: assetSizePercentage.toFixed(2) + '%',
+			visibilityMargin: visibilityMargin + '%',
+			currentPos: `${cloud.position.x.toFixed(1)}%, ${cloud.position.y.toFixed(1)}%`,
+			exitPos: `${exitPosition.x.toFixed(1)}%, ${exitPosition.y.toFixed(1)}%`,
+			calculation:
+				cloud.lado === 'esquerda'
+					? `5% - (${assetSizePercentage.toFixed(1)}% / 2) = ${exitPosition.x.toFixed(1)}%`
+					: `95% + (${assetSizePercentage.toFixed(1)}% / 2) = ${exitPosition.x.toFixed(1)}%`,
+			note: 'Nuvem pode vazar do container com overflow:visible - escala mantida'
+		});
+
+		return exitPosition;
+	}
+
 	function generateValidPosition() {
 		if (!placementManager) {
 			cloudLogger.critical('placement-manager-não-inicializado');
@@ -552,7 +765,7 @@
 
 		// 1. Renderizar nuvens fixas primeiro (posições em porcentagem)
 		for (const def of CLOUD_DEFS.filter((n) => n.categoria === 'fixa')) {
-			let xPerc = def.lado === 'direita' ? (isMobile ? 60 : 80) : (isMobile ? 2 : 5); // 2%-5% a 60%-80%
+			let xPerc = def.lado === 'direita' ? (isMobile ? 60 : 80) : isMobile ? 2 : 5; // 2%-5% a 60%-80%
 			let yPerc = isMobile ? 85 : 75; // 75% a 85%
 			const position = {
 				x: xPerc,
@@ -569,7 +782,7 @@
 			clouds.push(cloud);
 			placementManager.addPlacedCloud(cloud);
 			successfulPlacements++;
-			cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+			cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id, def.lado));
 		}
 
 		// 2. Renderizar grandes, medianas, pequenas (posições em porcentagem)
@@ -580,7 +793,7 @@
 				while (attempts < CLOUD_CONFIG.placement.maxAttempts && !position) {
 					attempts++;
 					// Sistema de coordenadas em porcentagem (0-100)
-					const xMin = def.lado === 'direita' ? 50 : 0;  // 0% a 50% ou 50% a 100%
+					const xMin = def.lado === 'direita' ? 50 : 0; // 0% a 50% ou 50% a 100%
 					const xMax = def.lado === 'direita' ? 100 : 50;
 					const x = Math.random() * (xMax - xMin) + xMin;
 					const y = Math.random() * 80 + 10; // 10% a 80%
@@ -601,7 +814,7 @@
 					clouds.push(cloud);
 					placementManager.addPlacedCloud(cloud);
 					successfulPlacements++;
-					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id, def.lado));
 				} else {
 					failedPlacements++;
 				}
@@ -638,7 +851,7 @@
 					clouds.push(cloud);
 					placementManager.addPlacedCloud(cloud);
 					successfulPlacements++;
-					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id));
+					cloudControllers.set(cloud.id, new CloudMovementController(position, cloud.id, 'ambos'));
 					detalheCount++;
 					flip = !flip;
 				} else {
@@ -650,18 +863,20 @@
 
 		cloudAssets = clouds;
 		const finalStats = placementManager.getPlacementStats();
-		
+
 		// DEBUG: Verificar se cloudAssets foi populado
 		console.log('🔍 [DEBUG] cloudAssets criado:', {
 			totalClouds: clouds.length,
-			cloudIds: clouds.map(c => c.id),
+			cloudIds: clouds.map((c) => c.id),
 			firstCloudSrc: clouds[0]?.src || 'N/A',
 			coordinateSystem: 'percentage-based',
-			samplePositions: clouds.slice(0, 3).map(c => ({id: c.id, x: c.position.x + '%', y: c.position.y + '%'}))
+			samplePositions: clouds
+				.slice(0, 3)
+				.map((c) => ({ id: c.id, x: c.position.x + '%', y: c.position.y + '%' }))
 		});
-		
+
 		// Disparar evento de sistema pronto
-		dispatch('cloudSystemReady', { 
+		dispatch('cloudSystemReady', {
 			stats: finalStats,
 			successfulPlacements,
 			failedPlacements,
@@ -676,7 +891,7 @@
 			theme: themeFolder,
 			placementStats: finalStats
 		});
-		
+
 		cloudLogger.performance('posicionamento-final', {
 			...finalStats,
 			successfulPlacements,
@@ -729,9 +944,17 @@
 			y: controller.currentPosition.y + direction.y * controller.stepDistance
 		};
 
-		// Garantir que as nuvens permaneçam dentro da viewport (0% a 100%)
-		newPosition.x = Math.max(0, Math.min(100, newPosition.x));
-		newPosition.y = Math.max(0, Math.min(100, newPosition.y));
+		// Durante o jogo (após transição), permitir movimento além do viewport
+		// mas com limites expandidos para evitar nuvens muito distantes
+		if (gameState === 'playing') {
+			// Limites expandidos: -20% a 120% para permitir movimento nas bordas
+			newPosition.x = Math.max(-20, Math.min(120, newPosition.x));
+			newPosition.y = Math.max(-10, Math.min(110, newPosition.y));
+		} else {
+			// Durante estado inicial, manter dentro do viewport original
+			newPosition.x = Math.max(0, Math.min(100, newPosition.x));
+			newPosition.y = Math.max(0, Math.min(100, newPosition.y));
+		}
 
 		controller.currentPosition = newPosition;
 		controller.movementHistory.push(direction.name);
@@ -768,12 +991,166 @@
 		}
 	}
 
+	// === SISTEMA DE TRANSIÇÃO DAS NUVENS ===
+	export function startCloudTransition() {
+		if (gameState === 'transitioning') {
+			cloudLogger.structured.debug('transição-já-em-andamento');
+			return;
+		}
+
+		gameState = 'transitioning';
+		transitionStartTime = Date.now();
+		transitionProgress = 0;
+
+		cloudLogger.structured.animation('transição-global-iniciada', {
+			totalClouds: cloudAssets.length,
+			gameState: 'waiting -> transitioning'
+		});
+
+		// Pausar animações atuais
+		pauseAnimations();
+
+		// Calcular e iniciar transições para cada nuvem
+		cloudAssets.forEach((cloud) => {
+			const controller = cloudControllers.get(cloud.id);
+			if (controller) {
+				const exitPosition = calculateExitPosition(cloud);
+				controller.startExitTransition(exitPosition);
+
+				// Log detalhado da transição para debug
+				const assetSizeRem = CLOUD_CONFIG.sizes[cloud.categoria];
+				const assetSizePercentage = (() => {
+					const isDesktop = window.innerWidth > 768;
+					const viewportWidth = isDesktop ? 1200 : 375;
+					const sizeInPx = assetSizeRem * 16;
+					return (sizeInPx / viewportWidth) * 100;
+				})();
+
+				cloudLogger.structured.debug('transição-cloud-configurada', {
+					cloudId: cloud.id,
+					lado: cloud.lado,
+					categoria: cloud.categoria,
+					assetSizeRem: assetSizeRem,
+					assetSizePercentage: assetSizePercentage.toFixed(2) + '%',
+					from: {
+						x: controller.currentPosition.x.toFixed(2) + '%',
+						y: controller.currentPosition.y.toFixed(2) + '%'
+					},
+					to: {
+						x: exitPosition.x.toFixed(2) + '%',
+						y: exitPosition.y.toFixed(2) + '%'
+					},
+					visibilityCalculation:
+						cloud.lado === 'esquerda'
+							? `extremidade direita a 5% da borda esquerda`
+							: `extremidade esquerda a 5% da borda direita`
+				});
+			}
+		});
+
+		// Iniciar loop de animação
+		animateTransition();
+	}
+
+	function animateTransition() {
+		const elapsed = Date.now() - transitionStartTime;
+		const progress = Math.min(elapsed / 2000, 1); // 2s de duração
+
+		// Atualizar progresso global
+		transitionProgress = progress;
+
+		// Atualizar posições de todas as nuvens
+		cloudAssets.forEach((cloud, index) => {
+			const controller = cloudControllers.get(cloud.id);
+			if (controller) {
+				controller.updateTransitionState(progress);
+
+				// Atualizar posição visual reativa
+				cloudAssets[index].position = { ...controller.currentPosition };
+			}
+		});
+
+		// Continuar animação ou finalizar
+		if (progress < 1) {
+			transitionAnimationFrame = requestAnimationFrame(animateTransition);
+		} else {
+			completeTransition();
+		}
+	}
+
+	function completeTransition() {
+		// Cancelar qualquer frame pendente
+		if (transitionAnimationFrame) {
+			cancelAnimationFrame(transitionAnimationFrame);
+			transitionAnimationFrame = null;
+		}
+
+		// Redefinir origens e finalizar transições individuais
+		cloudAssets.forEach((cloud) => {
+			const controller = cloudControllers.get(cloud.id);
+			if (controller) {
+				controller.completeTransition();
+			}
+		});
+
+		gameState = 'playing';
+		transitionProgress = 1;
+
+		// Reiniciar animações com novos pontos de origem
+		startCloudAnimations();
+
+		// Disparar evento de transição completa
+		dispatch('cloudTransitionComplete', {
+			duration: Date.now() - transitionStartTime,
+			cloudsTransitioned: cloudAssets.length,
+			newGameState: gameState
+		});
+
+		cloudLogger.structured.animation('transição-global-concluída', {
+			duration: Date.now() - transitionStartTime,
+			cloudsTransitioned: cloudAssets.length,
+			gameState: 'transitioning -> playing'
+		});
+	}
+
+	// Função para reverter transição (caso necessário)
+	export function rollbackCloudTransition() {
+		if (gameState !== 'transitioning') return;
+
+		// Cancelar animação em andamento
+		if (transitionAnimationFrame) {
+			cancelAnimationFrame(transitionAnimationFrame);
+			transitionAnimationFrame = null;
+		}
+
+		// Reverter cada controller
+		cloudAssets.forEach((cloud) => {
+			const controller = cloudControllers.get(cloud.id);
+			if (controller) {
+				controller.rollbackTransition();
+			}
+		});
+
+		gameState = 'waiting';
+		transitionProgress = 0;
+
+		// Reiniciar animações normais
+		startCloudAnimations();
+
+		cloudLogger.structured.animation('transição-revertida', {
+			gameState: 'transitioning -> waiting'
+		});
+	}
+
 	export function getSystemStats() {
 		return {
 			cloudCount: cloudAssets.length,
 			activeControllers: cloudControllers.size,
 			activeAnimations: cloudAnimationIntervals.size,
 			currentTheme,
+			gameState,
+			transitionProgress,
+			isTransitioning: gameState === 'transitioning',
 			placementStats: placementManager?.getPlacementStats(),
 			memoryStats: cloudLogger.getMemoryStats()
 		};
@@ -822,8 +1199,16 @@
 				activeIntervals: cloudAnimationIntervals.size,
 				activeControllers: cloudControllers.size,
 				themeObserverActive: themeObserver !== null,
+				gameState,
+				transitionActive: transitionAnimationFrame !== null,
 				memoryStats: cloudLogger.getMemoryStats()
 			});
+
+			// Cleanup de transição em andamento
+			if (transitionAnimationFrame) {
+				cancelAnimationFrame(transitionAnimationFrame);
+				transitionAnimationFrame = null;
+			}
 
 			cleanupThemeObserver();
 
@@ -841,6 +1226,11 @@
 				placementManager = null;
 			}
 
+			// Reset estados de transição
+			gameState = 'waiting';
+			transitionProgress = 0;
+			transitionStartTime = null;
+
 			currentTheme = CLOUD_CONFIG.themeSystem.fallbackTheme;
 			cloudLogger.clearLocalLogs();
 
@@ -852,38 +1242,41 @@
 	});
 </script>
 
-	{#if enabled}
-		<div class="cloud-layer" style="opacity: {opacity};">
-			<!-- Debug: Total de nuvens = {cloudAssets.length} -->
-			{#each cloudAssets as cloud (cloud.id)}
-				<img
-					src={cloud.src}
-					alt="Nuvem decorativa ({cloud.id})"
-					class="cloud-asset cloud-{cloud.categoria}"
-					style="left: {cloud.position.x}%; top: {cloud.position.y}%; {cloud.flip
-						? 'transform: scaleX(-1);'
-						: ''} max-width: {CLOUD_CONFIG.sizes[cloud.categoria]}rem; max-height: {CLOUD_CONFIG
-						.sizes[cloud.categoria]}rem;"
-					bind:this={cloud.element}
-					onerror={(e) => {
-						console.error('❌ Erro ao carregar imagem:', cloud.src, e);
-						cloudLogger.critical('erro-carregamento-imagem', { src: cloud.src, cloudId: cloud.id });
-					}}
-					onload={(e) => {
-						console.log('✅ Imagem carregada:', cloud.src);
-					}}
-				/>
-			{/each}
-		</div>
-	{/if}<style lang="scss">
+{#if enabled}
+	<div class="cloud-layer" style="opacity: {opacity};">
+		<!-- Debug: Total de nuvens = {cloudAssets.length} -->
+		{#each cloudAssets as cloud (cloud.id)}
+			<img
+				src={cloud.src}
+				alt="Nuvem decorativa ({cloud.id})"
+				class="cloud-asset cloud-{cloud.categoria}"
+				style="left: {cloud.position.x}%; top: {cloud.position.y}%; {cloud.flip
+					? 'transform: scaleX(-1);'
+					: ''} max-width: {CLOUD_CONFIG.sizes[cloud.categoria]}rem; max-height: {CLOUD_CONFIG
+					.sizes[cloud.categoria]}rem;"
+				bind:this={cloud.element}
+				onerror={(e) => {
+					console.error('❌ Erro ao carregar imagem:', cloud.src, e);
+					cloudLogger.critical('erro-carregamento-imagem', { src: cloud.src, cloudId: cloud.id });
+				}}
+				onload={(e) => {
+					console.log('✅ Imagem carregada:', cloud.src);
+				}}
+			/>
+		{/each}
+	</div>
+{/if}
+
+<style lang="scss">
 	.cloud-layer {
 		position: fixed;
-		top: 0;
+		top: -5%;
 		left: -10%;
-		width: 110%; /* Container ajustado para 110% */
-		height: 100%;
+		width: 120%; /* Container ajustado para 110% */
+		height: 110%;
 		pointer-events: none;
 		transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: visible; /* Permitir que nuvens vazem do container sem redimensionar */
 	}
 
 	.cloud-asset {
@@ -897,6 +1290,13 @@
 		image-rendering: pixelated;
 		image-rendering: -moz-crisp-edges;
 		image-rendering: crisp-edges;
+		/* Garantir que as nuvens mantenham escala fixa */
+		flex-shrink: 0;
+		min-width: 0; /* Resetar constraints de width */
+		min-height: 0; /* Resetar constraints de height */
+		object-fit: none; /* Não redimensionar a imagem */
+		/* Forçar dimensões baseadas no max-width/height definido inline */
+		box-sizing: content-box;
 	}
 
 	.cloud-fixa {

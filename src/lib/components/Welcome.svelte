@@ -5,6 +5,9 @@
 	import { logger } from '$lib/stores/logger.js';
 	import { createOutlineThemeObserver, isMobileDevice } from '$lib/utils/textOutline.js';
 
+	// Prop para receber referência do CloudLayer
+	let { cloudLayerComponent = null } = $props();
+
 	let mousePosition = $state({ x: 0, y: 0 }); // Posição absoluta do mouse para cálculos vetoriais
 	let welcomeSection;
 	let glimmerElement;
@@ -21,6 +24,48 @@
 		const angleRad = Math.atan2(deltaY, deltaX);
 		return ((angleRad * 180) / Math.PI + 360) % 360; // Normalizar para 0-360°
 	});
+
+	// === HANDLER DO BOTÃO START GAME ===
+	function handleStartGame() {
+		if (cloudLayerComponent) {
+			try {
+				// Verificar se o sistema está pronto
+				const stats = cloudLayerComponent.getSystemStats();
+				logger.actions.component('Welcome', 'botão-start-clicado', {
+					cloudSystemReady: stats.cloudCount > 0,
+					gameState: stats.gameState,
+					cloudCount: stats.cloudCount
+				});
+
+				if (stats.cloudCount > 0 && stats.gameState === 'waiting') {
+					// Iniciar transição das nuvens
+					cloudLayerComponent.startCloudTransition();
+
+					logger.actions.component('Welcome', 'transição-nuvens-iniciada', {
+						cloudCount: stats.cloudCount,
+						transitionType: 'saída-parcial-bordas'
+					});
+				} else {
+					console.warn('⚠️ Sistema de nuvens não está pronto ou já em transição:', {
+						gameState: stats.gameState,
+						cloudCount: stats.cloudCount
+					});
+				}
+			} catch (error) {
+				logger.actions.error('Welcome: erro-ao-iniciar-transição', {
+					error: error.message,
+					hasCloudLayer: !!cloudLayerComponent
+				});
+				console.error('❌ Erro ao iniciar transição das nuvens:', error);
+			}
+		} else {
+			logger.actions.error('Welcome: cloud-layer-component-não-disponível');
+			console.warn('⚠️ CloudLayer component não está disponível');
+		}
+
+		// TODO: Adicionar aqui lógica adicional do jogo
+		// Por exemplo: navegar para tela do jogo, inicializar sistemas, etc.
+	}
 	onMount(() => {
 		// === INICIALIZAÇÃO DO SISTEMA DE OUTLINE MATEMÁTICO ===
 		// Coletar elementos que precisam de outline
@@ -344,7 +389,11 @@
 			</div>
 		</div>
 		<div class="button-border-container">
-			<Button variant="unelevated" class="theme-interactive-transition game-start-button">
+			<Button
+				onclick={handleStartGame}
+				variant="unelevated"
+				class="theme-interactive-transition game-start-button"
+			>
 				<Label>{m.start_game()}</Label>
 			</Button>
 			<div class="button-blob"></div>
@@ -452,9 +501,12 @@
 	}
 
 	/* Responsividade */
-	@media (max-width: 48rem) {
+	@media (max-width: 48rem), (max-height: 28rem) {
 		#welcome {
 			max-width: 80%;
+			.title-text {
+				margin: 0.1em;
+			}
 		}
 	}
 
@@ -531,5 +583,4 @@
 		font-weight: 600 !important;
 		letter-spacing: 0.5px !important;
 	}
-
 </style>

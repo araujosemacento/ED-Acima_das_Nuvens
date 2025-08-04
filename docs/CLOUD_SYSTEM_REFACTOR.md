@@ -66,12 +66,12 @@ Welcome.svelte
 ### Props Configuráveis
 
 ```javascript
-export let enabled = true;           // Habilitar/desabilitar sistema
-export let opacity = 0.8;            // Opacidade global
-export let animationSpeed = 1000;    // Velocidade base das animações
-export let cloudDensity = 'normal';  // 'low', 'normal', 'high'
+export let enabled = true; // Habilitar/desabilitar sistema
+export let opacity = 0.8; // Opacidade global
+export let animationSpeed = 1000; // Velocidade base das animações
+export let cloudDensity = 'normal'; // 'low', 'normal', 'high'
 export let boundaryMode = 'viewport'; // 'viewport', 'container'
-export let debugMode = false;        // Modo de debug detalhado
+export let debugMode = false; // Modo de debug detalhado
 ```
 
 ### Eventos Customizados
@@ -97,26 +97,23 @@ O `CLOUD_CONFIG` agora é um objeto derivado (`$derived`) que se adapta automati
 
 ```javascript
 const CLOUD_CONFIG = $derived({
-    // Configurações base
-    stepDistance: 0.25,
-    maxDistance: 5,
-    moveInterval: animationSpeed,  // Reativo à prop
-    
-    // Densidade adaptativa
-    placement: {
-        minDistance: cloudDensity === 'high' ? 2 : 
-                    cloudDensity === 'low' ? 4 : 3,
-    },
-    
-    // Tamanhos dinâmicos
-    sizes: {
-        fixa: cloudDensity === 'high' ? 30 : 
-              cloudDensity === 'low' ? 20 : 25,
-        // ... outras categorias
-    },
-    
-    detalheCopies: cloudDensity === 'high' ? 12 : 
-                   cloudDensity === 'low' ? 4 : 8
+	// Configurações base
+	stepDistance: 0.25,
+	maxDistance: 5,
+	moveInterval: animationSpeed, // Reativo à prop
+
+	// Densidade adaptativa
+	placement: {
+		minDistance: cloudDensity === 'high' ? 2 : cloudDensity === 'low' ? 4 : 3
+	},
+
+	// Tamanhos dinâmicos
+	sizes: {
+		fixa: cloudDensity === 'high' ? 30 : cloudDensity === 'low' ? 20 : 25
+		// ... outras categorias
+	},
+
+	detalheCopies: cloudDensity === 'high' ? 12 : cloudDensity === 'low' ? 4 : 8
 });
 ```
 
@@ -144,37 +141,37 @@ const CLOUD_CONFIG = $derived({
 
 ```svelte
 <script>
-    import Welcome from '$lib/components/Welcome.svelte';
-    import CloudLayer from '$lib/components/CloudLayer.svelte';
+	import Welcome from '$lib/components/Welcome.svelte';
+	import CloudLayer from '$lib/components/CloudLayer.svelte';
 
-    // Handlers para eventos do CloudLayer
-    function handleCloudSystemReady(event) {
-        console.log('🌤️ Sistema de nuvens inicializado:', event.detail);
-    }
-    
-    function handleThemeChanged(event) {
-        console.log('🎨 Tema das nuvens alterado:', event.detail);
-    }
-    
-    function handlePerformanceAlert(event) {
-        console.warn('⚠️ Alerta de performance:', event.detail);
-    }
+	// Handlers para eventos do CloudLayer
+	function handleCloudSystemReady(event) {
+		console.log('🌤️ Sistema de nuvens inicializado:', event.detail);
+	}
+
+	function handleThemeChanged(event) {
+		console.log('🎨 Tema das nuvens alterado:', event.detail);
+	}
+
+	function handlePerformanceAlert(event) {
+		console.warn('⚠️ Alerta de performance:', event.detail);
+	}
 </script>
 
 <!-- Camada de nuvens (fundo) -->
 <CloudLayer
-    enabled={true}
-    opacity={0.8}
-    animationSpeed={1000}
-    cloudDensity="normal"
-    on:cloudSystemReady={handleCloudSystemReady}
-    on:themeChanged={handleThemeChanged}
-    on:performanceAlert={handlePerformanceAlert}
+	enabled={true}
+	opacity={0.8}
+	animationSpeed={1000}
+	cloudDensity="normal"
+	on:cloudSystemReady={handleCloudSystemReady}
+	on:themeChanged={handleThemeChanged}
+	on:performanceAlert={handlePerformanceAlert}
 />
 
 <!-- Conteúdo principal (sobreposição) -->
 <section class="theme-background-transition theme-text-transition">
-    <Welcome />
+	<Welcome />
 </section>
 ```
 
@@ -221,34 +218,25 @@ const CLOUD_CONFIG = $derived({
 ### Configuração de Performance (Mobile/Low-end)
 
 ```svelte
-<CloudLayer 
-    cloudDensity="low" 
-    animationSpeed={2000}
-    opacity={0.6}
-/>
+<CloudLayer cloudDensity="low" animationSpeed={2000} opacity={0.6} />
 ```
 
 ### Configuração Rica (Desktop/High-end)
 
 ```svelte
-<CloudLayer 
-    cloudDensity="high" 
-    animationSpeed={750}
-    opacity={0.9}
-    debugMode={true}
-/>
+<CloudLayer cloudDensity="high" animationSpeed={750} opacity={0.9} debugMode={true} />
 ```
 
 ### Controle Programático
 
 ```svelte
 <script>
-    let cloudLayer;
-    
-    function handleUserInteraction() {
-        cloudLayer.pauseAnimations();
-        setTimeout(() => cloudLayer.resumeAnimations(), 5000);
-    }
+	let cloudLayer;
+
+	function handleUserInteraction() {
+		cloudLayer.pauseAnimations();
+		setTimeout(() => cloudLayer.resumeAnimations(), 5000);
+	}
 </script>
 
 <CloudLayer bind:this={cloudLayer} />

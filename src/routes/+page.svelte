@@ -5,6 +5,7 @@
 	// Estados para controle do sistema de nuvens
 	let cloudSystemReady = false;
 	let cloudSystemStats = null;
+	let cloudLayerComponent = null;
 
 	// Handlers para eventos do CloudLayer
 	function handleCloudSystemReady(event) {
@@ -20,6 +21,10 @@
 	function handlePerformanceAlert(event) {
 		console.warn('⚠️ Alerta de performance das nuvens:', event.detail);
 	}
+
+	function handleCloudTransitionComplete(event) {
+		console.log('✨ Transição das nuvens concluída:', event.detail);
+	}
 </script>
 
 <svelte:head>
@@ -29,20 +34,22 @@
 
 <!-- Conteúdo principal (sobreposição) -->
 <section class="theme-background-transition theme-text-transition">
-	<Welcome />
+	<Welcome {cloudLayerComponent} />
 </section>
 
 <!-- Camada de nuvens (fundo) -->
 <CloudLayer
+	bind:this={cloudLayerComponent}
 	enabled={true}
 	opacity={0.8}
 	animationSpeed={1000}
 	cloudDensity="normal"
 	boundaryMode="viewport"
-	debugMode={false}
+	debugMode={true}
 	on:cloudSystemReady={handleCloudSystemReady}
 	on:themeChanged={handleThemeChanged}
 	on:performanceAlert={handlePerformanceAlert}
+	on:cloudTransitionComplete={handleCloudTransitionComplete}
 />
 
 <style>
