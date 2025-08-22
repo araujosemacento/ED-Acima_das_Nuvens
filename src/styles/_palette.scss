@@ -1,0 +1,176 @@
+@use 'sass:map';
+
+$themes: (
+	light: (
+		text: (
+			default: hsl(209, 76%, 10%),
+			50: hsl(208, 76%, 5%),
+			100: hsl(209, 76%, 10%),
+			200: hsl(209, 76%, 20%),
+			300: hsl(209, 76%, 30%),
+			400: hsl(209, 76%, 40%),
+			500: hsl(209, 76%, 50%),
+			600: hsl(209, 76%, 60%),
+			700: hsl(209, 76%, 70%),
+			800: hsl(209, 76%, 80%),
+			900: hsl(209, 76%, 90%),
+			950: hsl(208, 76%, 95%)
+		),
+		background: (
+			default: hsl(150, 100%, 97%),
+			50: hsl(150, 100%, 5%),
+			100: hsl(151, 100%, 10%),
+			200: hsl(150, 100%, 20%),
+			300: hsl(150, 100%, 30%),
+			400: hsl(150, 100%, 40%),
+			500: hsl(150, 100%, 50%),
+			600: hsl(150, 100%, 60%),
+			700: hsl(150, 100%, 70%),
+			800: hsl(150, 100%, 80%),
+			900: hsl(151, 100%, 90%),
+			950: hsl(150, 100%, 95%)
+		),
+		primary: (
+			default: hsl(275, 85%, 40%),
+			50: hsl(275, 85%, 5%),
+			100: hsl(275, 84%, 10%),
+			200: hsl(275, 84%, 20%),
+			300: hsl(275, 86%, 30%),
+			400: hsl(275, 85%, 40%),
+			500: hsl(275, 85%, 50%),
+			600: hsl(275, 85%, 60%),
+			700: hsl(275, 86%, 70%),
+			800: hsl(275, 84%, 80%),
+			900: hsl(275, 84%, 90%),
+			950: hsl(275, 85%, 95%)
+		),
+		secondary: (
+			default: hsl(270, 84%, 80%),
+			50: hsl(270, 84%, 5%),
+			100: hsl(270, 84%, 10%),
+			200: hsl(270, 84%, 20%),
+			300: hsl(270, 84%, 30%),
+			400: hsl(270, 84%, 40%),
+			500: hsl(270, 84%, 50%),
+			600: hsl(270, 84%, 60%),
+			700: hsl(270, 84%, 70%),
+			800: hsl(270, 84%, 80%),
+			900: hsl(270, 84%, 90%),
+			950: hsl(270, 84%, 95%)
+		),
+		accent: (
+			default: hsl(315, 100%, 60%),
+			50: hsl(316, 100%, 5%),
+			100: hsl(315, 100%, 10%),
+			200: hsl(315, 100%, 20%),
+			300: hsl(315, 100%, 30%),
+			400: hsl(315, 100%, 40%),
+			500: hsl(315, 100%, 50%),
+			600: hsl(315, 100%, 60%),
+			700: hsl(315, 100%, 70%),
+			800: hsl(315, 100%, 80%),
+			900: hsl(315, 100%, 90%),
+			950: hsl(314, 100%, 95%)
+		)
+	),
+	dark: (
+		text: (
+			default: hsl(209, 80%, 90%),
+			50: hsl(207, 77%, 95%),
+			100: hsl(209, 80%, 90%),
+			200: hsl(209, 78%, 80%),
+			300: hsl(209, 79%, 70%),
+			400: hsl(209, 79%, 60%),
+			500: hsl(209, 79%, 50%),
+			600: hsl(209, 79%, 40%),
+			700: hsl(209, 79%, 30%),
+			800: hsl(209, 78%, 20%),
+			900: hsl(209, 80%, 10%),
+			950: hsl(210, 77%, 5%)
+		),
+		background: (
+			default: hsl(150, 85%, 5%),
+			50: hsl(150, 85%, 95%),
+			100: hsl(151, 84%, 90%),
+			200: hsl(150, 84%, 80%),
+			300: hsl(150, 86%, 70%),
+			400: hsl(150, 85%, 60%),
+			500: hsl(150, 85%, 50%),
+			600: hsl(150, 85%, 40%),
+			700: hsl(150, 86%, 30%),
+			800: hsl(150, 84%, 20%),
+			900: hsl(151, 84%, 10%),
+			950: hsl(150, 85%, 5%)
+		),
+		primary: (
+			default: hsl(300, 76%, 70%),
+			50: hsl(300, 76%, 95%),
+			100: hsl(300, 76%, 90%),
+			200: hsl(300, 76%, 80%),
+			300: hsl(300, 76%, 70%),
+			400: hsl(300, 76%, 60%),
+			500: hsl(300, 76%, 50%),
+			600: hsl(300, 76%, 40%),
+			700: hsl(300, 76%, 30%),
+			800: hsl(300, 76%, 20%),
+			900: hsl(300, 76%, 10%),
+			950: hsl(300, 76%, 5%)
+		),
+		secondary: (
+			default: hsl(278, 84%, 36%),
+			50: hsl(277, 84%, 95%),
+			100: hsl(278, 84%, 90%),
+			200: hsl(278, 84%, 80%),
+			300: hsl(278, 84%, 70%),
+			400: hsl(278, 84%, 60%),
+			500: hsl(278, 84%, 50%),
+			600: hsl(278, 84%, 40%),
+			700: hsl(278, 84%, 30%),
+			800: hsl(278, 84%, 20%),
+			900: hsl(278, 84%, 10%),
+			950: hsl(280, 84%, 5%)
+		),
+		accent: (
+			default: hsl(295, 80%, 30%),
+			50: hsl(297, 77%, 95%),
+			100: hsl(296, 80%, 90%),
+			200: hsl(295, 80%, 80%),
+			300: hsl(295, 80%, 70%),
+			400: hsl(295, 80%, 60%),
+			500: hsl(295, 80%, 50%),
+			600: hsl(295, 80%, 40%),
+			700: hsl(295, 80%, 30%),
+			800: hsl(295, 80%, 20%),
+			900: hsl(294, 80%, 10%),
+			950: hsl(294, 77%, 5%)
+		)
+	)
+);
+
+// Função para pegar cor default de um tema e categoria
+@function palette-default($theme, $category) {
+	@return map.get(map.get(map.get($themes, $theme), $category), default);
+}
+
+// Função para pegar cor específica de um tema, categoria e tom
+@function palette-tone($theme, $category, $tone) {
+	@return map.get(map.get(map.get($themes, $theme), $category), $tone);
+}
+
+// Exportação direta: light(primary), dark(secondary), etc.
+@function light($category) {
+	@return palette-default(light, $category);
+}
+@function dark($category) {
+	@return palette-default(dark, $category);
+}
+
+// Exportação específica para tema light
+@function light-tone($category, $tone) {
+	@return palette-tone(light, $category, $tone);
+}
+
+// Exportação específica para tema dark
+@function dark-tone($category, $tone) {
+	@return palette-tone(dark, $category, $tone);
+}
